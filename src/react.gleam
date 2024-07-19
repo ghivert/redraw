@@ -20,6 +20,12 @@ pub fn component_(name name: String, render render: fn(props) -> Component) {
   |> add_proxy
 }
 
+pub fn component__(name name: String, render render: fn() -> Component) {
+  render
+  |> set_function_name(name)
+  |> add_empty_proxy
+}
+
 @external(javascript, "react", "memo")
 pub fn memo(
   component: fn(props, List(Component)) -> Component,
@@ -162,6 +168,9 @@ fn set_function_name(a: a, name: String) -> a
 
 @external(javascript, "./react.ffi.mjs", "addProxy")
 fn add_proxy(a: fn(props) -> Component) -> fn(props) -> Component
+
+@external(javascript, "./react.ffi.mjs", "addEmptyProxy")
+fn add_empty_proxy(a: fn() -> Component) -> fn() -> Component
 
 @external(javascript, "./react.ffi.mjs", "addChildrenProxy")
 fn add_children_proxy(

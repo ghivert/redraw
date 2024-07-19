@@ -2,8 +2,10 @@ import gleam/function
 import gleam/int
 import gleam/io
 import react
+import react/attribute as a
 import react/client
-import react/element
+import react/event as e
+import react/html
 
 pub type Root
 
@@ -15,62 +17,46 @@ pub fn main() {
   let root = root()
   client.create_root("root")
   |> client.render(root([]))
-  // |> render(children())
-}
-
-fn use_damuf() {
-  use <- function.flip(react.use_effect)(#())
-  io.debug("mumuf")
-  Nil
-}
-
-fn use_hello_effect(content: String) {
-  use <- function.flip(react.use_effect)(#())
-  io.debug("hello " <> content)
-  Nil
-}
-
-pub fn app() {
-  use_damuf()
-  element.div([], [element.a([], [element.img([])]), element.text("Meh?")])
 }
 
 pub fn root() {
-  let inside = mk_inside()
+  let app = app()
   use _props <- react.component_("Root")
-  let #(state, _set_state) = react.use_state_(0)
-  // use_timeout(fn() {
-  // use state <- set_state()
-  // state + 1
-  // })
-  use_hello_effect("root")
-  react.strict_mode([
-    app(),
-    inside(InsideProps(state), [element.text("in root")]),
+  react.strict_mode([app()])
+}
+
+pub fn app() {
+  use <- react.component__("App")
+  let #(count, set_count) = react.use_state(0)
+  react.fragment([
+    html.div([], [
+      html.a([a.href("https://vitejs.dev"), a.target("_blank")], [
+        html.img([a.src("/vite.svg"), a.class("logo"), a.alt("Vite logo")]),
+      ]),
+      html.a([a.href("https://gleam.run"), a.target("_blank")], [
+        html.img([a.src("/lucy.svg"), a.class("logo lucy"), a.alt("Gleam logo")]),
+      ]),
+      html.a([a.href("https://react.dev"), a.target("_blank")], [
+        html.img([
+          a.src("/react.svg"),
+          a.class("logo react"),
+          a.alt("React logo"),
+        ]),
+      ]),
+    ]),
+    html.h1([], [html.text("Vite + Gleam + React")]),
+    html.div([a.class("card")], [
+      html.button([e.on_click(fn() { set_count(count + 1) })], [
+        html.text("count is " <> int.to_string(count)),
+      ]),
+      html.p([], [
+        html.text("Edit "),
+        html.code([], [html.text("src/main.gleam")]),
+        html.text(" and save to test HMR"),
+      ]),
+    ]),
+    html.p([a.class("read-the-docs")], [
+      html.text("Click on the Vite and React logos to learn more"),
+    ]),
   ])
-}
-
-pub type InsideProps {
-  InsideProps(count: Int)
-}
-
-pub fn mk_inside() {
-  let inside_help = mk_inside_help()
-  use props: InsideProps, children <- react.component("Insider")
-  use_damuf()
-  react.use_debug_value("muf")
-  let #(state, set_state) = react.use_state(1)
-  element.div([], [
-    react.fragment(children),
-    element.text(int.to_string(state)),
-    inside_help(props),
-    element.div([], [element.text("inside " <> int.to_string(props.count))]),
-  ])
-}
-
-pub fn mk_inside_help() {
-  use props: InsideProps <- react.component_("InsiderHelp")
-  react.use_debug_value("mumuf")
-  use_damuf()
-  element.div([], [element.text("inside " <> int.to_string(props.count))])
 }

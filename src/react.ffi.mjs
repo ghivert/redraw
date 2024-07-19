@@ -26,10 +26,19 @@ export function withChildren(Component) {
 // This exist because `component` has shape `fn(props, children) -> Component`.
 export function addChildrenProxy(Component) {
   return new Proxy(Component, {
-    apply(target, _, argumentsList) {
+    apply(target, _this, argumentsList) {
       const props = argumentsList[0];
       const children = argumentsList[1];
       return jsx(withChildren(target), props, children);
+    },
+  });
+}
+
+export function addEmptyProxy(Component) {
+  return new Proxy(Component, {
+    apply(target) {
+      const props = {};
+      return jsx(target, props);
     },
   });
 }
@@ -47,12 +56,12 @@ export function addProxy(Component) {
 // jsx is for dynamic components, while jsxs is for static components.
 export function jsx(value, props_, children_) {
   if (value === "text_") return children_;
-  let children = children_?.toArray?.() ?? [];
+  let children = children_?.toArray?.();
   let isStatic = true;
 
   // Handle keyed elements like lustre does.
   // This allow to have a similar interface between lustre and greact.
-  if (Array.isArray(children[0])) {
+  if (Array.isArray(children?.[0])) {
     children = children.map((c) => {
       const [key, node] = c;
       if ("key" in node) return React.cloneElement(node, { key });
@@ -65,7 +74,7 @@ export function jsx(value, props_, children_) {
   // Uses the existing props, and add children if needed.
   const props = {};
   Object.assign(props, props_);
-  if (children.length > 0) props.children = children;
+  if (children?.length > 0) props.children = children;
 
   if (isStatic) {
     return runtime.jsxs(value, props);
@@ -111,4 +120,12 @@ export function setCurrent(ref, value) {
 
 export function getCurrent(ref) {
   return ref.current;
+}
+
+export function toProps(attributes) {
+  const props = {};
+  for (const item of attributes) {
+    props[item.key] = item.content;
+  }
+  return props;
 }
