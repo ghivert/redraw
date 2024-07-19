@@ -1,6 +1,4 @@
-import gleam/function
 import gleam/int
-import gleam/io
 import react
 import react/attribute as a
 import react/client
@@ -25,30 +23,36 @@ pub fn root() {
   react.strict_mode([app()])
 }
 
-pub fn app() {
-  use <- react.component__("App")
-  let #(count, set_count) = react.use_state(0)
-  react.fragment([
-    html.div([], [
-      html.a([a.href("https://vitejs.dev"), a.target("_blank")], [
-        html.img([a.src("/vite.svg"), a.class("logo"), a.alt("Vite logo")]),
-      ]),
-      html.a([a.href("https://gleam.run"), a.target("_blank")], [
-        html.img([a.src("/lucy.svg"), a.class("logo lucy"), a.alt("Gleam logo")]),
-      ]),
-      html.a([a.href("https://react.dev"), a.target("_blank")], [
-        html.img([
-          a.src("/react.svg"),
-          a.class("logo react"),
-          a.alt("React logo"),
-        ]),
-      ]),
+fn counter() {
+  use <- react.component__("Counter")
+  let #(counting, set_counting) = react.use_state_(0)
+  html.button([e.on_click(fn() { set_counting(fn(count) { count + 1 }) })], [
+    html.text("count is " <> int.to_string(counting)),
+  ])
+}
+
+fn nav_links() {
+  html.div([], [
+    html.a([a.href("https://vitejs.dev"), a.target("_blank")], [
+      html.img([a.src("/vite.svg"), a.class("logo"), a.alt("Vite logo")]),
     ]),
+    html.a([a.href("https://gleam.run"), a.target("_blank")], [
+      html.img([a.src("/lucy.svg"), a.class("logo lucy"), a.alt("Gleam logo")]),
+    ]),
+    html.a([a.href("https://react.dev"), a.target("_blank")], [
+      html.img([a.src("/react.svg"), a.class("logo react"), a.alt("React logo")]),
+    ]),
+  ])
+}
+
+pub fn app() {
+  let counter = counter()
+  use <- react.component__("App")
+  react.fragment([
+    nav_links(),
     html.h1([], [html.text("Vite + Gleam + React")]),
     html.div([a.class("card")], [
-      html.button([e.on_click(fn() { set_count(count + 1) })], [
-        html.text("count is " <> int.to_string(count)),
-      ]),
+      counter(),
       html.p([], [
         html.text("Edit "),
         html.code([], [html.text("src/main.gleam")]),
