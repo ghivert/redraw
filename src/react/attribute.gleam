@@ -1,4 +1,5 @@
 import gleam/dynamic
+import gleam/string
 import react
 import react/internals/attribute
 
@@ -189,4 +190,156 @@ pub fn translate(value: Translate) {
     No -> "no"
   }
   attribute.attribute("translate", value)
+}
+
+pub fn type_(name: String) {
+  attribute.attribute("type", name)
+}
+
+pub fn value(val: String) {
+  attribute.attribute("value", val)
+}
+
+pub fn checked(is_checked: Bool) {
+  attribute.attribute("checked", is_checked)
+}
+
+pub fn placeholder(text: String) {
+  attribute.attribute("placeholder", text)
+}
+
+pub fn selected(is_selected: Bool) {
+  attribute.attribute("selected", is_selected)
+}
+
+pub fn accept(types: List(String)) {
+  attribute.attribute("accept", string.join(types, " "))
+}
+
+pub fn accept_charset(types: List(String)) {
+  attribute.attribute("acceptCharset", string.join(types, " "))
+}
+
+pub fn msg(uri: String) {
+  attribute.attribute("msg", uri)
+}
+
+pub fn autocomplete(name: String) {
+  attribute.attribute("autocomplete", name)
+}
+
+pub fn autofocus(should_autofocus: Bool) {
+  attribute.attribute("autofocus", should_autofocus)
+}
+
+pub fn disabled(is_disabled: Bool) {
+  attribute.attribute("disabled", is_disabled)
+}
+
+pub fn name(name: String) {
+  attribute.attribute("name", name)
+}
+
+pub fn pattern(regex: String) {
+  attribute.attribute("pattern", regex)
+}
+
+pub fn readonly(is_readonly: Bool) {
+  attribute.attribute("readonly", is_readonly)
+}
+
+pub fn required(is_required: Bool) {
+  attribute.attribute("required", is_required)
+}
+
+pub fn max(val: String) {
+  attribute.attribute("max", val)
+}
+
+pub fn min(val: String) {
+  attribute.attribute("min", val)
+}
+
+pub fn step(val: String) {
+  attribute.attribute("step", val)
+}
+
+pub fn cols(val: Int) {
+  attribute.attribute("cols", val)
+}
+
+pub fn rows(val: Int) {
+  attribute.attribute("rows", val)
+}
+
+pub fn wrap(mode: String) {
+  attribute.attribute("wrap", mode)
+}
+
+pub fn download(filename: String) {
+  attribute.attribute("download", filename)
+}
+
+pub fn rel(relationship: String) {
+  attribute.attribute("rel", relationship)
+}
+
+pub fn height(val: Int) {
+  attribute.attribute("height", val)
+}
+
+pub fn width(val: Int) {
+  attribute.attribute("width", val)
+}
+
+pub fn autoplay(should_autoplay: Bool) {
+  attribute.attribute("autoplay", should_autoplay)
+}
+
+pub fn controls(visible: Bool) {
+  attribute.attribute("controls", visible)
+}
+
+pub fn loop(should_loop: Bool) {
+  attribute.attribute("loop", should_loop)
+}
+
+pub fn action(url: String) {
+  attribute.attribute("action", url)
+}
+
+pub fn enctype(value: String) {
+  attribute.attribute("enctype", value)
+}
+
+pub fn method(method: String) {
+  attribute.attribute("method", method)
+}
+
+pub fn novalidate(value: Bool) {
+  attribute.attribute("novalidate", value)
+}
+
+pub fn form_action(action: String) {
+  attribute.attribute("formaction", action)
+}
+
+pub fn form_enctype(value: String) {
+  attribute.attribute("formenctype", value)
+}
+
+pub fn form_method(method: String) {
+  attribute.attribute("formmethod", method)
+}
+
+pub fn form_novalidate(value: Bool) {
+  attribute.attribute("formnovalidate", value)
+}
+
+pub fn form_target(target: String) {
+  attribute.attribute("formtarget", target)
+}
+
+pub fn open(is_open: Bool) {
+  attribute.attribute("open", is_open)
 }
