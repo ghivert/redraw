@@ -1,5 +1,6 @@
 import gleam/javascript/promise.{type Promise}
 import gleam/option.{type Option}
+import react/internals/coerce.{coerce}
 
 // Component creation
 
@@ -176,6 +177,3 @@ fn add_empty_proxy(a: fn() -> Component) -> fn() -> Component
 fn add_children_proxy(
   a: fn(props, List(Component)) -> Component,
 ) -> fn(props, List(Component)) -> Component
-
-@external(javascript, "./react.ffi.mjs", "coerce")
-fn coerce(a: a) -> b

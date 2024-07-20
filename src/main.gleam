@@ -26,7 +26,7 @@ pub fn root() {
 fn counter() {
   use <- react.component__("Counter")
   let #(counting, set_counting) = react.use_state_(0)
-  html.button([e.on_click(fn() { set_counting(fn(count) { count + 1 }) })], [
+  html.button([e.on_click(fn(_) { set_counting(fn(count) { count + 1 }) })], [
     html.text("count is " <> int.to_string(counting)),
   ])
 }
