@@ -142,10 +142,6 @@ export function pageY(event) {
   return event.pageY
 }
 
-export function relatedTarget(event) {
-  return event.relatedTarget
-}
-
 export function screenX(event) {
   return event.screenX
 }

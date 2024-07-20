@@ -1,4 +1,6 @@
 import gleam/int
+import gleam/io
+import gleam/option
 import react
 import react/attribute as a
 import react/client
@@ -23,12 +25,28 @@ pub fn root() {
   react.strict_mode([app()])
 }
 
+@external(javascript, "./react.ffi.mjs", "nativeLog")
+fn native_log(value: a) -> a
+
 fn counter() {
-  use <- react.component__("Counter")
+  use _, ref <- react.forward_ref_("Counter")
   let #(counting, set_counting) = react.use_state_(0)
-  html.button([e.on_click(fn(_) { set_counting(fn(count) { count + 1 }) })], [
-    html.text("count is " <> int.to_string(counting)),
-  ])
+  html.button(
+    [
+      a.ref(ref),
+      e.on_click(fn(_) {
+        case react.get_current(ref) {
+          option.None -> Nil
+          option.Some(_) -> {
+            native_log(ref)
+            Nil
+          }
+        }
+        set_counting(fn(count) { count + 1 })
+      }),
+    ],
+    [html.text("count is " <> int.to_string(counting))],
+  )
 }
 
 fn nav_links() {
@@ -48,11 +66,12 @@ fn nav_links() {
 pub fn app() {
   let counter = counter()
   use <- react.component__("App")
+  let ref = react.use_ref()
   react.fragment([
     nav_links(),
     html.h1([], [html.text("Vite + Gleam + React")]),
     html.div([a.class("card")], [
-      counter(),
+      counter(Nil, ref),
       html.p([], [
         html.text("Edit "),
         html.code([], [html.text("src/main.gleam")]),

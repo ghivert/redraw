@@ -1,4 +1,5 @@
 import gleam/dynamic
+import gleam/option
 import gleam/string
 import react
 import react/internals/attribute
@@ -36,13 +37,20 @@ pub fn dangerously_set_inner_html(inner_html: InnerHTML) {
   attribute.attribute("dangerouslySetInnerHTML", inner_html)
 }
 
-/// A ref object from `react.use_ref`. Your ref will be filled with the DOM element for this node.
-pub fn ref(ref: react.Ref(a)) {
-  attribute.attribute("ref", ref)
+/// A ref object from `react.use_ref`. Your ref will be filled with the DOM
+/// element for this node. Contrarily to JS React, when using a Ref, you're
+/// forced to use an optional type here. Because when using this function, you
+/// want to get a reference from a real DOM node, meaning at the initialization
+/// of the reference, you won't have any data. Use `ref_` when you want full
+/// control over the ref you send to the Component.
+pub fn ref(ref: react.Ref(option.Option(a))) {
+  attribute.attribute("ref", fn(dom_ref) {
+    react.set_current(ref, option.Some(dom_ref))
+  })
 }
 
-/// A ref callback function. The callback will be provided with the DOM element for this node.
-pub fn ref_(ref: fn(dynamic.Dynamic) -> Nil) {
+/// A ref callback function. The callback will be provided with the DOM element for this node. Use this function to get control on the ref provided by the DOM node or the component.
+pub fn ref_(ref: fn(a) -> Nil) {
   attribute.attribute("ref", ref)
 }
 

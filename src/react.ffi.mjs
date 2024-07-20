@@ -22,12 +22,46 @@ export function render(root, children) {
   return root.render(children)
 }
 
+export function addForwardRef(Component) {
+  return new Proxy(Component, {
+    apply(target, _this, argumentsList) {
+      const props_ = argumentsList[0]
+      const ref = argumentsList[1]
+      const props = { ...props_, ref }
+      return jsx(React.forwardRef(target), props)
+    },
+  })
+}
+
+export function addChildrenForwardRef(Component) {
+  return new Proxy(Component, {
+    apply(target, _this, argumentsList) {
+      const props_ = argumentsList[0]
+      const ref = argumentsList[1]
+      const children = argumentsList[2]
+      const props = { ...props_, ref }
+      return jsx(React.forwardRef(withRefChildren(target), props, children))
+    },
+  })
+}
+
 export function withChildren(Component) {
   return new Proxy(Component, {
     apply(target, _, argumentsList) {
       const props = argumentsList[0]
       const children = gleam.List.fromArray(props.children)
       return target(props, children)
+    },
+  })
+}
+
+export function withRefChildren(Component) {
+  return new Proxy(Component, {
+    apply(target, _, argumentsList) {
+      const props = argumentsList[0]
+      const ref = argumentsList[1]
+      const children = gleam.List.fromArray(props.children)
+      return target(props, ref, children)
     },
   })
 }
@@ -154,4 +188,9 @@ export function convertStyle(styles) {
 
 export function innerHTML(html) {
   return { __html: html }
+}
+
+export function nativeLog(a) {
+  console.log(a)
+  return a
 }
