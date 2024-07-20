@@ -10,6 +10,29 @@ function withDisplayName(Component, Wrapper) {
   return Wrapper
 }
 
+function withComputedProps(Component, originalProps) {
+  return withDisplayName(Component, (props, ...rest) => {
+    // if (originalProps.toArray) {
+    //   const newProps = []
+    //   for (const prop of Object.values(props)) {
+    //     newProps.push(prop)
+    //   }
+    //   return Component(gleam.List.fromArray(newProps), ...rest)
+    // }
+    // const Proto = Object.getPrototypeOf(originalProps)
+    // const values = Object.keys(originalProps).map((key) => props[key])
+    // const newProps = new Proto.constructor(...values)
+    console.log(originalProps)
+    console.log(props)
+    return Component(originalProps, ...rest)
+  })
+}
+
+function convertProps(props) {
+  if (props.toArray) return props.toArray()
+  return props
+}
+
 export function createRoot(value) {
   const node = document.getElementById(value)
   return ReactDOM.createRoot(node)
@@ -34,9 +57,10 @@ export function render(root, children) {
  * have shape`fn (props, ref) -> Component`. `addForwardRef` turns it into
  * `fn (props) -> jsx(Component)`.*/
 export function addForwardRef(Component) {
+  const added = React.forwardRef(Component)
   return withDisplayName(Component, (props_, ref) => {
     const props = { ...props_, ref }
-    return jsx(React.forwardRef(Component), props)
+    return jsx(added, props)
   })
 }
 
@@ -47,9 +71,10 @@ export function addForwardRef(Component) {
  * to `fn (props, ref, children) -> jsx(Component)` by extracting the children
  * from the props. */
 export function addChildrenForwardRef(Component) {
+  const added = React.forwardRef(withRefChildren(Component))
   return withDisplayName(Component, (props_, ref, children) => {
     const props = { ...props_, ref }
-    return jsx(React.forwardRef(withRefChildren(Component), props, children))
+    return jsx(added, props, children)
   })
 }
 
@@ -77,8 +102,9 @@ export function withRefChildren(Component) {
  * to `fn (props, children) -> jsx(Component)` by extracting the children
  * from the props. */
 export function addChildrenProxy(Component) {
+  const childrenAdded = withChildren(Component)
   return withDisplayName(Component, (props, children) => {
-    return jsx(withChildren(Component), props, children)
+    return jsx(childrenAdded, props, children)
   })
 }
 
@@ -100,7 +126,7 @@ export function addEmptyProxy(Component) {
  * from the props. */
 export function addProxy(Component) {
   return withDisplayName(Component, (props) => {
-    return jsx(Component, props)
+    return jsx(withComputedProps(Component, props), convertProps(props))
   })
 }
 

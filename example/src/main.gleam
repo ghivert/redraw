@@ -1,4 +1,6 @@
 import gleam/int
+import gleam/io
+import gleam/list
 import react
 import react/attribute as a
 import react/event as e
@@ -14,21 +16,37 @@ pub type Children
 pub fn main() {
   let root = root()
   client.create_root("root")
-  |> client.render(root())
+  |> client.render(react.strict_mode([root()]))
 }
 
 pub fn root() {
   let app = app()
   use <- react.component__("Root")
-  react.strict_mode([app()])
+  app()
+}
+
+pub type CounterProps {
+
+  // #(List(Int), fn(fn(Int) -> Int) -> Nil)
+  CounterProps(count: Int, set_count: fn(fn(Int) -> Int) -> Nil)
 }
 
 fn counter() {
-  use _, ref <- react.forward_ref_("Counter")
-  let #(counting, set_counting) = react.use_state_(0)
+  use props: CounterProps <- react.component_("Counter")
+  react.use_effect(
+    fn() {
+      // io.debug("props")
+      io.debug("in use_effect " <> int.to_string(props.count))
+      // io.debug(props)
+      Nil
+    },
+    #(props.count),
+  )
   html.button(
-    [a.ref(ref), e.on_click(fn(_) { set_counting(fn(count) { count + 1 }) })],
-    [html.text("count is " <> int.to_string(counting))],
+    [e.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
+    list.map([props.count], fn(count) {
+      html.text("count is " <> int.to_string(count))
+    }),
   )
 }
 
@@ -49,12 +67,13 @@ fn nav_links() {
 pub fn app() {
   let counter = counter()
   use <- react.component__("App")
-  let ref = react.use_ref()
+  let #(count, set_count) = react.use_state_(0)
   react.fragment([
     nav_links(),
     html.h1([], [html.text("Vite + Gleam + React")]),
     html.div([a.class("card")], [
-      counter(Nil, ref),
+      counter(CounterProps(int.min(count, 30), set_count)),
+      counter(CounterProps(0, set_count)),
       html.p([], [
         html.text("Edit "),
         html.code([], [html.text("src/main.gleam")]),
