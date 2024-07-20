@@ -37,7 +37,7 @@ fn counter() {
     fn() {
       // io.debug("props")
       io.debug("in use_effect " <> int.to_string(props.count))
-      // io.debug(props)
+      io.debug(props)
       Nil
     },
     #(props.count),
