@@ -3,6 +3,13 @@ import ReactDOM from "react-dom/client"
 import runtime from "react/jsx-runtime"
 import * as gleam from "./gleam.mjs"
 
+/**  Keep display name on Wrapper, to correctly display Components
+ * in React devtools. */
+function withDisplayName(Component, Wrapper) {
+  if (Component.displayName) Wrapper.displayName = Component.displayName
+  return Wrapper
+}
+
 export function createRoot(value) {
   const node = document.getElementById(value)
   return ReactDOM.createRoot(node)
@@ -22,82 +29,83 @@ export function render(root, children) {
   return root.render(children)
 }
 
+/** Wrap the Component in a `forwardRef`, and inject the `ref` from the function
+ * arguments to the props. In Gleam, when called, a `forwardRef` component will
+ * have shape`fn (props, ref) -> Component`. `addForwardRef` turns it into
+ * `fn (props) -> jsx(Component)`.*/
 export function addForwardRef(Component) {
-  return new Proxy(Component, {
-    apply(target, _this, argumentsList) {
-      const props_ = argumentsList[0]
-      const ref = argumentsList[1]
-      const props = { ...props_, ref }
-      return jsx(React.forwardRef(target), props)
-    },
+  return withDisplayName(Component, (props_, ref) => {
+    const props = { ...props_, ref }
+    return jsx(React.forwardRef(Component), props)
   })
 }
 
+/** Wrap the Component in a `forwardRef`, and inject the `ref` from the function
+ * arguments to the props. In Gleam, a `forwardRef` component will have shape
+ * `fn (props, ref, children) -> Component`. `addChildrenForwardRef` turns it
+ * into `fn (props) -> jsx(Component)`. It will then be transformed once again
+ * to `fn (props, ref, children) -> jsx(Component)` by extracting the children
+ * from the props. */
 export function addChildrenForwardRef(Component) {
-  return new Proxy(Component, {
-    apply(target, _this, argumentsList) {
-      const props_ = argumentsList[0]
-      const ref = argumentsList[1]
-      const children = argumentsList[2]
-      const props = { ...props_, ref }
-      return jsx(React.forwardRef(withRefChildren(target), props, children))
-    },
+  return withDisplayName(Component, (props_, ref, children) => {
+    const props = { ...props_, ref }
+    return jsx(React.forwardRef(withRefChildren(Component), props, children))
   })
 }
 
+/** Extract the Component's children from the props to feed it to the function
+ * directly. */
 export function withChildren(Component) {
-  return new Proxy(Component, {
-    apply(target, _, argumentsList) {
-      const props = argumentsList[0]
-      const children = gleam.List.fromArray(props.children)
-      return target(props, children)
-    },
+  return withDisplayName(Component, (props) => {
+    const children = gleam.List.fromArray(props.children)
+    return Component(props, children)
   })
 }
 
+/** Extract the Forwarded Ref Component's children from the props to feed it to
+ * the function directly. */
 export function withRefChildren(Component) {
-  return new Proxy(Component, {
-    apply(target, _, argumentsList) {
-      const props = argumentsList[0]
-      const ref = argumentsList[1]
-      const children = gleam.List.fromArray(props.children)
-      return target(props, ref, children)
-    },
+  return withDisplayName(Component, (props, ref) => {
+    const children = gleam.List.fromArray(props.children)
+    return Component(props, ref, children)
   })
 }
 
-// Extract children from props to give it to function.
-// This exist because `component` has shape `fn(props, children) -> Component`.
+/** In Gleam, a `component` will have shape
+ * `fn (props, children) -> Component`. `addChildrenProxy` turns it
+ * into `fn (props) -> jsx(Component)`. It will then be transformed once again
+ * to `fn (props, children) -> jsx(Component)` by extracting the children
+ * from the props. */
 export function addChildrenProxy(Component) {
-  return new Proxy(Component, {
-    apply(target, _this, argumentsList) {
-      const props = argumentsList[0]
-      const children = argumentsList[1]
-      return jsx(withChildren(target), props, children)
-    },
+  return withDisplayName(Component, (props, children) => {
+    return jsx(withChildren(Component), props, children)
   })
 }
 
+/** In Gleam, a `component__` will have shape
+ * `fn () -> Component`. `addEmptyProxy` turns it
+ * into `fn (props) -> jsx(Component)`. It will then be transformed once again
+ * to `fn () -> jsx(Component)` by extracting the children
+ * from the props. */
 export function addEmptyProxy(Component) {
-  return new Proxy(Component, {
-    apply(target) {
-      const props = {}
-      return jsx(target, props)
-    },
+  return withDisplayName(Component, () => {
+    return jsx(Component, {})
   })
 }
 
+/** In Gleam, a `component_` will have shape
+ * `fn (props) -> Component`. `addEmptyProxy` turns it
+ * into `fn (props) -> jsx(Component)`. It will then be transformed once again
+ * to `fn (props) -> jsx(Component)` by extracting the children
+ * from the props. */
 export function addProxy(Component) {
-  return new Proxy(Component, {
-    apply(target, _, argumentsList) {
-      const props = argumentsList[0]
-      return jsx(target, props)
-    },
+  return withDisplayName(Component, (props) => {
+    return jsx(Component, props)
   })
 }
 
-// Generate JSX using the JSX factory.
-// jsx is for dynamic components, while jsxs is for static components.
+/**  Generate JSX using the JSX factory.
+ * `jsx` is for dynamic components, while `jsxs` is for static components. */
 export function jsx(value, props_, children_) {
   if (value === "text_") return children_
   let children = children_?.toArray?.()
@@ -127,8 +135,8 @@ export function jsx(value, props_, children_) {
   }
 }
 
-// Set the display name function. Essential to display the correct name in
-// the devtools.
+/** Set the display name function. Essential to display the correct name in
+ * the devtools. */
 export function setFunctionName(component, name) {
   component.displayName = name
   return component
@@ -174,10 +182,13 @@ export function toProps(attributes) {
   return props
 }
 
+/** Used to camelize CSS property names. */
 function camelize(key) {
   return key.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
 }
 
+/** Turns a `List(#(String, String))` into an object `{ [key: string]: string }`
+ * to conform with the React `style` API. */
 export function convertStyle(styles) {
   const styles_ = {}
   for (const style of styles) {
@@ -188,9 +199,4 @@ export function convertStyle(styles) {
 
 export function innerHTML(html) {
   return { __html: html }
-}
-
-export function nativeLog(a) {
-  console.log(a)
-  return a
 }
