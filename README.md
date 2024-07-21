@@ -1,8 +1,8 @@
 # Redraw
 
-React bindings for Gleam. Because a lot of frameworks and products are using
-React in a day-to-day way, Redraw fills the gap by providing nice, simple API to
-work on a React codebase, Gleam-enhanced!
+React opinionated bindings for Gleam. Because a lot of frameworks and products
+are using React in a day-to-day way, Redraw fills the gap by providing nice,
+simple API to work on a React codebase, Gleam-enhanced!
 
 > [!TIP]
 >
