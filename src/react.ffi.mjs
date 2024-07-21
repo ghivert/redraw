@@ -2,6 +2,7 @@ import React from "react"
 import ReactDOM from "react-dom/client"
 import runtime from "react/jsx-runtime"
 import * as gleam from "./gleam.mjs"
+import { propsToGleamProps, gleamPropsToProps } from "./props.ffi.mjs"
 
 /**  Keep display name on Wrapper, to correctly display Components
  * in React devtools. */
@@ -12,24 +13,9 @@ function withDisplayName(Component, Wrapper) {
 
 function withComputedProps(Component, originalProps) {
   return withDisplayName(Component, (props, ...rest) => {
-    if (!originalProps.current) return Component(props, ...rest)
-    const [Prototype, firstProps] = originalProps.current[props.__propsType]
-    // if (originalProps.toArray) {
-    //   const newProps = []
-    //   for (const prop of Object.values(props)) {
-    //     newProps.push(prop)
-    //   }
-    //   return Component(gleam.List.fromArray(newProps), ...rest)
-    // }
-    const values = Object.keys(firstProps).map((key) => props[key])
-    const newProps = new Prototype.constructor(...values)
+    const newProps = propsToGleamProps(props, originalProps)
     return Component(newProps, ...rest)
   })
-}
-
-function convertProps(props) {
-  if (props.toArray) return props.toArray()
-  return props
 }
 
 export function createRoot(value) {
@@ -59,11 +45,10 @@ export function addForwardRef(Component) {
   const originalProps = { current: {} }
   const added = React.forwardRef(withComputedProps(Component, originalProps))
   return withDisplayName(Component, (props_, ref) => {
-    const prototype = Object.getPrototypeOf(props_)
-    const name = prototype.constructor.name
-    originalProps.current[name] ??= [prototype, props_]
-    const props = { ...props_, __propsType: name, ref }
-    return jsx(added, props)
+    const props = gleamPropsToProps(props_, originalProps, ref)
+    if (props) return jsx(added, props)
+    const render = withDisplayName(Component, () => null)
+    return jsx(render, {})
   })
 }
 
@@ -79,11 +64,10 @@ export function addChildrenForwardRef(Component) {
     withRefChildren(withComputedProps(Component, originalProps)),
   )
   return withDisplayName(Component, (props_, ref, children) => {
-    const prototype = Object.getPrototypeOf(props_)
-    const name = prototype.constructor.name
-    originalProps.current[name] ??= [prototype, props_]
-    const props = { ...props_, __propsType: name, ref }
-    return jsx(added, props, children)
+    const props = gleamPropsToProps(props_, originalProps, ref)
+    if (props) return jsx(added, props, children)
+    const render = withDisplayName(Component, () => null)
+    return jsx(render, {})
   })
 }
 
@@ -117,11 +101,10 @@ export function addChildrenProxy(Component) {
     originalProps,
   )
   return withDisplayName(Component, (props_, children) => {
-    const prototype = Object.getPrototypeOf(props_)
-    const name = prototype.constructor.name
-    originalProps.current[name] ??= [prototype, props_]
-    const props = { ...props_, __propsType: name }
-    return jsx(childrenAdded, props, children)
+    const props = gleamPropsToProps(props_, originalProps)
+    if (props) return jsx(childrenAdded, props, children)
+    const render = withDisplayName(Component, () => null)
+    return jsx(render, {})
   })
 }
 
@@ -145,11 +128,10 @@ export function addProxy(Component) {
   const originalProps = { current: {} }
   const added = withComputedProps(Component, originalProps)
   return withDisplayName(Component, (props_) => {
-    const prototype = Object.getPrototypeOf(props_)
-    const name = prototype.constructor.name
-    originalProps.current[name] ??= [prototype, props_]
-    const props = { ...props_, __propsType: name }
-    return jsx(added, props)
+    const props = gleamPropsToProps(props_, originalProps)
+    if (props) return jsx(added, props)
+    const render = withDisplayName(Component, () => null)
+    return jsx(render, {})
   })
 }
 

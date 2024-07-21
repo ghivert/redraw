@@ -25,27 +25,30 @@ pub fn root() {
   app()
 }
 
-pub type CounterProps {
+pub type CounterProps =
+  #(Int, fn(fn(Int) -> Int) -> Nil)
 
-  // #(List(Int), fn(fn(Int) -> Int) -> Nil)
-  CounterProps(count: Int, set_count: fn(fn(Int) -> Int) -> Nil)
-}
+// #(List(Int), fn(fn(Int) -> Int) -> Nil)
+//   {
+//   CounterProps(count: Int, set_count: fn(fn(Int) -> Int) -> Nil)
+// }
 
 fn counter() {
   use props: CounterProps <- react.component_("Counter")
   react.use_effect(
     fn() {
       // io.debug("props")
-      io.debug("in use_effect " <> int.to_string(props.count))
+      io.debug("in use_effect " <> int.to_string(props.0))
       io.debug(props)
       Nil
     },
-    #(props.count),
+    #(props),
   )
   html.button(
-    [e.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
-    list.map([props.count], fn(count) {
-      html.text("count is " <> int.to_string(count))
+    // [e.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
+    [],
+    list.map([props], fn(count) {
+      html.text("count is " <> int.to_string(count.0))
     }),
   )
 }
@@ -72,8 +75,8 @@ pub fn app() {
     nav_links(),
     html.h1([], [html.text("Vite + Gleam + React")]),
     html.div([a.class("card")], [
-      counter(CounterProps(int.min(count, 30), set_count)),
-      counter(CounterProps(0, set_count)),
+      counter(#(count, set_count)),
+      counter(#(count, set_count)),
       html.p([], [
         html.text("Edit "),
         html.code([], [html.text("src/main.gleam")]),
