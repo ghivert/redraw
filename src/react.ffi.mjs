@@ -12,6 +12,8 @@ function withDisplayName(Component, Wrapper) {
 
 function withComputedProps(Component, originalProps) {
   return withDisplayName(Component, (props, ...rest) => {
+    if (!originalProps.current) return Component(props, ...rest)
+    const [Prototype, firstProps] = originalProps.current[props.__propsType]
     // if (originalProps.toArray) {
     //   const newProps = []
     //   for (const prop of Object.values(props)) {
@@ -19,12 +21,9 @@ function withComputedProps(Component, originalProps) {
     //   }
     //   return Component(gleam.List.fromArray(newProps), ...rest)
     // }
-    // const Proto = Object.getPrototypeOf(originalProps)
-    // const values = Object.keys(originalProps).map((key) => props[key])
-    // const newProps = new Proto.constructor(...values)
-    console.log(originalProps)
-    console.log(props)
-    return Component(originalProps, ...rest)
+    const values = Object.keys(firstProps).map((key) => props[key])
+    const newProps = new Prototype.constructor(...values)
+    return Component(newProps, ...rest)
   })
 }
 
@@ -57,9 +56,13 @@ export function render(root, children) {
  * have shape`fn (props, ref) -> Component`. `addForwardRef` turns it into
  * `fn (props) -> jsx(Component)`.*/
 export function addForwardRef(Component) {
-  const added = React.forwardRef(Component)
+  const originalProps = { current: {} }
+  const added = React.forwardRef(withComputedProps(Component, originalProps))
   return withDisplayName(Component, (props_, ref) => {
-    const props = { ...props_, ref }
+    const prototype = Object.getPrototypeOf(props_)
+    const name = prototype.constructor.name
+    originalProps.current[name] ??= [prototype, props_]
+    const props = { ...props_, __propsType: name, ref }
     return jsx(added, props)
   })
 }
@@ -71,9 +74,15 @@ export function addForwardRef(Component) {
  * to `fn (props, ref, children) -> jsx(Component)` by extracting the children
  * from the props. */
 export function addChildrenForwardRef(Component) {
-  const added = React.forwardRef(withRefChildren(Component))
+  const originalProps = { current: {} }
+  const added = React.forwardRef(
+    withRefChildren(withComputedProps(Component, originalProps)),
+  )
   return withDisplayName(Component, (props_, ref, children) => {
-    const props = { ...props_, ref }
+    const prototype = Object.getPrototypeOf(props_)
+    const name = prototype.constructor.name
+    originalProps.current[name] ??= [prototype, props_]
+    const props = { ...props_, __propsType: name, ref }
     return jsx(added, props, children)
   })
 }
@@ -102,8 +111,16 @@ export function withRefChildren(Component) {
  * to `fn (props, children) -> jsx(Component)` by extracting the children
  * from the props. */
 export function addChildrenProxy(Component) {
-  const childrenAdded = withChildren(Component)
-  return withDisplayName(Component, (props, children) => {
+  const originalProps = { current: {} }
+  const childrenAdded = withChildren(
+    withComputedProps(Component),
+    originalProps,
+  )
+  return withDisplayName(Component, (props_, children) => {
+    const prototype = Object.getPrototypeOf(props_)
+    const name = prototype.constructor.name
+    originalProps.current[name] ??= [prototype, props_]
+    const props = { ...props_, __propsType: name }
     return jsx(childrenAdded, props, children)
   })
 }
@@ -125,8 +142,14 @@ export function addEmptyProxy(Component) {
  * to `fn (props) -> jsx(Component)` by extracting the children
  * from the props. */
 export function addProxy(Component) {
-  return withDisplayName(Component, (props) => {
-    return jsx(withComputedProps(Component, props), convertProps(props))
+  const originalProps = { current: {} }
+  const added = withComputedProps(Component, originalProps)
+  return withDisplayName(Component, (props_) => {
+    const prototype = Object.getPrototypeOf(props_)
+    const name = prototype.constructor.name
+    originalProps.current[name] ??= [prototype, props_]
+    const props = { ...props_, __propsType: name }
+    return jsx(added, props)
   })
 }
 
