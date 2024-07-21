@@ -68,7 +68,7 @@ pub fn app() {
       ]),
     ]),
     html.p([a.class("read-the-docs")], [
-      html.text("Click on the Vite and React logos to learn more"),
+      html.text("Click on the Vite, Gleam and React logos to learn more"),
     ]),
   ])
 }
