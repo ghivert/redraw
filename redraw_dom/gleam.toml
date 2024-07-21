@@ -1,4 +1,4 @@
-name = "example"
+name = "redraw_dom"
 version = "1.0.0"
 target = "javascript"
 
@@ -16,7 +16,6 @@ target = "javascript"
 [dependencies]
 gleam_stdlib = ">= 0.34.0 and < 2.0.0"
 redraw = { path = "../redraw" }
-redraw_dom = { path = "../redraw_dom" }
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

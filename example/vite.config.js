@@ -5,7 +5,4 @@ import gleam from "vite-gleam"
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), gleam()],
-  build: {
-    minify: false,
-  },
 })
