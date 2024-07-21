@@ -6,6 +6,8 @@ import redraw/internals/attribute
 pub type Attribute =
   attribute.Attribute
 
+pub const attribute = attribute.attribute
+
 pub fn href(url: String) {
   attribute.attribute("href", url)
 }
