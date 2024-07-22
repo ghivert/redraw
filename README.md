@@ -299,7 +299,7 @@ Some questions, answers, and various informations.
 ### What is the state of support for React Native, or any other React flavor?
 
 React is an isolated packages, and renderers can be various. Redraw has
-successfully be used with Raycast. You can also easily add a `redraw_native`
+successfully been used with Raycast. You can also easily add a `redraw_native`
 package, and provide an interface for native components. Everything can be done
 quickly and easily, because the entire package is written with as few JS as
 possible. Everything should work almost out-of-the box, because React is already
