@@ -174,10 +174,6 @@ export function coerce(value) {
   return value
 }
 
-export function contextProvider(context, value, children) {
-  return jsx(context.Provider, { value }, children)
-}
-
 export function setCurrent(ref, value) {
   ref.current = value
 }
