@@ -101,7 +101,8 @@ pub fn to_component_(
 }
 
 /// Create a Redraw component with children with forwarded ref. Take a look at
-/// [redraw.dev documentation to get more info.](https://fr.redraw.dev/reference/redraw/forwardRef)
+///
+/// [Documentation](https://fr.react.dev/reference/react/forwardRef)
 pub fn forward_ref(
   name name: String,
   render render: fn(props, Ref(ref), List(Component)) -> Component,
@@ -112,7 +113,8 @@ pub fn forward_ref(
 }
 
 /// Create a Redraw component without children with forwarded ref. Take a look at
-/// [redraw.dev documentation to get more info.](https://redraw.dev/reference/redraw/forwardRef)
+///
+/// [Documentation](https://react.dev/reference/react/forwardRef)
 pub fn forward_ref_(
   name name: String,
   render render: fn(props, Ref(ref)) -> Component,
@@ -123,29 +125,36 @@ pub fn forward_ref_(
 }
 
 /// Memoizes a Redraw component with children.
+///
+/// [Documentation](https://react.dev/reference/react/memo)
 @external(javascript, "react", "memo")
 pub fn memo(
   component: fn(props, List(Component)) -> Component,
 ) -> fn(props, List(Component)) -> Component
 
 /// Memoizes a Redraw component without children.
+///
+/// [Documentation](https://react.dev/reference/react/memo)
 @external(javascript, "react", "memo")
 pub fn memo_(component: fn(props) -> Component) -> fn(props) -> Component
 
 // Components
 
 /// Strict Mode should be enabled during development.
-/// [Documentation](https://redraw.dev/reference/redraw/StrictMode)
+///
+/// [Documentation](https://react.dev/reference/react/StrictMode)
 @external(javascript, "./redraw.ffi.mjs", "strictMode")
 pub fn strict_mode(children: List(Component)) -> Component
 
 /// Fragment allow to group children, without creating a node in the DOM.
-/// [Documentation](https://redraw.dev/reference/redraw/Fragment)
+///
+/// [Documentation](https://react.dev/reference/react/Fragment)
 @external(javascript, "./redraw.ffi.mjs", "fragment")
 pub fn fragment(children: List(Component)) -> Component
 
 /// Profile allows to measure code performance for a component tree.
-/// [Documentation](https://redraw.dev/reference/redraw/Profiler)
+///
+/// [Documentation](https://react.dev/reference/react/Profiler)
 @external(javascript, "./redraw.ffi.mjs", "strictMode")
 pub fn profiler(children: List(Component)) -> Component
 
@@ -155,7 +164,8 @@ pub type Suspense {
 
 /// Suspense allow to display a fallback content while waiting for children to
 /// finish loading.
-/// [Documentation](https://fr.redraw.dev/reference/redraw/Suspense)
+///
+/// [Documentation](https://fr.react.dev/reference/react/Suspense)
 @external(javascript, "./redraw.ffi.mjs", "fragment")
 pub fn suspense(props: Suspense, children: List(Component)) -> Component
 
@@ -163,57 +173,67 @@ pub fn suspense(props: Suspense, children: List(Component)) -> Component
 
 /// Let you cache a function definition between re-renders.
 /// `dependencies` should be a tuple.
-/// [Documentation](https://redraw.dev/reference/redraw/useCallback)
+///
+/// [Documentation](https://react.dev/reference/react/useCallback)
 @external(javascript, "react", "useCallback")
 pub fn use_callback(fun: function, dependencies: dependencies) -> a
 
 /// Let you add a label to a custom Hook in React DevTools.
-/// [Documentation](https://redraw.dev/reference/redraw/useDebugValue)
+///
+/// [Documentation](https://react.dev/reference/react/useDebugValue)
 @external(javascript, "react", "useDebugValue")
 pub fn use_debug_value(value: a) -> Nil
 
 /// Let you add a label to a custom Hook in React DevTools, but allow to format
 /// it before.
-/// [Documentation](https://redraw.dev/reference/redraw/useDebugValue)
+///
+/// [Documentation](https://react.dev/reference/react/useDebugValue)
 @external(javascript, "react", "useDebugValue")
 pub fn use_debug_value_(value: a, formatter: fn(a) -> String) -> Nil
 
 /// Let you defer updating a part of the UI.
-/// [Documentation](https://redraw.dev/reference/redraw/useDeferredValue)
+///
+/// [Documentation](https://react.dev/reference/react/useDeferredValue)
 @external(javascript, "react", "useDeferredValue")
 pub fn use_deferred_value(value: a) -> a
 
 /// Let you synchronize a component with an external system.
-/// [Documentation](https://redraw.dev/reference/redraw/useEffect)
+///
+/// [Documentation](https://react.dev/reference/react/useEffect)
 @external(javascript, "react", "useEffect")
 pub fn use_effect(value: fn() -> Nil, dependencies: a) -> Nil
 
 /// Version of useEffect that fires before the browser repaints the screen.
-/// [Documentation](https://redraw.dev/reference/redraw/useLayoutEffect)
+///
+/// [Documentation](https://react.dev/reference/react/useLayoutEffect)
 @external(javascript, "react", "useLayoutEffect")
 pub fn use_layout_effect(value: fn() -> Nil, dependencies: a) -> Nil
 
 /// Generate unique IDs that can be passed to accessibility attributes.
-/// [Documentation](https://redraw.dev/reference/redraw/useId)
+///
+/// [Documentation](https://react.dev/reference/react/useId)
 @external(javascript, "react", "useId")
 pub fn use_id() -> String
 
 /// Let you cache the result of a calculation between re-renders.
-/// [Documentation](https://redraw.dev/reference/redraw/useMemo)
+///
+/// [Documentation](https://react.dev/reference/react/useMemo)
 @external(javascript, "react", "useMemo")
 pub fn use_memo(calculate_value: fn() -> a, dependencies: b) -> a
 
-/// Let you add a [reducer](https://redraw.dev/learn/extracting-state-logic-into-a-reducer) to your component.
-/// [Documentation](https://redraw.dev/reference/redraw/useReducer)
+/// Let you add a [reducer](https://react.dev/learn/extracting-state-logic-into-a-reducer) to your component.
+///
+/// [Documentation](https://react.dev/reference/react/useReducer)
 @external(javascript, "react", "useReducer")
 pub fn use_reducer(
   reducer: fn(state, action) -> state,
   initial_state: state,
 ) -> #(state, fn(action) -> Nil)
 
-/// Let you add a [reducer](https://redraw.dev/learn/extracting-state-logic-into-a-reducer) to your component.
+/// Let you add a [reducer](https://react.dev/learn/extracting-state-logic-into-a-reducer) to your component.
 /// Allow to initialize the store in a custom way.
-/// [Documentation](https://redraw.dev/reference/redraw/useReducer)
+///
+/// [Documentation](https://react.dev/reference/react/useReducer)
 @external(javascript, "react", "useReducer")
 pub fn use_reducer_(
   reducer: fn(state, action) -> state,
@@ -221,32 +241,37 @@ pub fn use_reducer_(
   init: fn(initializer) -> state,
 ) -> #(state, fn(action) -> Nil)
 
-/// Let you add a [state variable](https://redraw.dev/learn/state-a-components-memory) to your component.
-/// [Documentation](https://redraw.dev/reference/redraw/useState)
+/// Let you add a [state variable](https://react.dev/learn/state-a-components-memory) to your component.
+///
+/// [Documentation](https://react.dev/reference/react/useState)
 @external(javascript, "react", "useState")
 pub fn use_state(initial_value: a) -> #(a, fn(a) -> Nil)
 
-/// Let you add a [state variable](https://redraw.dev/learn/state-a-components-memory) to your component.
+/// Let you add a [state variable](https://react.dev/learn/state-a-components-memory) to your component.
 /// Give an `updater` function instead of a state setter.
-/// [Documentation](https://redraw.dev/reference/redraw/useState)
+///
+/// [Documentation](https://react.dev/reference/react/useState)
 @external(javascript, "react", "useState")
 pub fn use_state_(initial_value: a) -> #(a, fn(fn(a) -> a) -> Nil)
 
-/// Let you add a [state variable](https://redraw.dev/learn/state-a-components-memory) to your component.
+/// Let you add a [state variable](https://react.dev/learn/state-a-components-memory) to your component.
 /// Allow to create the initial value in a lazy way.
-/// [Documentation](https://redraw.dev/reference/redraw/useState)
+///
+/// [Documentation](https://react.dev/reference/react/useState)
 @external(javascript, "react", "useState")
 pub fn use_lazy_state(initial_value: fn() -> a) -> #(a, fn(a) -> Nil)
 
-/// Let you add a [state variable](https://redraw.dev/learn/state-a-components-memory) to your component.
+/// Let you add a [state variable](https://react.dev/learn/state-a-components-memory) to your component.
 /// Allow to create the initial value in a lazy way.
 /// Give an `updater` function instead of a state setter.
-/// [Documentation](https://redraw.dev/reference/redraw/useState)
+///
+/// [Documentation](https://react.dev/reference/react/useState)
 @external(javascript, "react", "useState")
 pub fn use_lazy_state_(initial_value: fn() -> a) -> #(a, fn(fn(a) -> a) -> Nil)
 
 /// Let you update the state without blocking the UI.
-/// [Documentation](https://redraw.dev/reference/redraw/useTransition)
+///
+/// [Documentation](https://react.dev/reference/react/useTransition)
 @external(javascript, "react", "useTransition")
 pub fn use_transition() -> #(Bool, fn() -> Nil)
 
@@ -255,6 +280,8 @@ pub fn use_transition() -> #(Bool, fn() -> Nil)
 /// A Ref is a mutable data stored in React, persisted across renders.
 /// They allow to keep track of a DOM node, a component data, or to store a
 /// mutable variable in the component, outside of every component lifecycle.
+///
+/// [Documentation](https://react.dev/learn/referencing-values-with-refs)
 pub type Ref(a)
 
 /// Set the current value of a ref, overriding its existing content.
@@ -270,7 +297,8 @@ pub fn get_current(from ref: Ref(a)) -> a
 /// and can be passed to `attribute.ref` or `use_imperative_handle`.
 /// You probably don't want the ref value to be anything than `Option(a)`, unless
 /// you have really strong reasons.
-/// [Documentation](https://redraw.dev/reference/redraw/useRef)
+///
+/// [Documentation](https://react.dev/reference/react/useRef)
 pub fn use_ref() {
   use_ref_(option.None)
 }
@@ -280,22 +308,25 @@ pub fn use_ref() {
 /// component. Use `use_ref_` when you want to keep track of a data, like if
 /// you're doing some side-effects, in conjuction with `get_current` and
 /// `set_current`.
-/// [Documentation](https://redraw.dev/reference/redraw/useRef)
+///
+/// [Documentation](https://react.dev/reference/react/useRef)
 @external(javascript, "react", "useRef")
 pub fn use_ref_(initial_value: a) -> Ref(a)
 
-/// Let you customize the handle exposed as a [ref](https://redraw.dev/learn/manipulating-the-dom-with-refs).
+/// Let you customize the handle exposed as a [ref](https://react.dev/learn/manipulating-the-dom-with-refs).
 /// Use `use_imperative_handle` when you want to customize the data stored in
 /// a ref. It's mostly used in conjuction with `forward_ref`.
-/// [Documentation](https://redraw.dev/reference/redraw/useImperativeHandle)
+///
+/// [Documentation](https://react.dev/reference/react/useImperativeHandle)
 pub fn use_imperative_handle(ref, handler, dependencies) {
   use_imperative_handle_(ref, fn() { option.Some(handler()) }, dependencies)
 }
 
-/// Let you customize the handle exposed as a [ref](https://redraw.dev/learn/manipulating-the-dom-with-refs).
+/// Let you customize the handle exposed as a [ref](https://react.dev/learn/manipulating-the-dom-with-refs).
 /// Use `use_imperative_handle` by default, unless you really know what you're
 /// doing.
-/// [Documentation](https://redraw.dev/reference/redraw/useImperativeHandle)
+///
+/// [Documentation](https://react.dev/reference/react/useImperativeHandle)
 @external(javascript, "react", "useImperativeHandle")
 pub fn use_imperative_handle_(
   ref: Ref(a),
@@ -306,22 +337,26 @@ pub fn use_imperative_handle_(
 // Contexts
 
 /// Pass data without props drilling.
-/// [Documentation](https://redraw.dev/learn/passing-data-deeply-with-context)
+///
+/// [Documentation](https://react.dev/learn/passing-data-deeply-with-context)
 pub type Context(a)
 
-/// Let you read and subscribe to [context](https://redraw.dev/learn/passing-data-deeply-with-context) from your component.
-/// [Documentation](https://redraw.dev/reference/redraw/useContext)
+/// Let you read and subscribe to [context](https://react.dev/learn/passing-data-deeply-with-context) from your component.
+///
+/// [Documentation](https://react.dev/reference/react/useContext)
 @external(javascript, "react", "useContext")
 pub fn use_context(context: Context(a)) -> a
 
-/// Let you create a [context](https://redraw.dev/learn/passing-data-deeply-with-context) that components can provide or read.
-/// [Documentation](https://redraw.dev/reference/redraw/createContext)
+/// Let you create a [context](https://react.dev/learn/passing-data-deeply-with-context) that components can provide or read.
+///
+/// [Documentation](https://react.dev/reference/react/createContext)
 @deprecated("Use redraw/create_context_ instead. redraw/create_context will be removed in 2.0.0. Unusable right now, due to how React handles Context.")
 @external(javascript, "react", "createContext")
 pub fn create_context(default_value default_value: Option(a)) -> Context(a)
 
 /// Wrap your components into a context provider to specify the value of this context for all components inside.
-/// [Documentation](https://redraw.dev/reference/redraw/createContext#provider)
+///
+/// [Documentation](https://react.dev/reference/react/createContext#provider)
 @external(javascript, "./context.ffi.mjs", "contextProvider")
 pub fn provider(
   context context: Context(a),
@@ -329,7 +364,7 @@ pub fn provider(
   children children: List(Component),
 ) -> Component
 
-/// Create a [context](https://redraw.dev/learn/passing-data-deeply-with-context)
+/// Create a [context](https://react.dev/learn/passing-data-deeply-with-context)
 /// that components can provide or read.
 /// Each context is referenced by its name, a little bit like actors in OTP
 /// (if you're familiar with Erlang). Because Gleam cannot execute code outside of
@@ -376,7 +411,8 @@ pub fn provider(
 /// Be careful, `create_context_` fails if the Context is already defined.
 /// Choose a full qualified name, hard to overlap with inattention. If
 /// you want to get a Context in an idempotent way, take a look at [`context()`](#context).
-/// [Documentation](https://redraw.dev/reference/redraw/createContext)
+///
+/// [Documentation](https://react.dev/reference/react/createContext)
 @external(javascript, "./context.ffi.mjs", "createContext")
 pub fn create_context_(
   name: String,
@@ -475,12 +511,14 @@ pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
 // API
 //
 /// Test helper to apply pending React updates before making assertions.
-/// [Documentation](https://redraw.dev/reference/redraw/act)
+///
+/// [Documentation](https://react.dev/reference/react/act)
 @external(javascript, "react", "act")
 pub fn act(act_fn: fn() -> Promise(Nil)) -> Promise(Nil)
 
 /// Let you update the state without blocking the UI.
-/// [Documentation](https://redraw.dev/reference/redraw/startTransition)
+///
+/// [Documentation](https://react.dev/reference/react/startTransition)
 @external(javascript, "react", "startTransition")
 pub fn start_transition(scope scope: fn() -> Nil) -> Nil
 

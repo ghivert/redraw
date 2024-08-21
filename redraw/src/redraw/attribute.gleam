@@ -30,10 +30,23 @@ pub fn alt(value: String) {
 
 pub type InnerHTML
 
+/// The `inner_html` data should be created as close to where the HTML is
+/// generated as possible. This ensures that all raw HTML being used in your
+/// code is explicitly marked as such, and that only variables that you expect
+/// to contain HTML are passed to `dangerously_set_inner_html`. It is not
+/// recommended to create the object inline like
+/// `html.div([attribute.dangerously_set_inner_html(attribute.inner_html(markup))], [])`
+///
+/// [Documentation](https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html)
 @external(javascript, "../redraw.ffi.mjs", "innerHTML")
 pub fn inner_html(html: String) -> InnerHTML
 
-/// Overrides the innerHTML property of the DOM node and displays the passed HTML inside. This should be used with extreme caution! If the HTML inside isn’t trusted (for example, if it’s based on user data), you risk introducing an XSS vulnerability.
+/// Overrides the innerHTML property of the DOM node and displays the passed
+/// HTML inside. This should be used with extreme caution! If the HTML inside
+/// isn’t trusted (for example, if it’s based on user data), you risk
+/// introducing an XSS vulnerability.
+///
+/// [Documentation](https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html)
 pub fn dangerously_set_inner_html(inner_html: InnerHTML) {
   attribute.attribute("dangerouslySetInnerHTML", inner_html)
 }
@@ -50,7 +63,9 @@ pub fn ref(ref: redraw.Ref(option.Option(a))) {
   })
 }
 
-/// A ref callback function. The callback will be provided with the DOM element for this node. Use this function to get control on the ref provided by the DOM node or the component.
+/// A ref callback function. The callback will be provided with the DOM element
+/// for this node. Use this function to get control on the ref provided by the
+/// DOM node or the component.
 pub fn ref_(ref: fn(a) -> Nil) {
   attribute.attribute("ref", ref)
 }
@@ -88,12 +103,18 @@ pub fn class_name(value: String) {
   attribute.attribute("className", value)
 }
 
-/// If true, the browser lets the user edit the rendered element directly. This is used to implement rich text input libraries like Lexical. React warns if you try to pass React children to an element with contentEditable={true} because React will not be able to update its content after user edits.
+/// If true, the browser lets the user edit the rendered element directly.
+/// This is used to implement rich text input libraries like Lexical. React
+/// warns if you try to pass React children to an element with
+/// `content_editable(True)` because React will not be able to update its content
+/// after user edits.
 pub fn content_editable(value: Bool) {
   attribute.attribute("contentEditable", value)
 }
 
-/// Data attributes let you attach some string data to the element, for example data-fruit="banana". In React, they are not commonly used because you would usually read data from props or state instead.
+/// Data attributes let you attach some string data to the element, for example
+/// `data("fruit", "banana")`. In React, they are not commonly used because you
+/// would usually read data from props or state instead.
 pub fn data(key: String, value: String) {
   attribute.attribute("data-" <> key, value)
 }
@@ -122,7 +143,8 @@ pub fn enter_key_hint(value: String) {
   attribute.attribute("enterKeyHint", value)
 }
 
-/// For <label> and <output>, lets you associate the label with some control. Same as for HTML attribute. React uses the standard DOM property names (htmlFor) instead of HTML attribute names.
+/// For <label> and <output>, lets you associate the label with some control.
+/// Same as for HTML attribute.
 pub fn for(value: String) {
   attribute.attribute("htmlFor", value)
 }
@@ -137,7 +159,9 @@ pub fn hidden(value: Bool) {
   attribute.attribute("hidden", value)
 }
 
-/// Specifies a unique identifier for this element, which can be used to find it later or connect it with other elements. Generate it with useId to avoid clashes between multiple instances of the same component.
+/// Specifies a unique identifier for this element, which can be used to find
+/// it later or connect it with other elements. Generate it with useId to avoid
+/// clashes between multiple instances of the same component.
 pub fn id(value: String) {
   attribute.attribute("id", value)
 }
