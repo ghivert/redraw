@@ -203,6 +203,13 @@ pub fn use_deferred_value(value: a) -> a
 @external(javascript, "react", "useEffect")
 pub fn use_effect(value: fn() -> Nil, dependencies: a) -> Nil
 
+/// Let you synchronize a component with an external system. Allow to return
+/// a cleanup function.
+///
+/// [Documentation](https://react.dev/reference/react/useEffect)
+@external(javascript, "react", "useEffect")
+pub fn use_effect_(value: fn() -> fn() -> Nil, dependencies: a) -> Nil
+
 /// Version of useEffect that fires before the browser repaints the screen.
 ///
 /// [Documentation](https://react.dev/reference/react/useLayoutEffect)
