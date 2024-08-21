@@ -176,7 +176,7 @@ pub fn suspense(props: Suspense, children: List(Component)) -> Component
 ///
 /// [Documentation](https://react.dev/reference/react/useCallback)
 @external(javascript, "react", "useCallback")
-pub fn use_callback(fun: function, dependencies: dependencies) -> a
+pub fn use_callback(fun: function, dependencies: dependencies) -> function
 
 /// Let you add a label to a custom Hook in React DevTools.
 ///
