@@ -31,6 +31,10 @@ pub fn title(attrs, content) {
   redraw.jsx("title", attrs, [text(content)])
 }
 
+pub fn none() {
+  redraw.jsx("none_", Nil, Nil)
+}
+
 pub fn text(content: String) -> Component {
   redraw.jsx("text_", Nil, content)
 }
