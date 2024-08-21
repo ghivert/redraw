@@ -118,6 +118,7 @@ export function addProxy(Component) {
 /**  Generate JSX using the JSX factory.
  * `jsx` is for dynamic components, while `jsxs` is for static components. */
 export function jsx(value, props_, children_) {
+  if (value === "none_") return null
   if (value === "text_") return children_
   let children = children_?.toArray?.()
   let isStatic = true
