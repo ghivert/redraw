@@ -1,14 +1,14 @@
 name = "redraw_dom"
-version = "1.0.0"
 target = "javascript"
+version = "1.0.0"
 
 # Fill out these fields if you intend to generate HTML documentation or publish
 # your project to the Hex package manager.
 
 description = "Redraw DOM renderer. Take a look at Redraw to use it."
 licences = ["MIT"]
-repository = { type = "github", user = "ghivert", repo = "redraw" }
-links = [{ title = "Sponsor", href = "https://github.com/sponsors/ghivert" }]
+links = [{title = "Sponsor", href = "https://github.com/sponsors/ghivert"}]
+repository = {type = "github", user = "ghivert", repo = "redraw/redraw_dom"}
 
 # For a full reference of all the available options, you can have a look at
 # https://gleam.run/writing-gleam/gleam-toml/.
