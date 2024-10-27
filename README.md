@@ -1,8 +1,11 @@
 # Redraw
 
-React opinionated bindings for Gleam. Because a lot of frameworks and products
-are using React in a day-to-day way, Redraw fills the gap by providing nice,
-simple API to work on a React codebase, Gleam-enhanced!
+React opinionated bindings for Gleam. Use React directly from Gleam, with a
+friendly API that will never go in your path. Redraw tries to stick to React
+conventions, while providing idiomatic Gleam code. Write interoperable code
+between React and Gleam code, reuse existing components, and leverage on
+type-safe components & immutable data structure. Forget runtime errors, and
+write React components that just works.
 
 > [!TIP]
 >
@@ -12,15 +15,20 @@ simple API to work on a React codebase, Gleam-enhanced!
 > write than Redraw, and is supported by the entire Gleam community! Before
 > launching into Redraw, you should take a look at Lustre, it provides a
 > user-friendly, awesome experience right out-of-the-box for every gleamlins!
-> Plus, Lustre is homomorphic, i.e. it can be used as well on client and on
-> server with the same codebase! When using Redraw, you assume to have knowledge
-> about frontend development.
+>
+> As a bonus, Lustre is homomorphic, i.e. it can be used as well on client and
+> on server with the same codebase!
+>
+> Redraw assumes you have minimal knowledge on frontend development, and will
+> neither try to ease your learning curve nor simplify and hide the frontend
+> technology stack and complexities. In case you're not sure what you really
+> need, pick Lustre.
 
 ## Overview
 
-Redraw is a package to help you use React in a frontend-only Gleam project. By
+Redraw is a package that let you use React in a frontend-only Gleam project. By
 leveraging on the entire JS ecosystem, Redraw help you interop with existing
-current React codebases, or allow you to build your custom codebase and
+current React codebases, or allows you to build your custom codebase and
 cherry-picking the existing components you know and love! Redraw tries to keep
 everything at the lowest level possible, turning all the React niceties into
 Gleam niceties. Wherever possible, Redraw tries to stick with Lustre API, to
@@ -33,11 +41,17 @@ system for all your products!
 Redraw assumes that you're a fluent frontend developer and already understand
 how React works. If you don't, it's best to first learn React and the frontend
 ecosystem, and come back here later. Meanwhile, you could also take a look at
-[Lustre](https://lustre.build) to solve your problems.
+[Lustre](https://lustre.build) to create your own application. You'll find some
+good tutorials on [react.dev](https://react.dev/), more specifically on
+["Get Started" page](https://react.dev/learn).
 
-Redraw assumes you have [`node.js`](https://nodejs.org/en) as well as a decent
-package manager, i.e. `npm`, `yarn` or `pnpm`. Redraw also assumes you're using
-[`Vite`](https://vitejs.dev/) as a tooling, to build your application.
+Redraw assumes you have [`node.js`](https://nodejs.org/en) or equivalent as well
+as a modern package manager, i.e. `npm`, `yarn`, `pnpm`, or even `bun`. Redraw
+also assumes you're using [`Vite`](https://vitejs.dev/) or an equivalent as
+build tool, and will not provide any interface to build your application. In the
+rest of that README, `Vite` will be used as example. It's up to you to use
+another bundler if you prefer. Redraw sticks with the modern, up-to-date
+frontend stack.
 
 ## Getting started
 
@@ -69,14 +83,18 @@ project correctly.
 cd [project-name]
 yarn install
 
-# Install the Vite Gleam plugin.
+# Install the Vite Gleam plugin. That plugin is required to tell Vite how to
+# read Gleam files.
 yarn add -D vite-gleam
 
 # If you want to build the project on Vercel or Netlify.
+# @chouqueth/gleam provides a local version of the Gleam compiler installed in
+# your node_modules. You can freely skip that step if you don't need to build
+# your application remotely or if you're in control of the environment.
 yarn add -D @chouqueth/gleam
 
 # Remove the files needed for `gleam new` to work.
-rm README.md
+mv README.md README.md.old
 mv .gitignore .gitignore.old
 
 # Setup the project.
@@ -119,7 +137,7 @@ pub fn gleam_is_awesome() {
 ```
 
 While this could feels strange at first, you'll get used to it quickly. To call
-the component, it's needed to call the function first, _before definining a new
+the component, you'll need to call the function first, _before definining a new
 component_.
 
 ```gleam
@@ -201,7 +219,11 @@ To define components, you should use `component`, `component_` or `component__`.
 The difference between the three is the signature of the resulting component.
 `component` accepts props and children, `component_` accepts only props, and
 `component__` do not accept anything. See it as a way to create an empty
-component, used with contexts or internal state for instance.
+component, used with contexts or internal state for instance. You cannot create
+a component that accept children but no props. While it can feel boilerplaty at
+first, that is a design decision. Most of the time, components that accept
+children also accept props, so it's not worth creating another API and add
+overhead for a function that will almost not be used.
 
 ### `forward_ref`-family functions
 
@@ -295,6 +317,14 @@ pub fn my_other_component() {
 ## Miscellaneous
 
 Some questions, answers, and various informations.
+
+### Is there no linter for Redraw?
+
+At the moment, Redraw leverages on the Gleam compiler and does not offer linter
+support for critical parts like hooks dependencies. A future, complementary
+linter is planned, and should bridge that gap between Gleam and React. While
+Gleam compiler provides all useful information about Gleam code, Redraw linter
+will focus on specific Redraw requirements.
 
 ### What is the state of support for React Native, or any other React flavor?
 
