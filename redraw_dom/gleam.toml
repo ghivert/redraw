@@ -8,7 +8,12 @@ version = "1.1.0"
 description = "Redraw DOM renderer. Take a look at Redraw to use it."
 licences = ["MIT"]
 links = [{title = "Sponsor", href = "https://github.com/sponsors/ghivert"}]
-repository = {type = "github", user = "ghivert", repo = "redraw"}
+
+[repository]
+type = "github"
+user = "ghivert"
+repo = "redraw"
+path = "redraw_dom"
 
 # For a full reference of all the available options, you can have a look at
 # https://gleam.run/writing-gleam/gleam-toml/.
