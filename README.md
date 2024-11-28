@@ -3,9 +3,9 @@
 React opinionated bindings for Gleam. Use React directly from Gleam, with a
 friendly API that will never go in your path. Redraw tries to stick to React
 conventions, while providing idiomatic Gleam code. Write interoperable code
-between React and Gleam code, reuse existing components, and leverage on
-type-safe components & immutable data structure. Forget runtime errors, and
-write React components that just works.
+between React and Gleam code, reuse existing components, and leverage type-safe
+components & immutable data structure. Forget runtime errors, and write React
+components that just works.
 
 > [!TIP]
 >
