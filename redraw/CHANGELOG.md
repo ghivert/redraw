@@ -1,3 +1,7 @@
+## Unreleased
+
+- Bump minimal required versions.
+
 ## v1.1.0 - 2024-21-08
 
 - Documentation improvements.
