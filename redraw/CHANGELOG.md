@@ -1,6 +1,8 @@
-## Unreleased
+## v1.1.1 - 2024-12-23
 
+- Add documentation for every functions.
 - Bump minimal required versions.
+- Add `offset_x`, `offset_y`, `altitude_angle` & `azimuth_angle`.
 
 ## v1.1.0 - 2024-21-08
 

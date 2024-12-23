@@ -102,6 +102,14 @@ export function clientY(event) {
   return event.clientY
 }
 
+export function offsetX(event) {
+  return event.offsetX
+}
+
+export function offsetY(event) {
+  return event.offsetY
+}
+
 export function metaKey(event) {
   return event.metaKey
 }
@@ -168,6 +176,14 @@ export function width(event) {
 
 export function isPrimary(event) {
   return event.isPrimary
+}
+
+export function altitudeAngle(event) {
+  return event.altitudeAngle
+}
+
+export function azimuthAngle(event) {
+  return event.azimuthAngle
 }
 
 export function pointerId(event) {

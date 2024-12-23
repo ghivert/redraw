@@ -1,33 +1,51 @@
+//// Implementation for HTML and SVG attributes usable in React and in browser.
+//// Contrarily to Lustre, every attributes can take arbitrary data, because
+//// they're directly bind in the underlying component's props.
+////
+//// All available attributes can be found in the
+//// [React.dev](https://react.dev/reference/react-dom/components/common#common)
+//// documentation for detailed information, as well as on
+//// [MDN](https://developer.mozilla.org/docs/Web/API/Element).
+
 import gleam/option
 import gleam/string
 import redraw
 import redraw/internals/attribute
 
+/// Attribute linked on an HTML or SVG node. Think about like a `prop` in React.
 pub type Attribute =
   attribute.Attribute
 
 pub const attribute = attribute.attribute
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/href)
 pub fn href(url: String) {
-  attribute.attribute("href", url)
+  attribute("href", url)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/target)
 pub fn target(value: String) {
-  attribute.attribute("target", value)
+  attribute("target", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/src)
 pub fn src(value: String) {
-  attribute.attribute("src", value)
+  attribute("src", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/class)
 pub fn class(value: String) {
-  attribute.attribute("className", value)
+  attribute("className", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/alt)
 pub fn alt(value: String) {
-  attribute.attribute("alt", value)
+  attribute("alt", value)
 }
 
+/// Inner HTML data are HTML that will not be verified sanitized.
+/// Be careful when using it. You should almost always prefer to use
+/// `redraw/element/html`.
 pub type InnerHTML
 
 /// The `inner_html` data should be created as close to where the HTML is
@@ -35,8 +53,7 @@ pub type InnerHTML
 /// code is explicitly marked as such, and that only variables that you expect
 /// to contain HTML are passed to `dangerously_set_inner_html`. It is not
 /// recommended to create the object inline like
-/// `html.div([attribute.dangerously_set_inner_html(attribute.inner_html(markup))], [])`
-///
+/// `html.div([attribute.dangerously_set_inner_html(attribute.inner_html(markup))], [])` \
 /// [Documentation](https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html)
 @external(javascript, "../redraw.ffi.mjs", "innerHTML")
 pub fn inner_html(html: String) -> InnerHTML
@@ -44,11 +61,10 @@ pub fn inner_html(html: String) -> InnerHTML
 /// Overrides the innerHTML property of the DOM node and displays the passed
 /// HTML inside. This should be used with extreme caution! If the HTML inside
 /// isn’t trusted (for example, if it’s based on user data), you risk
-/// introducing an XSS vulnerability.
-///
+/// introducing an XSS vulnerability. \
 /// [Documentation](https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html)
 pub fn dangerously_set_inner_html(inner_html: InnerHTML) {
-  attribute.attribute("dangerouslySetInnerHTML", inner_html)
+  attribute("dangerouslySetInnerHTML", inner_html)
 }
 
 /// A ref object from `redraw.use_ref`. Your ref will be filled with the DOM
@@ -56,323 +72,419 @@ pub fn dangerously_set_inner_html(inner_html: InnerHTML) {
 /// forced to use an optional type here. Because when using this function, you
 /// want to get a reference from a real DOM node, meaning at the initialization
 /// of the reference, you won't have any data. Use `ref_` when you want full
-/// control over the ref you send to the Component.
+/// control over the ref you send to the Component. \
+/// [Documentation](https://react.dev/reference/react-dom/components/common#manipulating-a-dom-node-with-a-ref)
 pub fn ref(ref: redraw.Ref(option.Option(a))) {
-  attribute.attribute("ref", fn(dom_ref) {
-    redraw.set_current(ref, option.Some(dom_ref))
-  })
+  attribute("ref", fn(dom_ref) { redraw.set_current(ref, option.Some(dom_ref)) })
 }
 
 /// A ref callback function. The callback will be provided with the DOM element
 /// for this node. Use this function to get control on the ref provided by the
-/// DOM node or the component.
+/// DOM node or the component. \
+/// [Documentation](https://react.dev/reference/react-dom/components/common#manipulating-a-dom-node-with-a-ref)
 pub fn ref_(ref: fn(a) -> Nil) {
-  attribute.attribute("ref", ref)
+  attribute("ref", ref)
 }
 
+/// If `True`, suppresses the warning that React shows for elements that both
+/// have `children` and `content_editable(True)` (which normally do not work
+/// together). Use this if you’re building a text input library that manages
+/// the `contentEditable` content manually.
 pub fn suppress_content_editable_warning(value: Bool) {
-  attribute.attribute("suppressContentEditableWarning", value)
+  attribute("suppressContentEditableWarning", value)
 }
 
+/// If you use [server rendering](https://react.dev/reference/react-dom/server),
+/// normally there is a warning when the server and the client render different
+/// content. In some rare cases (like timestamps), it is very hard or impossible
+/// to guarantee an exact match. If you set suppressHydrationWarning to true,
+/// React will not warn you about mismatches in the attributes and the content
+/// of that element. It only works one level deep, and is intended to be used
+/// as an escape hatch. Don’t overuse it.
+/// [Read about suppressing hydration errors.](https://react.dev/reference/react-dom/client/hydrateRoot#suppressing-unavoidable-hydration-mismatch-errors)
 pub fn suppress_hydration_warning(value: Bool) {
-  attribute.attribute("suppressHydrationWarning", value)
+  attribute("suppressHydrationWarning", value)
 }
 
 @external(javascript, "../redraw.ffi.mjs", "convertStyle")
 fn convert_style(styles: List(#(String, String))) -> a
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/style)
 pub fn style(styles: List(#(String, String))) {
-  attribute.attribute("style", convert_style(styles))
+  attribute("style", convert_style(styles))
 }
 
 /// Set aria attribute on the node. Should be used like `aria("valuenow", "75")`.
 pub fn aria(key: String, value: String) {
-  attribute.attribute("aria-" <> key, value)
+  attribute("aria-" <> key, value)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/accesskey)
 pub fn access_key(value: String) {
-  attribute.attribute("accessKey", value)
+  attribute("accessKey", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/autocapitalize)
 pub fn auto_capitalize(value: String) {
-  attribute.attribute("autoCapitalize", value)
+  attribute("autoCapitalize", value)
 }
 
-/// Alias of `class`.
+/// Alias of `class`. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/class)
 pub fn class_name(value: String) {
-  attribute.attribute("className", value)
+  attribute("className", value)
 }
 
 /// If true, the browser lets the user edit the rendered element directly.
 /// This is used to implement rich text input libraries like Lexical. React
 /// warns if you try to pass React children to an element with
 /// `content_editable(True)` because React will not be able to update its content
-/// after user edits.
+/// after user edits. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTML/Global_attributes/contenteditable)
 pub fn content_editable(value: Bool) {
-  attribute.attribute("contentEditable", value)
+  attribute("contentEditable", value)
 }
 
 /// Data attributes let you attach some string data to the element, for example
 /// `data("fruit", "banana")`. In React, they are not commonly used because you
-/// would usually read data from props or state instead.
+/// would usually read data from props or state instead. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/data-*)
 pub fn data(key: String, value: String) {
-  attribute.attribute("data-" <> key, value)
+  attribute("data-" <> key, value)
 }
 
+/// Directionality of an element text.
 pub type Dir {
   Ltr
   Rtl
 }
 
-/// Specifies the text direction of the element.
+/// Specifies the text direction of the element. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/dir)
 pub fn dir(value: Dir) {
   let value = case value {
     Ltr -> "ltr"
     Rtl -> "rtl"
   }
-  attribute.attribute("dir", value)
+  attribute("dir", value)
 }
 
-/// Specifies whether the element is draggable. Part of HTML Drag and Drop API.
+/// Specifies whether the element is draggable. Part of HTML Drag and Drop API. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/draggable)
 pub fn draggable(value: Bool) {
-  attribute.attribute("draggable", value)
+  attribute("draggable", value)
 }
 
-/// Specifies which action to present for the enter key on virtual keyboards.
+/// Specifies which action to present for the enter key on virtual keyboards.\
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/enterkeyhint)
 pub fn enter_key_hint(value: String) {
-  attribute.attribute("enterKeyHint", value)
+  attribute("enterKeyHint", value)
 }
 
 /// For <label> and <output>, lets you associate the label with some control.
-/// Same as for HTML attribute.
+/// Same as for HTML attribute. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/for)
 pub fn for(value: String) {
-  attribute.attribute("htmlFor", value)
+  attribute("htmlFor", value)
 }
 
-/// Alias of `for`.
+/// Alias of `for`. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/for)
 pub fn html_for(value: String) {
-  attribute.attribute("htmlFor", value)
+  attribute("htmlFor", value)
 }
 
-/// Specifies whether the element should be hidden.
+/// Specifies whether the element should be hidden. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/hidden)
 pub fn hidden(value: Bool) {
-  attribute.attribute("hidden", value)
+  attribute("hidden", value)
 }
 
 /// Specifies a unique identifier for this element, which can be used to find
 /// it later or connect it with other elements. Generate it with useId to avoid
-/// clashes between multiple instances of the same component.
+/// clashes between multiple instances of the same component. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/id)
 pub fn id(value: String) {
-  attribute.attribute("id", value)
+  attribute("id", value)
 }
 
-/// If specified, the component will behave like a custom element.
+/// If specified, the component will behave like a custom element. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/is)
 pub fn is(value: String) {
-  attribute.attribute("is", value)
+  attribute("is", value)
 }
 
-/// Specifies what kind of keyboard to display (for example, text, number or telephone).
+/// Specifies what kind of keyboard to display (for example, text, number or telephone). \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/inputmode)
 pub fn input_mode(value: String) {
-  attribute.attribute("inputMode", value)
+  attribute("inputMode", value)
 }
 
-/// Specifies which property the element represents for structured data crawlers.
+/// Specifies which property the element represents for structured data crawlers. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/itemprop)
 pub fn item_prop(value: String) {
-  attribute.attribute("itemProp", value)
+  attribute("itemProp", value)
 }
 
-/// Specifies the language of the element.
+/// Specifies the language of the element. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/lang)
 pub fn lang(value: String) {
-  attribute.attribute("lang", value)
+  attribute("lang", value)
 }
 
 /// Specifies the element role explicitly for assistive technologies.
 pub fn role(value: String) {
-  attribute.attribute("role", value)
+  attribute("role", value)
 }
 
-/// Specifies the slot name when using shadow DOM.
+/// Specifies the slot name when using shadow DOM. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/slot)
 pub fn slot(value: String) {
-  attribute.attribute("slot", value)
+  attribute("slot", value)
 }
 
-/// If explicitly set to true or false, enables or disables spellchecking.
+/// If explicitly set to true or false, enables or disables spellchecking. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/spellcheck)
 pub fn spell_check(value: Bool) {
-  attribute.attribute("spellCheck", value)
+  attribute("spellCheck", value)
 }
 
-/// Overrides the default Tab button behavior. Avoid using values other than -1 and 0.
+/// Overrides the default Tab button behavior. Avoid using values other than -1 and 0. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/tabindex)
 pub fn tab_index(value: Int) {
-  attribute.attribute("tabIndex", value)
+  attribute("tabIndex", value)
 }
 
-/// Specifies the tooltip text for the element.
+/// Specifies the tooltip text for the element. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/title)
 pub fn title(value: String) {
-  attribute.attribute("title", value)
+  attribute("title", value)
 }
 
+/// Translate of a translatable element.
 pub type Translate {
   Yes
   No
 }
 
-/// Passing No excludes the element content from being translated.
+/// Passing No excludes the element content from being translated. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/translate)
 pub fn translate(value: Translate) {
   let value = case value {
     Yes -> "yes"
     No -> "no"
   }
-  attribute.attribute("translate", value)
+  attribute("translate", value)
 }
 
+/// Type of an `input`. Value can be
+/// [`"button"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/button),
+/// [`"checkbox"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/checkbox),
+/// [`"color"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/color),
+/// [`"date"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/date),
+/// [`"datetime-local"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/datetime-local),
+/// [`"email"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/email),
+/// [`"file"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/file),
+/// [`"hidden"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/hidden),
+/// [`"image"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/image),
+/// [`"month"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/month),
+/// [`"number"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/number),
+/// [`"password"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/password),
+/// [`"radio"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/radio),
+/// [`"range"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/range),
+/// [`"reset"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/reset),
+/// [`"search"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/search),
+/// [`"submit"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/submit),
+/// [`"tel"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/tel),
+/// [`"text"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/text),
+/// [`"time"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/time),
+/// [`"url"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/url), or
+/// [`"week"`](https://developer.mozilla.org/docs/Web/HTML/Element/input/week).
 pub fn type_(name: String) {
-  attribute.attribute("type", name)
+  attribute("type", name)
 }
 
+/// [Input Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/input#value) \
+/// [Button Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/button#value)
 pub fn value(val: String) {
-  attribute.attribute("value", val)
+  attribute("value", val)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/input#checked)
 pub fn checked(is_checked: Bool) {
-  attribute.attribute("checked", is_checked)
+  attribute("checked", is_checked)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/placeholder)
 pub fn placeholder(text: String) {
-  attribute.attribute("placeholder", text)
+  attribute("placeholder", text)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/option#selected)
 pub fn selected(is_selected: Bool) {
-  attribute.attribute("selected", is_selected)
+  attribute("selected", is_selected)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/accept)
 pub fn accept(types: List(String)) {
-  attribute.attribute("accept", string.join(types, " "))
+  attribute("accept", string.join(types, " "))
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/acceptCharset)
 pub fn accept_charset(types: List(String)) {
-  attribute.attribute("acceptCharset", string.join(types, " "))
+  attribute("acceptCharset", string.join(types, " "))
 }
 
 pub fn msg(uri: String) {
-  attribute.attribute("msg", uri)
+  attribute("msg", uri)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/autocomplete)
 pub fn autocomplete(name: String) {
-  attribute.attribute("autocomplete", name)
+  attribute("autocomplete", name)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/autofocus)
 pub fn autofocus(should_autofocus: Bool) {
-  attribute.attribute("autofocus", should_autofocus)
+  attribute("autofocus", should_autofocus)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/disabled)
 pub fn disabled(is_disabled: Bool) {
-  attribute.attribute("disabled", is_disabled)
+  attribute("disabled", is_disabled)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/name)
 pub fn name(name: String) {
-  attribute.attribute("name", name)
+  attribute("name", name)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/pattern)
 pub fn pattern(regex: String) {
-  attribute.attribute("pattern", regex)
+  attribute("pattern", regex)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/readonly)
 pub fn readonly(is_readonly: Bool) {
-  attribute.attribute("readonly", is_readonly)
+  attribute("readonly", is_readonly)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/required)
 pub fn required(is_required: Bool) {
-  attribute.attribute("required", is_required)
+  attribute("required", is_required)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/max)
 pub fn max(val: String) {
-  attribute.attribute("max", val)
+  attribute("max", val)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/min)
 pub fn min(val: String) {
-  attribute.attribute("min", val)
+  attribute("min", val)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/step)
 pub fn step(val: String) {
-  attribute.attribute("step", val)
+  attribute("step", val)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLTextAreaElement/cols)
 pub fn cols(val: Int) {
-  attribute.attribute("cols", val)
+  attribute("cols", val)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLTextAreaElement/rows)
 pub fn rows(val: Int) {
-  attribute.attribute("rows", val)
+  attribute("rows", val)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLTextAreaElement/wrap)
 pub fn wrap(mode: String) {
-  attribute.attribute("wrap", mode)
+  attribute("wrap", mode)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/download)
 pub fn download(filename: String) {
-  attribute.attribute("download", filename)
+  attribute("download", filename)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/rel)
 pub fn rel(relationship: String) {
-  attribute.attribute("rel", relationship)
+  attribute("rel", relationship)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLObjectElement/height)
 pub fn height(val: Int) {
-  attribute.attribute("height", val)
+  attribute("height", val)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLObjectElement/width)
 pub fn width(val: Int) {
-  attribute.attribute("width", val)
+  attribute("width", val)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/autoplay)
 pub fn autoplay(should_autoplay: Bool) {
-  attribute.attribute("autoplay", should_autoplay)
+  attribute("autoplay", should_autoplay)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/controls)
 pub fn controls(visible: Bool) {
-  attribute.attribute("controls", visible)
+  attribute("controls", visible)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loop)
 pub fn loop(should_loop: Bool) {
-  attribute.attribute("loop", should_loop)
+  attribute("loop", should_loop)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/action)
 pub fn action(url: String) {
-  attribute.attribute("action", url)
+  attribute("action", url)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/enctype)
 pub fn enctype(value: String) {
-  attribute.attribute("enctype", value)
+  attribute("enctype", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/method)
 pub fn method(method: String) {
-  attribute.attribute("method", method)
+  attribute("method", method)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/novalidate)
 pub fn novalidate(value: Bool) {
-  attribute.attribute("novalidate", value)
+  attribute("novalidate", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/button#formaction)
 pub fn form_action(action: String) {
-  attribute.attribute("formaction", action)
+  attribute("formaction", action)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/button#formenctype)
 pub fn form_enctype(value: String) {
-  attribute.attribute("formenctype", value)
+  attribute("formenctype", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/button#formmethod)
 pub fn form_method(method: String) {
-  attribute.attribute("formmethod", method)
+  attribute("formmethod", method)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/button#formnovalidate)
 pub fn form_novalidate(value: Bool) {
-  attribute.attribute("formnovalidate", value)
+  attribute("formnovalidate", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/button#formtarget)
 pub fn form_target(target: String) {
-  attribute.attribute("formtarget", target)
+  attribute("formtarget", target)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLDetailsElement/open)
 pub fn open(is_open: Bool) {
-  attribute.attribute("open", is_open)
+  attribute("open", is_open)
 }

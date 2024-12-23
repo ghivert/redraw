@@ -5,6 +5,7 @@ pub type Attribute {
 }
 
 @external(javascript, "../../redraw.ffi.mjs", "toProps")
+@internal
 pub fn to_props(attrs: List(Attribute)) -> a
 
 pub fn attribute(key: String, content: a) {
