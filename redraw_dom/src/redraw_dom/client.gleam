@@ -1,7 +1,6 @@
 import redraw.{type Component}
 
-/// Root to display React DOM.
-///
+/// Root to display React DOM. \
 /// [Documentation](https://react.dev/reference/react-dom/client/createRoot#createroot)
 pub type Root
 
@@ -44,8 +43,7 @@ pub fn create_root(root: String) -> Result(Root, Nil)
 pub fn hydrate_root(root: String, node: Component) -> Result(Root, Nil)
 
 /// Call `render(root)` to display a piece of JSX (“React node”) into the React
-/// root’s browser DOM node.
-///
+/// root’s browser DOM node. \
 /// [Documentation](https://react.dev/reference/react-dom/client/createRoot#root-render)
 @external(javascript, "../redraw_dom.ffi.mjs", "render")
 pub fn render(root: Root, child: Component) -> Nil
@@ -79,6 +77,7 @@ pub fn render(root: Root, child: Component) -> Nil
 ///   html.div([], [html.text("Inside the modal!")])
 /// }
 /// ```
+///
 /// [Documentation](https://react.dev/reference/react-dom/createPortal)
 @external(javascript, "../redraw_dom.ffi.mjs", "createPortal")
 pub fn create_portal(
