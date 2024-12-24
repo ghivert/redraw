@@ -12,7 +12,8 @@ pub type Root
 /// value in your application.
 ///
 /// ```gleam
-/// import redraw_dom/client
+/// import redraw/dom/client
+///
 /// pub fn main() {
 ///   let assert Ok(root) = client.create_root("app")
 ///   client.render(root, app())
@@ -20,7 +21,7 @@ pub type Root
 /// ```
 ///
 /// [Documentation](https://react.dev/reference/react-dom/client/createRoot)
-@external(javascript, "../redraw_dom.ffi.mjs", "createRoot")
+@external(javascript, "../../client.ffi.mjs", "createRoot")
 pub fn create_root(root: String) -> Result(Root, Nil)
 
 /// Let you display React components inside a browser DOM node whose HTML content
@@ -32,55 +33,19 @@ pub fn create_root(root: String) -> Result(Root, Nil)
 /// value in your application.
 ///
 /// ```gleam
-/// import redraw_dom/client
+/// import redraw/dom/client
+///
 /// pub fn main() {
 ///   let assert Ok(root) = client.hydrate_root("app")
 /// }
 /// ```
 ///
 /// [Documentation](https://react.dev/reference/react-dom/client/hydrateRoot)
-@external(javascript, "../redraw_dom.ffi.mjs", "hydrateRoot")
+@external(javascript, "../../client.ffi.mjs", "hydrateRoot")
 pub fn hydrate_root(root: String, node: Component) -> Result(Root, Nil)
 
 /// Call `render(root)` to display a piece of JSX (“React node”) into the React
 /// root’s browser DOM node. \
 /// [Documentation](https://react.dev/reference/react-dom/client/createRoot#root-render)
-@external(javascript, "../redraw_dom.ffi.mjs", "render")
+@external(javascript, "../../client.ffi.mjs", "render")
 pub fn render(root: Root, child: Component) -> Nil
-
-/// Let you render some children into a different part of the DOM.
-/// Contrarily to JavaScript, `create_portal` returns a `Result` to avoid runtime
-/// error. Indeed, when the provided root does not exist in your HTML, `create_portal`
-/// fails. You should never assume `create_portal` will work out-of-the-box when
-/// you're building a library. Otherwise, you could assert the resulting
-/// value in your application.
-///
-/// ```gleam
-/// import redraw
-/// import redraw/html
-/// import redraw_dom/client
-///
-/// pub fn main() {
-///   let assert Ok(root) = client.create_root("app")
-///   client.render(app)
-/// }
-///
-/// fn app() {
-///   let modal = modal()
-///   use <- redraw.component__("App")
-///   let assert Ok(modal) = client.create_portal(modal, "modal")
-///   html.div([], [html.text("Hello World!"), modal])
-/// }
-///
-/// fn modal() {
-///   use <- redraw.component__("Modal")
-///   html.div([], [html.text("Inside the modal!")])
-/// }
-/// ```
-///
-/// [Documentation](https://react.dev/reference/react-dom/createPortal)
-@external(javascript, "../redraw_dom.ffi.mjs", "createPortal")
-pub fn create_portal(
-  children: Component,
-  root: String,
-) -> Result(Component, Nil)
