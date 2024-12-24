@@ -1,3 +1,9 @@
+## v2.0.0 - 2024-12-24
+
+- Remove DOM attributes and elements in favour of `redraw_dom`. Keep only React
+  core to simplify support for all flavours of React (DOM, Native, etc.). This
+  decrease package size when DOM is unused.
+
 ## v1.1.1 - 2024-12-23
 
 - Add documentation for every functions.

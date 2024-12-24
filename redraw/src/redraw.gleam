@@ -282,7 +282,7 @@ pub fn get_current(from ref: Ref(a)) -> a
 
 /// Let you reference a value that’s not needed for rendering.
 /// Most used ref you'll want to create. They're automatically created to `None`,
-/// and can be passed to `attribute.ref` or `use_imperative_handle`.
+/// and can be passed to `ref` prop or `use_imperative_handle`.
 /// You probably don't want the ref value to be anything than `Option(a)`, unless
 /// you have really strong reasons. \
 /// [Documentation](https://react.dev/reference/react/useRef)
