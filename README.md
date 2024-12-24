@@ -16,8 +16,8 @@ components that just works.
 > launching into Redraw, you should take a look at Lustre, it provides a
 > user-friendly, awesome experience right out-of-the-box for every gleamlins!
 >
-> As a bonus, Lustre is homomorphic, i.e. it can be used as well on client and
-> on server with the same codebase!
+> As a bonus, Lustre is isomorphic, i.e. it can be used as well on client and on
+> server with the same codebase!
 >
 > Redraw assumes you have minimal knowledge on frontend development, and will
 > neither try to ease your learning curve nor simplify and hide the frontend
@@ -125,8 +125,8 @@ difference: wrap the component in `use <- redraw.component()`!
 
 ```gleam
 import redraw
-import redraw/attribute
-import redraw/html
+import redraw/dom/attribute
+import redraw/dom/html
 
 pub fn gleam_is_awesome() {
   use <- redraw.component__("GleamIsAwesome")
@@ -142,14 +142,14 @@ component_.
 
 ```gleam
 import redraw
-import redraw/attribute
-import redraw/html
-import redraw_dom/client
+import redraw/dom/attribute
+import redraw/dom/client
+import redraw/dom/html
 
 pub fn main() {
   let root = root()
-  client.create_root("root")
-  |> client.render(redraw.strict_mode([root()]))
+  let assert Ok(root) = client.create_root("root")
+  client.render(root, redraw.strict_mode([root()]))
 }
 
 fn root() {
@@ -190,7 +190,7 @@ pub type CounterProps {
 pub fn counter() {
   use props: CounterProps <- react.component_("Counter")
   html.button(
-    [h.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
+    [events.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
     [html.text("count is " <> int.to_string(props.count))],
   )
 }
@@ -204,7 +204,7 @@ pub type CounterProps = #(Int, fn(fn(Int) -> Int) -> Nil)
 pub fn counter() {
   use #(count, set_count): CounterProps <- react.component_("Counter")
   html.button(
-    [h.on_click(fn(_) { set_count(fn(count) { count + 1 }) })],
+    [events.on_click(fn(_) { set_count(fn(count) { count + 1 }) })],
     [html.text("count is " <> int.to_string(count))],
   )
 }
@@ -281,7 +281,7 @@ of optionals.
 ```gleam
 import gleam/option.{type Option}
 import redraw
-import redraw/html
+import redraw/dom/html
 
 // This type will be converted to correct JS props.
 pub type ExternalComponentProps {

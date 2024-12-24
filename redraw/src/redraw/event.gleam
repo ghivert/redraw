@@ -2,13 +2,13 @@
 //// known as a “synthetic event”.
 ////
 //// ```gleam
-//// import redraw/element/html
-//// import redraw/handler
+//// import redraw/dom/events
+//// import redraw/dom/html
 ////
 //// pub fn render() {
 ////   html.button(
 ////     [
-////       handler.on_click(fn (event) {
+////       events.on_click(fn (event) {
 ////         io.debug(event) // React Event
 ////       })
 ////     ],
@@ -27,7 +27,7 @@
 //// future. If you need the underlying browser event for some reason, read it
 //// from `event.native_event(event)`.
 ////
-//// Every events have their implementation as `redraw/event/[event_name]`, and
+//// Every events have their implementation as `redraw/dom/event/[event_name]`, and
 //// their corresponding functions are implemented in those. Every time you need
 //// to use one of the functions defined here, use `to_event` from the
 //// corresponding module.

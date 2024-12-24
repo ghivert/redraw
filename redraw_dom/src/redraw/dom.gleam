@@ -9,8 +9,8 @@ import redraw.{type Component}
 ///
 /// ```gleam
 /// import redraw
-/// import redraw/html
 /// import redraw/dom/client
+/// import redraw/dom/html
 ///
 /// pub fn main() {
 ///   let assert Ok(root) = client.create_root("app")
@@ -43,6 +43,7 @@ pub fn create_portal(
 /// ```gleam
 /// import redraw
 /// import redraw/dom
+/// import redraw/dom/events
 ///
 /// type Action {
 ///   Increment
@@ -53,7 +54,7 @@ pub fn create_portal(
 ///   use <- redraw.component__()
 ///   let #(state, set_state) = redraw.set_state(0)
 ///   let on_click = fn(type_: Action) {
-///     handler.on_click(fn (event) {
+///     events.on_click(fn (event) {
 ///       // Calling flush_sync forces the DOM to refresh.
 ///       dom.flush_sync(fn () {
 ///         set_state(case type_ {
