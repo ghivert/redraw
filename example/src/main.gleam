@@ -1,10 +1,10 @@
 import gleam/int
 import gleam/list
 import redraw as react
-import redraw/attribute as a
-import redraw/handler as h
-import redraw/html
-import redraw_dom/client
+import redraw/dom/attribute as a
+import redraw/dom/client
+import redraw/dom/events
+import redraw/dom/html
 
 pub type Root
 
@@ -14,8 +14,8 @@ pub type Children
 
 pub fn main() {
   let root = root()
-  client.create_root("root")
-  |> client.render(react.strict_mode([root()]))
+  let assert Ok(node) = client.create_root("root")
+  client.render(node, react.strict_mode([root()]))
 }
 
 pub fn root() {
@@ -31,7 +31,7 @@ pub type CounterProps {
 fn counter() {
   use props: CounterProps <- react.component_("Counter")
   html.button(
-    [h.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
+    [events.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
     list.map([props.count], fn(count) {
       html.text("count is " <> int.to_string(count))
     }),

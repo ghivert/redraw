@@ -273,15 +273,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chouqueth/gleam@npm:^1.3.2":
-  version: 1.3.2
-  resolution: "@chouqueth/gleam@npm:1.3.2"
+"@chouqueth/gleam@npm:^1.6.3":
+  version: 1.6.3
+  resolution: "@chouqueth/gleam@npm:1.6.3"
   dependencies:
     cachedir: "npm:^2.4.0"
     tar: "npm:^7.1.0"
   bin:
     gleam: bin/cli.mjs
-  checksum: 10c0/623d66b053375e44fd17b809d85caf9697214cd88826d5b2b17e89569d169ff9180441c88de3b9ec07b72957bba4d4580de9a8cc2354309f568e6bf9e0f61677
+  checksum: 10c0/1582f7205fc0c56578e71cc80c600a0090c622f7f90012b4fb1a35b4824619695799729792c19218fb8fdfbf1420d11e8ccf67eac50e0388c5df1a2355d72320
   languageName: node
   linkType: hard
 
@@ -2304,7 +2304,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "greact@workspace:."
   dependencies:
-    "@chouqueth/gleam": "npm:^1.3.2"
+    "@chouqueth/gleam": "npm:^1.6.3"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.1"
