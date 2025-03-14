@@ -176,8 +176,8 @@ And you know everything to create Redraw components!
 
 Components can have different kinds, accepting props, children, ref, or other
 things. To provide a simpler, usable API in Gleam, props components in Gleam can
-be List, Tuple or CustomTypes. It means you can totally define your component
-like this:
+be List, Tuple, CustomTypes or Nil. It means you can totally define your
+component like this:
 
 ```gleam
 pub type CounterProps {
@@ -188,7 +188,7 @@ pub type CounterProps {
 }
 
 pub fn counter() {
-  use props: CounterProps <- react.component_("Counter")
+  use props: CounterProps <- redraw.component_("Counter")
   html.button(
     [events.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
     [html.text("count is " <> int.to_string(props.count))],
@@ -202,7 +202,20 @@ but also like this:
 pub type CounterProps = #(Int, fn(fn(Int) -> Int) -> Nil)
 
 pub fn counter() {
-  use #(count, set_count): CounterProps <- react.component_("Counter")
+  use #(count, set_count): CounterProps <- redraw.component_("Counter")
+  html.button(
+    [events.on_click(fn(_) { set_count(fn(count) { count + 1 }) })],
+    [html.text("count is " <> int.to_string(count))],
+  )
+}
+```
+
+or even props-less components:
+
+```gleam
+pub fn counter() {
+  use Nil <- redraw.component_("Counter")
+  let #(count, set_count) = redraw.use_state(0)
   html.button(
     [events.on_click(fn(_) { set_count(fn(count) { count + 1 }) })],
     [html.text("count is " <> int.to_string(count))],

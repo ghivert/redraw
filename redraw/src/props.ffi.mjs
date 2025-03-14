@@ -13,6 +13,9 @@ export function propsToGleamProps(props, originalProps) {
       for (let i = 0; i < props.__length; i++) tuple[i] = props[i]
       return tuple
     }
+    case "Nil": {
+      return undefined
+    }
     default: {
       const [Prototype, firstProps] = originalProps.current[props.__propsType]
       const values = Object.keys(firstProps).map((key) => props[key])
@@ -43,9 +46,13 @@ export function gleamPropsToProps(props_, originalProps, ref) {
     props.__length = index
     if (ref) props.ref = ref
     return props
+  } else if (props_ === undefined) {
+    const props = { __propsType: "Nil" }
+    if (ref) props.ref = ref
+    return props
   } else {
     console.warn(
-      `redraw only support custom types, list or tuples as props.
+      `redraw only support custom types, list, tuples or Nil as props.
       ${Component.displayName} received ${props_} as props.`.replace(
         /\n( )*/g,
         "\n",

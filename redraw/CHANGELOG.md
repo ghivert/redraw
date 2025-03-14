@@ -1,3 +1,8 @@
+## v2.0.1 - 2025-03-14
+
+- Add support for `Nil` as props, instead of panicking.
+- Adapt to latest stdlib version (remove `function.flip`).
+
 ## v2.0.0 - 2024-12-24
 
 - Remove DOM attributes and elements in favour of `redraw_dom`. Keep only React

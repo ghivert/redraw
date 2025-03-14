@@ -1,4 +1,3 @@
-import gleam/function
 import gleam/javascript/promise.{type Promise}
 import gleam/option.{type Option}
 import gleam/string
@@ -479,7 +478,7 @@ pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
           let create = "  create_context_: " <> string.inspect(create)
           let head = "[Redraw Internal Error] Unable to find or create context."
           let body =
-            function.flip(string.join)(" ", [
+            string.join(_, with: " ")([
               "context should never panic.",
               "Please, open an issue on https://github.com/ghivert/redraw,",
               "and join the error details.\n",
