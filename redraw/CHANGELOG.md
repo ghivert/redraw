@@ -1,3 +1,7 @@
+## v2.0.2 - 2025-04-16
+
+- Fix FFI `suspense` external.
+
 ## v2.0.1 - 2025-03-14
 
 - Add support for `Nil` as props, instead of panicking.
