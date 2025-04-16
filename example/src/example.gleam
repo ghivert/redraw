@@ -54,12 +54,10 @@ fn nav_links() {
 
 pub fn app() {
   let counter = counter()
-  let childrenish = childrenish()
   use <- react.component__("App")
   let #(count, set_count) = react.use_state_(0)
   react.fragment([
     nav_links(),
-    childrenish(Nil, [html.text("mif")]),
     html.h1([], [html.text("Vite + Gleam + React")]),
     html.div([a.class("card")], [
       counter(CounterProps(count, set_count)),
