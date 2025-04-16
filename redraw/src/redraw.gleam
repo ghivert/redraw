@@ -163,7 +163,7 @@ pub type Suspense {
 /// Suspense allow to display a fallback content while waiting for children to
 /// finish loading. \
 /// [Documentation](https://fr.react.dev/reference/react/Suspense)
-@external(javascript, "./redraw.ffi.mjs", "fragment")
+@external(javascript, "./redraw.ffi.mjs", "suspense")
 pub fn suspense(props: Suspense, children: List(Component)) -> Component
 
 // Hooks
