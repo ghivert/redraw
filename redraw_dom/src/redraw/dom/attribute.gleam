@@ -18,7 +18,7 @@ pub opaque type Attribute {
 }
 
 pub fn attribute(key: String, content: a) -> Attribute {
-  Attribute(key: key, content: dynamic.from(content))
+  Attribute(key: key, content: coerce(content))
 }
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/href)
@@ -493,3 +493,6 @@ pub fn form_target(target: String) -> Attribute {
 pub fn open(is_open: Bool) -> Attribute {
   attribute("open", is_open)
 }
+
+@external(javascript, "../../attribute.ffi.mjs", "coerce")
+fn coerce(a: a) -> b

@@ -5,3 +5,7 @@ export function toProps(attributes) {
   }
   return props
 }
+
+export function coerce(a) {
+  return a
+}

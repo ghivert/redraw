@@ -1,3 +1,7 @@
+## v2.0.1 - 2025-08-09
+
+- Update everything to handle removal of `dynamic.from`.
+
 ## v2.0.0 - 2024-12-24
 
 - Bump dependencies versions requirements.
