@@ -1,3 +1,7 @@
+## v2.0.3 - 2025-08-27
+
+- Bump `gleam_javascript` dependency.
+
 ## v2.0.2 - 2025-04-16
 
 - Fix FFI `suspense` external.
