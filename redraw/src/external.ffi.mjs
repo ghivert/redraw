@@ -5,7 +5,7 @@ function camelize(key) {
 }
 
 function convertOption(value) {
-  if (value instanceof option.None) return undefined
+  if (value instanceof option.None) return null
   if (value instanceof option.Some) return value[0]
   return value
 }

@@ -5,118 +5,75 @@ import { propsToGleamProps, gleamPropsToProps } from "./props.ffi.mjs"
 
 /** Keep display name on Wrapper, to correctly display Components
  * in React devtools. */
-function withDisplayName(Component, Wrapper) {
+function propagateDisplayName(Component, Wrapper) {
   if (Component.displayName) Wrapper.displayName = Component.displayName
   return Wrapper
 }
 
-function withComputedProps(Component, originalProps) {
-  return withDisplayName(Component, (props, ...rest) => {
+/** Adds a wrapper that converts props from React props to Gleam props. */
+function wrapComputeProps(Component, originalProps) {
+  return propagateDisplayName(Component, (props, ...rest) => {
     const newProps = propsToGleamProps(props, originalProps)
     return Component(newProps, ...rest)
   })
 }
 
-/** Wrap the Component in a `forwardRef`, and inject the `ref` from the function
- * arguments to the props. In Gleam, when called, a `forwardRef` component will
- * have shape`fn (props, ref) -> Component`. `addForwardRef` turns it into
- * `fn (props) -> jsx(Component)`.*/
-export function addForwardRef(Component) {
-  const originalProps = { current: {} }
-  const added = React.forwardRef(withComputedProps(Component, originalProps))
-  return withDisplayName(Component, (props_, ref) => {
-    const props = gleamPropsToProps(props_, originalProps, ref)
-    if (props) return jsx(added, props)
-    const render = withDisplayName(Component, () => null)
-    return jsx(render, {})
-  })
-}
-
-/** Wrap the Component in a `forwardRef`, and inject the `ref` from the function
- * arguments to the props. In Gleam, a `forwardRef` component will have shape
- * `fn (props, ref, children) -> Component`. `addChildrenForwardRef` turns it
- * into `fn (props) -> jsx(Component)`. It will then be transformed once again
- * to `fn (props, ref, children) -> jsx(Component)` by extracting the children
- * from the props. */
-export function addChildrenForwardRef(Component) {
-  const originalProps = { current: {} }
-  const added = React.forwardRef(
-    withRefChildren(withComputedProps(Component, originalProps)),
-  )
-  return withDisplayName(Component, (props_, ref, children) => {
-    const props = gleamPropsToProps(props_, originalProps, ref)
-    if (props) return jsx(added, props, children)
-    const render = withDisplayName(Component, () => null)
-    return jsx(render, {})
-  })
-}
-
 /** Extract the Component's children from the props to feed it to the function
  * directly. */
-export function withChildren(Component) {
-  return withDisplayName(Component, (props) => {
+export function wrapConvertChildren(Component) {
+  return propagateDisplayName(Component, (props) => {
     const children = gleam.List.fromArray(props.children)
     return Component(props, children)
   })
 }
 
-/** Extract the Forwarded Ref Component's children from the props to feed it to
- * the function directly. */
-export function withRefChildren(Component) {
-  return withDisplayName(Component, (props, ref) => {
-    const children = gleam.List.fromArray(props.children)
-    return Component(props, ref, children)
-  })
-}
-
 /** In Gleam, a `component` will have shape
- * `fn (props, children) -> Component`. `addChildrenProxy` turns it
+ * `fn (props, children) -> Component`. `wrapComponent` turns it
  * into `fn (props) -> jsx(Component)`. It will then be transformed once again
  * to `fn (props, children) -> jsx(Component)` by extracting the children
  * from the props. */
-export function addChildrenProxy(Component) {
+export function wrapComponent(Component) {
   const originalProps = { current: {} }
-  const childrenAdded = withChildren(
-    withComputedProps(Component),
-    originalProps,
-  )
-  return withDisplayName(Component, (props_, children) => {
+  const PropsConverted = wrapComputeProps(Component)
+  const ChildrenAdded = wrapConvertChildren(PropsConverted, originalProps)
+  return propagateDisplayName(Component, (props_, children) => {
     const props = gleamPropsToProps(props_, originalProps)
-    if (props) return jsx(childrenAdded, props, children)
-    const render = withDisplayName(Component, () => null)
+    if (props) return jsx(ChildrenAdded, props, children)
+    const render = propagateDisplayName(Component, () => null)
     return jsx(render, {})
   })
 }
 
 /** In Gleam, a `component__` will have shape
- * `fn () -> Component`. `addEmptyProxy` turns it
+ * `fn () -> Component`. `wrapStandalone` turns it
  * into `fn (props) -> jsx(Component)`. It will then be transformed once again
  * to `fn () -> jsx(Component)` by extracting the children
  * from the props. */
-export function addEmptyProxy(Component) {
-  return withDisplayName(Component, () => {
+export function wrapStandalone(Component) {
+  return propagateDisplayName(Component, () => {
     return jsx(Component, {})
   })
 }
 
 /** In Gleam, a `component_` will have shape
- * `fn (props) -> Component`. `addEmptyProxy` turns it
+ * `fn (props) -> Component`. `wrapStandalone` turns it
  * into `fn (props) -> jsx(Component)`. It will then be transformed once again
  * to `fn (props) -> jsx(Component)` by extracting the children
  * from the props. */
-export function addProxy(Component) {
+export function wrapElement(Component) {
   const originalProps = { current: {} }
-  const added = withComputedProps(Component, originalProps)
-  return withDisplayName(Component, (props_) => {
+  const PropsConverted = wrapComputeProps(Component, originalProps)
+  return propagateDisplayName(Component, (props_) => {
     const props = gleamPropsToProps(props_, originalProps)
-    if (props) return jsx(added, props)
-    const render = withDisplayName(Component, () => null)
+    if (props) return jsx(PropsConverted, props)
+    const render = propagateDisplayName(Component, () => null)
     return jsx(render, {})
   })
 }
 
 /**  Generate JSX using the JSX factory.
- * `jsx` is for dynamic components, while `jsxs` is for static components. */
+ * `runtime.jsx` is for dynamic components,
+ * while `runtime.jsxs` is for static components. */
 export function jsx(value, props_, children_) {
   if (value === "none_") return null
   if (value === "text_") return children_

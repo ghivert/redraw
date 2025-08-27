@@ -6,42 +6,44 @@ import redraw/internals/coerce.{coerce}
 
 // Component creation
 
-/// Default Node in Redraw. Use `component`-family functions to create components.
-/// Forwarded ref can be constructed using `forward_ref`-family functions, while
-/// external components can be used with `to_component`-family functions.
+/// Default Node in Redraw. In Redraw, A component can be of three shapes:
+/// "components", accepting props and children, "elements", accepting props,
+/// like `<img>` tags, and "standalone" components, accepting nothing.
+/// Use respectively `component`, `element` or `standalone` to create
+/// one of them.
 pub type Component
 
-/// Create a Redraw component, with a `name`, and a `render` function. `render`
-/// will accept props, and a list of children.
+/// Create a Redraw component, with a `name`, and a `render` function.
+/// `render` will accept props, and a list of children.
 pub fn component(
   name name: String,
   render render: fn(props, List(Component)) -> Component,
 ) -> fn(props, List(Component)) -> Component {
   render
   |> set_function_name(name)
-  |> add_children_proxy
+  |> wrap_component
 }
 
-/// Create a Redraw component, with a `name`, and a `render` function. This
-/// component does not accept children.
-pub fn component_(
+/// Create a Redraw Element, with a `name`, and a `render` function.
+/// Keep in mind this component does not accept children.
+pub fn element(
   name name: String,
   render render: fn(props) -> Component,
 ) -> fn(props) -> Component {
   render
   |> set_function_name(name)
-  |> add_proxy
+  |> wrap_element
 }
 
-/// Create a Redraw component, with a `name` and a `render` function. This
-/// component does not accept children nor props.
-pub fn component__(
+/// Create a Redraw standalone component, with a `name` and a `render` function.
+/// Keep in mind this component does not accept children nor props.
+pub fn standalone(
   name name: String,
   render render: fn() -> Component,
 ) -> fn() -> Component {
   render
   |> set_function_name(name)
-  |> add_empty_proxy
+  |> wrap_standalone
 }
 
 @external(javascript, "./external.ffi.mjs", "convertProps")
@@ -76,7 +78,7 @@ pub fn to_component(
   |> set_function_name(name)
 }
 
-/// Convert a React Component to a redraw Component without children. Give it a
+/// Convert a React Component to a redraw Element. Give it a
 /// name, and send directly the FFI. Don't worry about the snake_case over
 /// camelCase, redraw take care of it for you.
 ///
@@ -94,37 +96,15 @@ pub fn to_component(
 /// fn do_my_component(props: MyComponentProps) -> redraw.Component
 ///
 /// pub fn my_component() -> fn(MyComponentProps) -> redraw.Component {
-///   redraw.to_component_("MyComponent", do_my_component)
+///   redraw.to_element("MyComponent", do_my_component)
 /// }
 /// ```
-pub fn to_component_(
+pub fn to_element(
   name name: String,
   component render: fn(props) -> Component,
 ) -> fn(props) -> Component {
   fn(props) { jsx(render, convert_props(props), Nil) }
   |> set_function_name(name)
-}
-
-/// Create a Redraw component with children with forwarded ref. \
-/// [Documentation](https://fr.react.dev/reference/react/forwardRef)
-pub fn forward_ref(
-  name name: String,
-  render render: fn(props, Ref(ref), List(Component)) -> Component,
-) -> fn(props, Ref(ref), List(Component)) -> Component {
-  render
-  |> set_function_name(name)
-  |> add_children_forward_ref
-}
-
-/// Create a Redraw component without children with forwarded ref. \
-/// [Documentation](https://react.dev/reference/react/forwardRef)
-pub fn forward_ref_(
-  name name: String,
-  render render: fn(props, Ref(ref)) -> Component,
-) -> fn(props, Ref(ref)) -> Component {
-  render
-  |> set_function_name(name)
-  |> add_forward_ref
 }
 
 /// Memoizes a Redraw component with children. \
@@ -332,12 +312,6 @@ pub type Context(a)
 @external(javascript, "react", "useContext")
 pub fn use_context(context: Context(a)) -> a
 
-/// Let you create a [context](https://react.dev/learn/passing-data-deeply-with-context) that components can provide or read. \
-/// [Documentation](https://react.dev/reference/react/createContext)
-@deprecated("Use redraw/create_context_ instead. redraw/create_context will be removed in 2.0.0. Unusable right now, due to how React handles Context.")
-@external(javascript, "react", "createContext")
-pub fn create_context(default_value default_value: Option(a)) -> Context(a)
-
 /// Wrap your components into a context provider to specify the value of this context for all components inside. \
 /// [Documentation](https://react.dev/reference/react/createContext#provider)
 @external(javascript, "./context.ffi.mjs", "contextProvider")
@@ -381,7 +355,7 @@ pub fn provider(
 /// const context_name = "MyContextName"
 ///
 /// pub fn my_provider(children) {
-///   let assert Ok(context) = redraw.create_context_(context_name, default_value)
+///   let assert Ok(context) = redraw.create_context(context_name, default_value)
 ///   redraw.provider(context, value, children)
 /// }
 ///
@@ -391,13 +365,13 @@ pub fn provider(
 /// }
 /// ```
 ///
-/// Be careful, `create_context_` fails if the Context is already defined.
+/// Be careful, `create_context` fails if the Context is already defined.
 /// Choose a full qualified name, hard to overlap with inattention. If
 /// you want to get a Context in an idempotent way, take a look at [`context()`](#context).
 ///
 /// [Documentation](https://react.dev/reference/react/createContext)
 @external(javascript, "./context.ffi.mjs", "createContext")
-pub fn create_context_(
+pub fn create_context(
   name: String,
   default_value: a,
 ) -> Result(Context(a), Error)
@@ -431,7 +405,7 @@ pub fn create_context_(
 pub fn get_context(name: String) -> Result(Context(a), Error)
 
 /// `context` emulates classic Context usage in React. Instead of calling
-/// `create_context_` and `get_context`, it's possible to simply call `context`,
+/// `create_context` and `get_context`, it's possible to simply call `context`,
 /// which will get or create the context directly, and allows to write code as
 /// if Context is globally available. `context` also tries to preserve
 /// type-checking at most. `context.default_value` is lazily evaluated, meaning
@@ -470,13 +444,13 @@ pub fn get_context(name: String) -> Result(Context(a), Error)
 pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
   case get_context(name) {
     Ok(context) -> context
-    Error(get) ->
-      case create_context_(name, default_value()) {
+    Error(get) -> {
+      case create_context(name, default_value()) {
         Ok(context) -> context
         Error(create) -> {
-          let get = "  get_context: " <> string.inspect(get)
-          let create = "  create_context_: " <> string.inspect(create)
           let head = "[Redraw Internal Error] Unable to find or create context."
+          let get = "  get_context: " <> string.inspect(get)
+          let create = "  create_context: " <> string.inspect(create)
           let body =
             string.join(_, with: " ")([
               "context should never panic.",
@@ -488,6 +462,7 @@ pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
           panic as msg
         }
       }
+    }
   }
 }
 
@@ -529,30 +504,21 @@ pub fn keyed(
 // Those functions are used internally by Redraw, to setup things correctly.
 // They should not be accessible from the outside world.
 
+/// `components` can be `"none_"`, `"text_"` or `List(Component)`
 @external(javascript, "./redraw.ffi.mjs", "jsx")
 @internal
-pub fn jsx(value: a, props: props, children: b) -> Component
+pub fn jsx(value: value, props: props, children: components) -> Component
 
 @external(javascript, "./redraw.ffi.mjs", "setFunctionName")
 fn set_function_name(a: a, name: String) -> a
 
-@external(javascript, "./redraw.ffi.mjs", "addProxy")
-fn add_proxy(a: fn(props) -> Component) -> fn(props) -> Component
+@external(javascript, "./redraw.ffi.mjs", "wrapElement")
+fn wrap_element(a: fn(props) -> Component) -> fn(props) -> Component
 
-@external(javascript, "./redraw.ffi.mjs", "addEmptyProxy")
-fn add_empty_proxy(a: fn() -> Component) -> fn() -> Component
+@external(javascript, "./redraw.ffi.mjs", "wrapStandalone")
+fn wrap_standalone(a: fn() -> Component) -> fn() -> Component
 
-@external(javascript, "./redraw.ffi.mjs", "addChildrenForwardRef")
-fn add_children_forward_ref(
-  a: fn(props, Ref(ref), List(Component)) -> Component,
-) -> fn(props, Ref(ref), List(Component)) -> Component
-
-@external(javascript, "./redraw.ffi.mjs", "addForwardRef")
-fn add_forward_ref(
-  a: fn(props, Ref(ref)) -> Component,
-) -> fn(props, Ref(ref)) -> Component
-
-@external(javascript, "./redraw.ffi.mjs", "addChildrenProxy")
-fn add_children_proxy(
+@external(javascript, "./redraw.ffi.mjs", "wrapComponent")
+fn wrap_component(
   a: fn(props, List(Component)) -> Component,
 ) -> fn(props, List(Component)) -> Component
