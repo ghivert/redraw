@@ -933,3 +933,6 @@ pub fn on_waiting(handler: fn(Event) -> Nil) {
 pub fn on_waiting_capture(handler: fn(Event) -> Nil) {
   attribute.attribute("onWaitingCapture", handler)
 }
+
+/// `none` will not appear in HTML attributes. Use it for conditional rendering.
+pub const none = attribute.none

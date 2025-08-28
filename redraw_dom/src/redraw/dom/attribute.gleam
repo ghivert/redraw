@@ -17,8 +17,15 @@ pub opaque type Attribute {
   Attribute(key: String, content: Dynamic)
 }
 
+/// Generic attribute. `key` will be the key in the HTML attributes as-is,
+/// while content can be anything. `content` will be converted by React to
+/// strings, so be careful to not send complicated data structure, but booleans,
+/// strings numbers, etc. are plainly supported.
+///
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Reference/Attributes)
 pub fn attribute(key: String, content: a) -> Attribute {
-  Attribute(key: key, content: coerce(content))
+  let content = coerce(content)
+  Attribute(key:, content:)
 }
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement/href)
@@ -492,6 +499,11 @@ pub fn form_target(target: String) -> Attribute {
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLDetailsElement/open)
 pub fn open(is_open: Bool) -> Attribute {
   attribute("open", is_open)
+}
+
+/// `none` will not appear in HTML attributes. Use it for conditional rendering.
+pub fn none() -> Attribute {
+  attribute("none_", Nil)
 }
 
 @external(javascript, "../../attribute.ffi.mjs", "coerce")

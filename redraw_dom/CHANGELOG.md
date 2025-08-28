@@ -1,3 +1,11 @@
+## v2.1.0 - 2025-08-28
+
+- Add `html.element` function to support arbitrary HTML elements.
+- Add `attribute.none` function to support none attributes.
+- Add `events.none` an alias to `attribute.none` (to help development and
+  simplify imports.)
+- Add documentation for `attribute.attribute` function.
+
 ## v2.0.1 - 2025-08-09
 
 - Update everything to handle removal of `dynamic.from`.

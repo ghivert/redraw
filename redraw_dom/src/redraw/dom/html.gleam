@@ -9,6 +9,16 @@
 import redraw.{type Component}
 import redraw/dom/attribute.{type Attribute}
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Reference/Elements)
+pub fn element(
+  tag: String,
+  attrs: List(Attribute),
+  children: List(Component),
+) -> Component {
+  let attrs = to_props(attrs)
+  redraw.jsx(tag, attrs, children)
+}
+
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/html)
 pub fn html(attrs: List(Attribute), children: List(Component)) -> Component {
   let attrs = to_props(attrs)
