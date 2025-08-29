@@ -1,11 +1,11 @@
-import * as $gleam from "./$gleam.mjs"
+import { List, Empty, NonEmpty, CustomType } from "./$gleam.mjs"
 
 export function propsToGleamProps(props, originalProps) {
   switch (props.__propsType) {
     case "List": {
-      let list = new $gleam.Empty()
+      let list = new Empty()
       for (let i = props.__length; i > 0; i--)
-        list = new $gleam.NonEmpty(props[i - 1], list)
+        list = new NonEmpty(props[i - 1], list)
       return list
     }
     case "Tuple": {
@@ -25,13 +25,13 @@ export function propsToGleamProps(props, originalProps) {
 }
 
 export function gleamPropsToProps(props_, originalProps) {
-  if (props_ instanceof $gleam.CustomType) {
+  if (props_ instanceof CustomType) {
     const prototype = Object.getPrototypeOf(props_)
     const name = prototype.constructor.name
     originalProps.current[name] ??= [prototype, props_]
     const props = { ...props_, __propsType: name }
     return props
-  } else if (props_ instanceof $gleam.List) {
+  } else if (props_ instanceof List) {
     const props = { __propsType: "List" }
     let index = 0
     for (const item of props_) props[index++] = item

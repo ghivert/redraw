@@ -17,15 +17,15 @@ pub type Component
 /// `render` will accept props, and a list of children.
 pub fn component(
   name name: String,
-  render render: fn(props, List(Component)) -> Component,
-) -> fn(props, List(Component)) -> Component {
+  render render: fn(props, children) -> Component,
+) -> fn(props, children) -> Component {
   render
   |> set_function_name(name)
   |> wrap_component
 }
 
 /// Create a Redraw Element, with a `name`, and a `render` function.
-/// Keep in mind this component does not accept children.
+/// Keep in mind this component does not accept children as second argument.
 pub fn element(
   name name: String,
   render render: fn(props) -> Component,
@@ -53,6 +53,10 @@ fn convert_props(gleam_props: gleam_props) -> props
 /// name, and send directly the FFI. Don't worry about the snake_case over
 /// camelCase, redraw take care of it for you.
 ///
+/// Because `children` can accept anything, it's up to you to define the type of
+/// the children. If you send a `List`, it will be automatically converted to a
+/// JavaScript array.
+///
 /// ```gleam
 /// import redraw
 ///
@@ -73,12 +77,13 @@ fn convert_props(gleam_props: gleam_props) -> props
 pub fn to_component(
   name name: String,
   component render: fn(props) -> Component,
-) -> fn(props, List(Component)) -> Component {
-  fn(props, children) { jsx(render, convert_props(props), children) }
-  |> set_function_name(name)
+) -> fn(props, children) -> Component {
+  use props, children <- set_function_name(_, name)
+  let props = convert_props(props)
+  jsx(type_: render, props:, children:, convert_props: True)
 }
 
-/// Convert a React Component to a redraw Element. Give it a
+/// Convert a React Component to a Redraw Element. Give it a
 /// name, and send directly the FFI. Don't worry about the snake_case over
 /// camelCase, redraw take care of it for you.
 ///
@@ -103,8 +108,9 @@ pub fn to_element(
   name name: String,
   component render: fn(props) -> Component,
 ) -> fn(props) -> Component {
-  fn(props) { jsx(render, convert_props(props), Nil) }
-  |> set_function_name(name)
+  use props <- set_function_name(_, name)
+  let props = convert_props(props)
+  jsx(type_: render, props:, children: Nil, convert_props: False)
 }
 
 /// Memoizes a Redraw component with children. \
@@ -302,17 +308,18 @@ pub fn use_imperative_handle_(
 ) -> Nil
 
 // Contexts
-
 /// Pass data without props drilling. \
 /// [Documentation](https://react.dev/learn/passing-data-deeply-with-context)
 pub type Context(a)
 
-/// Let you read and subscribe to [context](https://react.dev/learn/passing-data-deeply-with-context) from your component. \
+/// Let you read and subscribe to [context](https://react.dev/learn/passing-data-deeply-with-context)
+/// from your component. \
 /// [Documentation](https://react.dev/reference/react/useContext)
 @external(javascript, "react", "useContext")
 pub fn use_context(context: Context(a)) -> a
 
-/// Wrap your components into a context provider to specify the value of this context for all components inside. \
+/// Wrap your components into a context provider to specify the value of this
+/// context for all components inside. \
 /// [Documentation](https://react.dev/reference/react/createContext#provider)
 @external(javascript, "./context.ffi.mjs", "contextProvider")
 pub fn provider(
@@ -503,22 +510,33 @@ pub fn keyed(
 // FFI
 // Those functions are used internally by Redraw, to setup things correctly.
 // They should not be accessible from the outside world.
+//
 
-/// `components` can be `"none_"`, `"text_"` or `List(Component)`
+/// `type_` should be either an HTML tag, or a valid React Component.
+/// `props` should be an object.
+/// `children` can be anything.
+/// `convert_props` indicates whether the props should be converted as an array,
+/// or not. If `convert_props` is `True`, then the list of children will be
+/// turned to arrays. Use it only for apex children.
 @external(javascript, "./redraw.ffi.mjs", "jsx")
 @internal
-pub fn jsx(value: value, props: props, children: components) -> Component
+pub fn jsx(
+  type_ type_: value,
+  props props: props,
+  children children: components,
+  convert_props convert_props: Bool,
+) -> Component
 
 @external(javascript, "./redraw.ffi.mjs", "setFunctionName")
 fn set_function_name(a: a, name: String) -> a
-
-@external(javascript, "./redraw.ffi.mjs", "wrapElement")
-fn wrap_element(a: fn(props) -> Component) -> fn(props) -> Component
 
 @external(javascript, "./redraw.ffi.mjs", "wrapStandalone")
 fn wrap_standalone(a: fn() -> Component) -> fn() -> Component
 
 @external(javascript, "./redraw.ffi.mjs", "wrapComponent")
+fn wrap_element(a: fn(props) -> Component) -> fn(props) -> Component
+
+@external(javascript, "./redraw.ffi.mjs", "wrapComponent")
 fn wrap_component(
-  a: fn(props, List(Component)) -> Component,
-) -> fn(props, List(Component)) -> Component
+  a: fn(props, children) -> Component,
+) -> fn(props, children) -> Component
