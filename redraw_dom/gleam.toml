@@ -20,7 +20,7 @@ path = "redraw_dom"
 
 [dependencies]
 gleam_stdlib = ">= 0.51.0 and < 2.0.0"
-redraw = ">= 2.0.0 and < 3.0.0"
+redraw = {path = "../redraw"}
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

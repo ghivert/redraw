@@ -16,7 +16,7 @@
 import redraw/dom/event/mouse.{type MouseEvent}
 import redraw/dom/event/ui.{type UIEvent}
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent)
 pub type PointerEvent
@@ -70,16 +70,10 @@ pub fn twist(event: PointerEvent) -> Int
 pub fn width(event: PointerEvent) -> Int
 
 /// `PointerEvent` inherits `MouseEvent`.
-pub fn as_mouse_event(event: PointerEvent) -> MouseEvent {
-  coerce(event)
-}
+pub const as_mouse_event: fn(PointerEvent) -> MouseEvent = unsafe.coerce
 
 /// `PointerEvent` inherits `UIEvent`.
-pub fn as_ui_event(event: PointerEvent) -> UIEvent {
-  coerce(event)
-}
+pub const as_ui_event: fn(PointerEvent) -> UIEvent = unsafe.coerce
 
 /// `PointerEvent` inherits `Event`.
-pub fn as_event(event: PointerEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(PointerEvent) -> Event = unsafe.coerce

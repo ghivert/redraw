@@ -1,17 +1,6 @@
 import ReactDOM from "react-dom/client"
 import * as $gleam from "../../gleam.mjs"
 
-export function toProps(attributes) {
-  const props = {}
-  for (const item of attributes)
-    if (item.key !== "none_") props[item.key] = item.content
-  return props
-}
-
-export function coerce(a) {
-  return a
-}
-
 export function createPortal(children, root) {
   const node = document.getElementById(root)
   if (!node) return new $gleam.Error()

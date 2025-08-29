@@ -2,7 +2,7 @@
 //// related to [animations](https://developer.mozilla.org/docs/Web/CSS/CSS_animations/Using_CSS_animations).
 
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/AnimationEvent)
 pub type AnimationEvent
@@ -20,6 +20,4 @@ pub fn elapsed_time(event: AnimationEvent) -> Float
 pub fn pseudo_element(event: AnimationEvent) -> String
 
 /// `AnimationEvent` inherits `Event`.
-pub fn as_event(event: AnimationEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(AnimationEvent) -> Event = unsafe.coerce

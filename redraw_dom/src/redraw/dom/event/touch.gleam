@@ -23,7 +23,7 @@
 import gleam/dynamic
 import redraw/dom/event/ui.{type UIEvent}
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/TouchEvent)
 pub type TouchEvent
@@ -61,11 +61,7 @@ pub fn target_touches(event: TouchEvent) -> dynamic.Dynamic
 pub fn get_modifier_state(event: TouchEvent, key: String) -> Bool
 
 /// `TouchEvent` inherits `UIEvent`.
-pub fn as_ui_event(event: TouchEvent) -> UIEvent {
-  coerce(event)
-}
+pub const as_ui_event: fn(TouchEvent) -> UIEvent = unsafe.coerce
 
 /// `TouchEvent` inherits `Event`.
-pub fn as_event(event: TouchEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(TouchEvent) -> Event = unsafe.coerce

@@ -44,9 +44,11 @@ function propagateDisplayName(Component, Wrapper) {
 
 /** Adds a wrapper that converts props from React props to Gleam props. */
 function wrapComputeProps(Component, originalProps) {
-  return propagateDisplayName(Component, (props, ...rest) => {
+  return propagateDisplayName(Component, (props_) => {
+    const { children, ...props } = props_
     const newProps = window.redraw.props.toGleam(props, originalProps)
-    return Component(newProps, ...rest)
+    if (children !== undefined) return Component(newProps, children)
+    return Component(newProps)
   })
 }
 
@@ -110,9 +112,9 @@ export function jsx(value, props, children, shouldConvertChildren = false) {
   // Append the children in the props. They potentially have been converted, or
   // are propagated as-is. JavaScript makes no differences if `children` are
   // undefined or not.
-  props.children = children
+  if (children !== undefined) props.children = children
 
-  if (isStatic) {
+  if (isStatic && Array.isArray(props.children)) {
     return runtime.jsxs(value, props)
   } else {
     return runtime.jsx(value, props)
@@ -127,19 +129,19 @@ export function setFunctionName(component, name) {
 }
 
 export function strictMode(children) {
-  return jsx(React.StrictMode, {}, children)
+  return jsx(React.StrictMode, {}, children, true)
 }
 
 export function fragment(children) {
-  return jsx(React.Fragment, {}, children)
+  return jsx(React.Fragment, {}, children, true)
 }
 
 export function profiler(children) {
-  return jsx(React.Profiler, {}, children)
+  return jsx(React.Profiler, {}, children, true)
 }
 
 export function suspense(props, children) {
-  return jsx(React.Suspense, props, children)
+  return jsx(React.Suspense, props, children, true)
 }
 
 export function coerce(value) {

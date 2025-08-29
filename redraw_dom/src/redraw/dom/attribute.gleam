@@ -11,6 +11,7 @@ import gleam/dynamic.{type Dynamic}
 import gleam/option
 import gleam/string
 import redraw
+import redraw/internals/unsafe
 
 /// Attribute linked on an HTML or SVG node. Think about like a `prop` in React.
 pub opaque type Attribute {
@@ -24,7 +25,7 @@ pub opaque type Attribute {
 ///
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Reference/Attributes)
 pub fn attribute(key: String, content: a) -> Attribute {
-  let content = coerce(content)
+  let content = unsafe.coerce(content)
   Attribute(key:, content:)
 }
 
@@ -505,6 +506,3 @@ pub fn open(is_open: Bool) -> Attribute {
 pub fn none() -> Attribute {
   attribute("none_", Nil)
 }
-
-@external(javascript, "./attribute.ffi.mjs", "coerce")
-fn coerce(a: a) -> b

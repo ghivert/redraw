@@ -2,7 +2,7 @@
 //// related to [transitions](https://developer.mozilla.org/docs/Web/CSS/CSS_transitions/Using_CSS_transitions).
 
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/TransitionEvent)
 pub type TransitionEvent
@@ -20,6 +20,4 @@ pub fn property_name(event: TransitionEvent) -> String
 pub fn pseudo_element(event: TransitionEvent) -> String
 
 /// `TransitionEvent` inherits `Event`.
-pub fn as_event(event: TransitionEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(TransitionEvent) -> Event = unsafe.coerce

@@ -1,4 +1,4 @@
-import { List, Empty, NonEmpty, CustomType } from "./$gleam.mjs"
+import { List, Empty, NonEmpty, CustomType } from "./gleam.mjs"
 
 export function propsToGleamProps(props, originalProps) {
   switch (props.__propsType) {

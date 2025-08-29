@@ -2,7 +2,7 @@ import gleam/javascript/promise.{type Promise}
 import gleam/option.{type Option}
 import gleam/string
 import redraw/error.{type Error}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 // Component creation
 
@@ -47,7 +47,7 @@ pub fn standalone(
 }
 
 @external(javascript, "./external.ffi.mjs", "convertProps")
-fn convert_props(gleam_props: gleam_props) -> props
+fn convert_children(gleam_props: gleam_props) -> props
 
 /// Convert a React component to a React-redraw component with children. Give it a
 /// name, and send directly the FFI. Don't worry about the snake_case over
@@ -79,8 +79,8 @@ pub fn to_component(
   component render: fn(props) -> Component,
 ) -> fn(props, children) -> Component {
   use props, children <- set_function_name(_, name)
-  let props = convert_props(props)
-  jsx(type_: render, props:, children:, convert_props: True)
+  let props = convert_children(props)
+  jsx(type_: render, props:, children:, convert_children: True)
 }
 
 /// Convert a React Component to a Redraw Element. Give it a
@@ -109,8 +109,8 @@ pub fn to_element(
   component render: fn(props) -> Component,
 ) -> fn(props) -> Component {
   use props <- set_function_name(_, name)
-  let props = convert_props(props)
-  jsx(type_: render, props:, children: Nil, convert_props: False)
+  let props = convert_children(props)
+  jsx(type_: render, props:, children: Nil, convert_children: False)
 }
 
 /// Memoizes a Redraw component with children. \
@@ -502,9 +502,8 @@ pub fn keyed(
   element: fn(List(Component)) -> Component,
   content: List(#(String, Component)),
 ) {
-  content
-  |> coerce
-  |> element
+  let content = unsafe.coerce(content)
+  element(content)
 }
 
 // FFI
@@ -515,8 +514,8 @@ pub fn keyed(
 /// `type_` should be either an HTML tag, or a valid React Component.
 /// `props` should be an object.
 /// `children` can be anything.
-/// `convert_props` indicates whether the props should be converted as an array,
-/// or not. If `convert_props` is `True`, then the list of children will be
+/// `convert_children` indicates whether the props should be converted as an array,
+/// or not. If `convert_children` is `True`, then the list of children will be
 /// turned to arrays. Use it only for apex children.
 @external(javascript, "./redraw.ffi.mjs", "jsx")
 @internal
@@ -524,7 +523,7 @@ pub fn jsx(
   type_ type_: value,
   props props: props,
   children children: components,
-  convert_props convert_props: Bool,
+  convert_children convert_children: Bool,
 ) -> Component
 
 @external(javascript, "./redraw.ffi.mjs", "setFunctionName")

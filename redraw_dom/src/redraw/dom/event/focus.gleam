@@ -7,7 +7,7 @@
 import gleam/dynamic
 import redraw/dom/event/ui.{type UIEvent}
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/FocusEvent)
 pub type FocusEvent
@@ -17,11 +17,7 @@ pub type FocusEvent
 pub fn related_target(event: FocusEvent) -> dynamic.Dynamic
 
 /// `FocusEvent` inherits `UIEvent`.
-pub fn as_ui_event(event: FocusEvent) -> UIEvent {
-  coerce(event)
-}
+pub const as_ui_event: fn(FocusEvent) -> UIEvent = unsafe.coerce
 
 /// `FocusEvent` inherits `Event`.
-pub fn as_event(event: FocusEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(FocusEvent) -> Event = unsafe.coerce

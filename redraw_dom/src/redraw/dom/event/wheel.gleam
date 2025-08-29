@@ -20,7 +20,7 @@
 import redraw/dom/event/mouse.{type MouseEvent}
 import redraw/dom/event/ui.{type UIEvent}
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/WheelEvent)
 pub type WheelEvent
@@ -42,16 +42,10 @@ pub fn delta_y(event: WheelEvent) -> Float
 pub fn delta_z(event: WheelEvent) -> Float
 
 /// `WheelEvent` inherits `MouseEvent`.
-pub fn as_mouse_event(event: WheelEvent) -> MouseEvent {
-  coerce(event)
-}
+pub const as_mouse_event: fn(WheelEvent) -> MouseEvent = unsafe.coerce
 
 /// `WheelEvent` inherits `UIEvent`.
-pub fn as_ui_event(event: WheelEvent) -> UIEvent {
-  coerce(event)
-}
+pub const as_ui_event: fn(WheelEvent) -> UIEvent = unsafe.coerce
 
 /// `WheelEvent` inherits `Event`.
-pub fn as_event(event: WheelEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(WheelEvent) -> Event = unsafe.coerce
