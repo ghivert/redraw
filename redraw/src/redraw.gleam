@@ -249,6 +249,36 @@ pub fn use_lazy_state_(initial_value: fn() -> a) -> #(a, fn(fn(a) -> a) -> Nil)
 @external(javascript, "react", "useTransition")
 pub fn use_transition() -> #(Bool, fn() -> Nil)
 
+/// Async variant of [`use_transition`](#use_transition). \
+/// [Documentation](https://react.dev/reference/react/useTransition)
+@external(javascript, "react", "useTransition")
+pub fn use_async_transition() -> #(Bool, fn() -> Promise(Nil))
+
+/// Let you optimistically update the UI. \
+/// [Documentation](https://react.dev/reference/react/useOptimistic)
+@external(javascript, "react", "useOptimistic")
+pub fn use_optimistic(state: state) -> #(state, fn(state) -> Nil)
+
+/// Let you optimistically update the UI. \
+/// [Documentation](https://react.dev/reference/react/useOptimistic)
+@external(javascript, "react", "useOptimistic")
+pub fn use_optimistic_(state: state) -> #(state, fn(fn(state) -> state) -> Nil)
+
+/// Let you optimistically update the UI. \
+/// [Documentation](https://react.dev/reference/react/useOptimistic)
+@external(javascript, "react", "useOptimistic")
+pub fn use_optimistic_action(
+  state: state,
+  update: fn(state, action) -> state,
+) -> #(state, fn(action) -> Nil)
+
+/// Wait for a Promise and returns its content. Uses `use` under-the-hood.
+/// When the Promise is loading, it fallbacks to the nearest
+/// `Suspense` boundary. \
+/// [Documentation](https://react.dev/reference/react/use)
+@external(javascript, "react", "use")
+pub fn use_promise(promise: Promise(state)) -> state
+
 // Refs
 
 /// A Ref is a mutable data stored in React, persisted across renders.
@@ -313,9 +343,13 @@ pub fn use_imperative_handle_(
 pub type Context(a)
 
 /// Let you read and subscribe to [context](https://react.dev/learn/passing-data-deeply-with-context)
-/// from your component. \
+/// from your component.
+///
+/// Under-the-hood, `use_context` uses the new `use` function. This means you
+/// can call `use_context` conditionnally! \
+///
 /// [Documentation](https://react.dev/reference/react/useContext)
-@external(javascript, "react", "useContext")
+@external(javascript, "react", "use")
 pub fn use_context(context: Context(a)) -> a
 
 /// Wrap your components into a context provider to specify the value of this

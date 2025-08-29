@@ -8,7 +8,7 @@ const contexts = {}
 export function contextProvider(context, value, children) {
   const props = { value }
   const shouldConvertChildren = true
-  return jsx(context.Provider, props, children, shouldConvertChildren)
+  return jsx(context, props, children, shouldConvertChildren)
 }
 
 export function createContext(name, defaultValue) {
