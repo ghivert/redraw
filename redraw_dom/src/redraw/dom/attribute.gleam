@@ -65,7 +65,7 @@ pub type InnerHTML
 /// recommended to create the object inline like
 /// `html.div([attribute.dangerously_set_inner_html(attribute.inner_html(markup))], [])` \
 /// [Documentation](https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html)
-@external(javascript, "../../dom.ffi.mjs", "innerHTML")
+@external(javascript, "./attribute.ffi.mjs", "innerHTML")
 pub fn inner_html(html: String) -> InnerHTML
 
 /// Overrides the innerHTML property of the DOM node and displays the passed
@@ -118,7 +118,7 @@ pub fn suppress_hydration_warning(value: Bool) -> Attribute {
   attribute("suppressHydrationWarning", value)
 }
 
-@external(javascript, "../../dom.ffi.mjs", "convertStyle")
+@external(javascript, "./attribute.ffi.mjs", "convertStyle")
 fn convert_style(styles: List(#(String, String))) -> a
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/style)
@@ -506,5 +506,5 @@ pub fn none() -> Attribute {
   attribute("none_", Nil)
 }
 
-@external(javascript, "../../attribute.ffi.mjs", "coerce")
+@external(javascript, "./attribute.ffi.mjs", "coerce")
 fn coerce(a: a) -> b

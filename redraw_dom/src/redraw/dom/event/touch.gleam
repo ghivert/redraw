@@ -29,35 +29,35 @@ import redraw/internals/coerce.{coerce}
 pub type TouchEvent
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/TouchEvent/altKey)
-@external(javascript, "../../../events.ffi.mjs", "altKey")
+@external(javascript, "./events.ffi.mjs", "altKey")
 pub fn alt_key(event: TouchEvent) -> Bool
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/TouchEvent/ctrlKey)
-@external(javascript, "../../../events.ffi.mjs", "ctrlKey")
+@external(javascript, "./events.ffi.mjs", "ctrlKey")
 pub fn ctrl_key(event: TouchEvent) -> Bool
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/TouchEvent/changedTouches)
-@external(javascript, "../../../events.ffi.mjs", "changedTouches")
+@external(javascript, "./events.ffi.mjs", "changedTouches")
 pub fn changed_touches(event: TouchEvent) -> dynamic.Dynamic
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/TouchEvent/metaKey)
-@external(javascript, "../../../events.ffi.mjs", "metaKey")
+@external(javascript, "./events.ffi.mjs", "metaKey")
 pub fn meta_key(event: TouchEvent) -> Bool
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/TouchEvent/shiftKey)
-@external(javascript, "../../../events.ffi.mjs", "shiftKey")
+@external(javascript, "./events.ffi.mjs", "shiftKey")
 pub fn shift_key(event: TouchEvent) -> Bool
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/TouchEvent/touches)
-@external(javascript, "../../../events.ffi.mjs", "touches")
+@external(javascript, "./events.ffi.mjs", "touches")
 pub fn touches(event: TouchEvent) -> dynamic.Dynamic
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/TouchEvent/targetTouches)
-@external(javascript, "../../../events.ffi.mjs", "targetTouches")
+@external(javascript, "./events.ffi.mjs", "targetTouches")
 pub fn target_touches(event: TouchEvent) -> dynamic.Dynamic
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/TouchEvent/getModifierState)
-@external(javascript, "../../../events.ffi.mjs", "getModifierState")
+@external(javascript, "./events.ffi.mjs", "getModifierState")
 pub fn get_modifier_state(event: TouchEvent, key: String) -> Bool
 
 /// `TouchEvent` inherits `UIEvent`.

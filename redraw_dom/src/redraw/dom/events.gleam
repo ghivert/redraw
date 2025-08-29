@@ -94,6 +94,18 @@ pub fn on_blur_capture(handler: fn(FocusEvent) -> Nil) {
   attribute.attribute("onBlurCapture", handler)
 }
 
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/input_event)
+pub fn on_change(handler: fn(InputEvent) -> Nil) {
+  attribute.attribute("onChange", handler)
+}
+
+/// Alternative version of [`on_change`](#on_change) that runs during
+/// [capture phase](https://react.dev/learn/responding-to-events#capture-phase-events). \
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/input_event)
+pub fn on_change_capture(handler: fn(InputEvent) -> Nil) {
+  attribute.attribute("onChangeCapture", handler)
+}
+
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/click_event)
 pub fn on_click(handler: fn(MouseEvent) -> Nil) {
   attribute.attribute("onClick", handler)
@@ -286,6 +298,18 @@ pub fn on_got_pointer_capture(handler: fn(PointerEvent) -> Nil) {
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/gotpointercapture_event)
 pub fn on_got_pointer_capture_capture(handler: fn(PointerEvent) -> Nil) {
   attribute.attribute("onGotPointerCaptureCapture", handler)
+}
+
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/input_event)
+pub fn on_input(handler: fn(InputEvent) -> Nil) {
+  attribute.attribute("onInput", handler)
+}
+
+/// Alternative version of [`on_input`](#on_input) that runs during
+/// [capture phase](https://react.dev/learn/responding-to-events#capture-phase-events). \
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/input_event)
+pub fn on_input_capture(handler: fn(InputEvent) -> Nil) {
+  attribute.attribute("onInputCapture", handler)
 }
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/keydown_event)

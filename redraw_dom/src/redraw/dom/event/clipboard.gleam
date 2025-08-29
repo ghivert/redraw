@@ -12,7 +12,7 @@ import redraw/internals/coerce.{coerce}
 pub type ClipboardEvent
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/ClipboardEvent/clipboardData)
-@external(javascript, "../../../events.ffi.mjs", "clipboardData")
+@external(javascript, "./events.ffi.mjs", "clipboardData")
 pub fn clipboard_data(event: ClipboardEvent) -> dynamic.Dynamic
 
 /// `ClipboardEvent` inherits `Event`.

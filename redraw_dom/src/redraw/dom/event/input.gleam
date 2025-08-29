@@ -7,7 +7,7 @@ import redraw/internals/coerce.{coerce}
 pub type InputEvent
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/InputEvent/data)
-@external(javascript, "../../../events.ffi.mjs", "data")
+@external(javascript, "./events.ffi.mjs", "data")
 pub fn data(event: InputEvent) -> String
 
 /// `InputEvent` inherits `Event`.

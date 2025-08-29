@@ -22,51 +22,51 @@ import redraw/internals/coerce.{coerce}
 pub type PointerEvent
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/altitudeAngle)
-@external(javascript, "../../../events.ffi.mjs", "altitudeAngle")
+@external(javascript, "./events.ffi.mjs", "altitudeAngle")
 pub fn altitude_angle(event: PointerEvent) -> Int
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/azimuthAngle)
-@external(javascript, "../../../events.ffi.mjs", "azimuthAngle")
+@external(javascript, "./events.ffi.mjs", "azimuthAngle")
 pub fn azimuth_angle(event: PointerEvent) -> Int
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/height)
-@external(javascript, "../../../events.ffi.mjs", "height")
+@external(javascript, "./events.ffi.mjs", "height")
 pub fn height(event: PointerEvent) -> Int
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/isPrimary)
-@external(javascript, "../../../events.ffi.mjs", "isPrimary")
+@external(javascript, "./events.ffi.mjs", "isPrimary")
 pub fn is_primary(event: PointerEvent) -> Bool
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/pointerId)
-@external(javascript, "../../../events.ffi.mjs", "pointerId")
+@external(javascript, "./events.ffi.mjs", "pointerId")
 pub fn pointer_id(event: PointerEvent) -> Int
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/pointerType)
-@external(javascript, "../../../events.ffi.mjs", "pointerType")
+@external(javascript, "./events.ffi.mjs", "pointerType")
 pub fn pointer_type(event: PointerEvent) -> String
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/pressure)
-@external(javascript, "../../../events.ffi.mjs", "pressure")
+@external(javascript, "./events.ffi.mjs", "pressure")
 pub fn pressure(event: PointerEvent) -> Float
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/tangentialPressure)
-@external(javascript, "../../../events.ffi.mjs", "tangentialPressure")
+@external(javascript, "./events.ffi.mjs", "tangentialPressure")
 pub fn tangential_pressure(event: PointerEvent) -> Float
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/tiltX)
-@external(javascript, "../../../events.ffi.mjs", "tiltX")
+@external(javascript, "./events.ffi.mjs", "tiltX")
 pub fn tilt_x(event: PointerEvent) -> Int
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/tiltY)
-@external(javascript, "../../../events.ffi.mjs", "tiltY")
+@external(javascript, "./events.ffi.mjs", "tiltY")
 pub fn tilt_y(event: PointerEvent) -> Int
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/twist)
-@external(javascript, "../../../events.ffi.mjs", "twist")
+@external(javascript, "./events.ffi.mjs", "twist")
 pub fn twist(event: PointerEvent) -> Int
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/PointerEvent/width)
-@external(javascript, "../../../events.ffi.mjs", "width")
+@external(javascript, "./events.ffi.mjs", "width")
 pub fn width(event: PointerEvent) -> Int
 
 /// `PointerEvent` inherits `MouseEvent`.

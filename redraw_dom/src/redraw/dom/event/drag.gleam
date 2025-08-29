@@ -16,7 +16,7 @@ import redraw/internals/coerce.{coerce}
 pub type DragEvent
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/DragEvent/dataTransfer)
-@external(javascript, "../../../events.ffi.mjs", "dataTransfer")
+@external(javascript, "./events.ffi.mjs", "dataTransfer")
 pub fn data_transfer(event: DragEvent) -> dynamic.Dynamic
 
 /// `DragEvent` inherits from `MouseEvent`.

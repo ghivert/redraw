@@ -14,43 +14,43 @@ import redraw/internals/coerce.{coerce}
 pub type KeyboardEvent
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/KeyboardEvent/altKey)
-@external(javascript, "../../../events.ffi.mjs", "altKey")
+@external(javascript, "./events.ffi.mjs", "altKey")
 pub fn alt_key(event: KeyboardEvent) -> Bool
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/KeyboardEvent/code)
-@external(javascript, "../../../events.ffi.mjs", "code")
+@external(javascript, "./events.ffi.mjs", "code")
 pub fn code(event: KeyboardEvent) -> String
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/KeyboardEvent/ctrlKey)
-@external(javascript, "../../../events.ffi.mjs", "ctrlKey")
+@external(javascript, "./events.ffi.mjs", "ctrlKey")
 pub fn ctrl_key(event: KeyboardEvent) -> Bool
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/KeyboardEvent/key)
-@external(javascript, "../../../events.ffi.mjs", "key")
+@external(javascript, "./events.ffi.mjs", "key")
 pub fn key(event: KeyboardEvent) -> String
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/KeyboardEvent/locale)
-@external(javascript, "../../../events.ffi.mjs", "locale")
+@external(javascript, "./events.ffi.mjs", "locale")
 pub fn locale(event: KeyboardEvent) -> String
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/KeyboardEvent/metaKey)
-@external(javascript, "../../../events.ffi.mjs", "metaKey")
+@external(javascript, "./events.ffi.mjs", "metaKey")
 pub fn meta_key(event: KeyboardEvent) -> Bool
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/KeyboardEvent/location)
-@external(javascript, "../../../events.ffi.mjs", "location")
+@external(javascript, "./events.ffi.mjs", "location")
 pub fn location(event: KeyboardEvent) -> Float
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/KeyboardEvent/repeat)
-@external(javascript, "../../../events.ffi.mjs", "repeat")
+@external(javascript, "./events.ffi.mjs", "repeat")
 pub fn repeat(event: KeyboardEvent) -> Bool
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/KeyboardEvent/shiftKey)
-@external(javascript, "../../../events.ffi.mjs", "shiftKey")
+@external(javascript, "./events.ffi.mjs", "shiftKey")
 pub fn shift_key(event: KeyboardEvent) -> Bool
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/KeyboardEvent/getModifierState)
-@external(javascript, "../../../events.ffi.mjs", "getModifierState")
+@external(javascript, "./events.ffi.mjs", "getModifierState")
 pub fn get_modifier_state(event: KeyboardEvent, key: String) -> Bool
 
 /// `KeyboardEvent` inherits `UIEvent`.

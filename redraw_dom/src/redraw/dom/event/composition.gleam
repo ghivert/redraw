@@ -10,7 +10,7 @@ import redraw/internals/coerce.{coerce}
 pub type CompositionEvent
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/CompositionEvent/data)
-@external(javascript, "../../../events.ffi.mjs", "data")
+@external(javascript, "./events.ffi.mjs", "data")
 pub fn data(event: CompositionEvent) -> String
 
 /// `CompositionEvent` inherits `Event`.

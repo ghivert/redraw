@@ -26,19 +26,19 @@ import redraw/internals/coerce.{coerce}
 pub type WheelEvent
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/WheelEvent/deltaMode)
-@external(javascript, "../../../events.ffi.mjs", "deltaMode")
+@external(javascript, "./events.ffi.mjs", "deltaMode")
 pub fn delta_mode(event: WheelEvent) -> Int
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/WheelEvent/deltaX)
-@external(javascript, "../../../events.ffi.mjs", "deltaX")
+@external(javascript, "./events.ffi.mjs", "deltaX")
 pub fn delta_x(event: WheelEvent) -> Float
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/WheelEvent/deltaY)
-@external(javascript, "../../../events.ffi.mjs", "deltaY")
+@external(javascript, "./events.ffi.mjs", "deltaY")
 pub fn delta_y(event: WheelEvent) -> Float
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/WheelEvent/deltaZ)
-@external(javascript, "../../../events.ffi.mjs", "deltaZ")
+@external(javascript, "./events.ffi.mjs", "deltaZ")
 pub fn delta_z(event: WheelEvent) -> Float
 
 /// `WheelEvent` inherits `MouseEvent`.

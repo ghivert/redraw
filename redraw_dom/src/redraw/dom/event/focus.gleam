@@ -13,7 +13,7 @@ import redraw/internals/coerce.{coerce}
 pub type FocusEvent
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/FocusEvent/relatedTarget)
-@external(javascript, "../../../events.ffi.mjs", "relatedTarget")
+@external(javascript, "./events.ffi.mjs", "relatedTarget")
 pub fn related_target(event: FocusEvent) -> dynamic.Dynamic
 
 /// `FocusEvent` inherits `UIEvent`.

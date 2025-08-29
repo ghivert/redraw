@@ -8,15 +8,15 @@ import redraw/internals/coerce.{coerce}
 pub type AnimationEvent
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/AnimationEvent/animationName)
-@external(javascript, "../../../events.ffi.mjs", "animationName")
+@external(javascript, "./events.ffi.mjs", "animationName")
 pub fn animation_name(event: AnimationEvent) -> String
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/AnimationEvent/elapsedTime)
-@external(javascript, "../../../events.ffi.mjs", "elapsedTime")
+@external(javascript, "./events.ffi.mjs", "elapsedTime")
 pub fn elapsed_time(event: AnimationEvent) -> Float
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/AnimationEvent/pseudoElement)
-@external(javascript, "../../../events.ffi.mjs", "pseudoElement")
+@external(javascript, "./events.ffi.mjs", "pseudoElement")
 pub fn pseudo_element(event: AnimationEvent) -> String
 
 /// `AnimationEvent` inherits `Event`.
