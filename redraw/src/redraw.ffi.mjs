@@ -1,10 +1,7 @@
 import React from "react"
 import runtime from "react/jsx-runtime"
 import { List } from "./gleam.mjs"
-import {
-  DevelopmentOnly,
-  OwnerStackUnavailable,
-} from "./redraw/internals/error.mjs"
+import { DevelopmentOnly, OwnerStackUnavailable } from "./redraw.mjs"
 import "./props.ffi.mjs"
 
 /**
@@ -47,7 +44,7 @@ function propagateDisplayName(Component, Wrapper) {
 }
 
 /** Adds a wrapper that converts props from React props to Gleam props. */
-function wrapComputeProps(Component, originalProps) {
+function wrapConvertProps(Component, originalProps) {
   return propagateDisplayName(Component, (props_) => {
     const { children, ...props } = props_
     const newProps = window.redraw.props.toGleam(props, originalProps)
@@ -63,7 +60,7 @@ function wrapComputeProps(Component, originalProps) {
  * from the props. */
 export function wrapComponent(Component) {
   const originalProps = { current: {} }
-  const PropsConverted = wrapComputeProps(Component, originalProps)
+  const PropsConverted = wrapConvertProps(Component, originalProps)
   return propagateDisplayName(Component, (props_, children) => {
     const props = window.redraw.props.fromGleam(props_, originalProps)
     if (props) return jsx(PropsConverted, props, children)

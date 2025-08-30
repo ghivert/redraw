@@ -1,7 +1,7 @@
 import * as React from "react"
 import { jsx } from "./redraw.ffi.mjs"
 import { Error, Ok } from "./gleam.mjs"
-import { UnknownContext, ExistingContext } from "./redraw/error.mjs"
+import { UnknownContext, ExistingContext } from "./redraw.mjs"
 
 const contexts = {}
 

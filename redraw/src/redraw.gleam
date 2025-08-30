@@ -1,8 +1,26 @@
 import gleam/javascript/promise.{type Promise}
 import gleam/option.{type Option}
 import gleam/string
-import redraw/error.{type Error}
 import redraw/internals/unsafe
+
+/// Main error type. Currently only used in conjuction with `Context` related
+/// functions.
+pub type Error {
+  /// Error returned from `create_context_`.
+  /// Context with the corresponding `name` already exists.
+  ExistingContext(name: String)
+  /// Error returned from `get_context`.
+  /// Context with the corresponding `name` does not exists.
+  UnknownContext(name: String)
+  /// Error returned from `capture_owner_stack`.
+  /// `capture_owner_stack` can only be used in development, and you're not
+  /// in development anymore.
+  DevelopmentOnly
+  /// Error returned from `capture_owner_stack`.
+  /// `capture_owner_stack` can sometimes return `null`, when the stack is
+  /// unavailable.
+  OwnerStackUnavailable
+}
 
 // Component creation
 
@@ -187,15 +205,36 @@ pub fn use_effect(value: fn() -> Nil, dependencies: a) -> Nil
 @external(javascript, "react", "useEffect")
 pub fn use_effect_(value: fn() -> fn() -> Nil, dependencies: a) -> Nil
 
-/// Version of useEffect that fires before the browser repaints the screen. \
-/// [Documentation](https://react.dev/reference/react/useLayoutEffect)
-@external(javascript, "react", "useLayoutEffect")
-pub fn use_layout_effect(value: fn() -> Nil, dependencies: a) -> Nil
-
 /// Generate unique IDs that can be passed to accessibility attributes. \
 /// [Documentation](https://react.dev/reference/react/useId)
 @external(javascript, "react", "useId")
 pub fn use_id() -> String
+
+/// Allow inserting elements into the DOM before any layout Effects fire.
+///
+/// > `use_insertion_effect` is for CSS-in-JS library authors. Unless you are
+/// > working on a CSS-in-JS library and need a place to inject the styles, you
+/// > probably want `use_effect` or `use_layout_effect` instead.
+///
+/// [Documentation](https://react.dev/reference/react/useInsertionEffect)
+@external(javascript, "react", "useInsertionEffect")
+pub fn use_insertion_effect(handler: fn() -> Nil, deps: deps) -> Nil
+
+/// Allow inserting elements into the DOM before any layout Effects fire and
+/// allow to return a cleanup function.
+///
+/// > `use_insertion_effect` is for CSS-in-JS library authors. Unless you are
+/// > working on a CSS-in-JS library and need a place to inject the styles, you
+/// > probably want `use_effect` or `use_layout_effect` instead.
+///
+/// [Documentation](https://react.dev/reference/react/useInsertionEffect)
+@external(javascript, "react", "useInsertionEffect")
+pub fn use_insertion_effect_(handler: fn() -> fn() -> Nil, deps: deps) -> Nil
+
+/// Version of useEffect that fires before the browser repaints the screen. \
+/// [Documentation](https://react.dev/reference/react/useLayoutEffect)
+@external(javascript, "react", "useLayoutEffect")
+pub fn use_layout_effect(value: fn() -> Nil, dependencies: a) -> Nil
 
 /// Let you cache the result of a calculation between re-renders. \
 /// [Documentation](https://react.dev/reference/react/useMemo)
@@ -332,7 +371,7 @@ pub fn use_ref_(initial_value: a) -> Ref(a)
 
 /// Let you customize the handle exposed as a [ref](https://react.dev/learn/manipulating-the-dom-with-refs).
 /// Use `use_imperative_handle` when you want to customize the data stored in
-/// a ref. It's mostly used in conjuction with `forward_ref`. \
+/// a ref. \
 /// [Documentation](https://react.dev/reference/react/useImperativeHandle)
 pub fn use_imperative_handle(
   ref: Ref(Option(a)),
@@ -343,8 +382,8 @@ pub fn use_imperative_handle(
 }
 
 /// Let you customize the handle exposed as a [ref](https://react.dev/learn/manipulating-the-dom-with-refs).
-/// Use `use_imperative_handle` by default, unless you really know what you're
-/// doing. \
+/// You should probably use `use_imperative_handle` by default with
+/// optional refs. \
 /// [Documentation](https://react.dev/reference/react/useImperativeHandle)
 @external(javascript, "react", "useImperativeHandle")
 pub fn use_imperative_handle_(
