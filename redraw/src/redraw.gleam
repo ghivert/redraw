@@ -608,7 +608,7 @@ pub fn start_transition(scope scope: fn() -> Nil) -> Nil
 pub fn keyed(
   element: fn(List(Component)) -> Component,
   content: List(#(String, Component)),
-) {
+) -> Component {
   let content = unsafe.coerce(content)
   element(content)
 }
