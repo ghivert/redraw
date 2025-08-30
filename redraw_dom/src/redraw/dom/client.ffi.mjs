@@ -1,9 +1,10 @@
 import ReactDOM from "react-dom/client"
 import { Error, Ok } from "../../gleam.mjs"
+import { InvalidRoot } from "../dom.mjs"
 
 export function createRoot(value) {
   const node = document.getElementById(value)
-  if (!node) return new Error()
+  if (!node) return new Error(new InvalidRoot(value))
   const root = ReactDOM.createRoot(node)
   return new Ok(root)
 }
@@ -16,7 +17,7 @@ export function virtualRoot() {
 
 export function hydrateRoot(value, content) {
   const node = document.getElementById(value)
-  if (!node) return new Error()
+  if (!node) return new Error(new InvalidRoot(value))
   const hydration = ReactDOM.hydrateRoot(node, content)
   return new Ok(hydration)
 }

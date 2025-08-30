@@ -24,13 +24,14 @@ import {
   Video,
   Worker,
   Status,
+  InvalidRoot,
 } from "./dom.mjs"
 import * as $uri from "../../gleam_stdlib/gleam/uri.mjs"
 import { None, Some } from "../../gleam_stdlib/gleam/option.mjs"
 
 export function createPortal(children, root) {
   const node = document.getElementById(root)
-  if (!node) return new Error()
+  if (!node) return new Error(InvalidRoot(root))
   const portal = ReactDOM.createPortal(children, node)
   return new Ok(portal)
 }

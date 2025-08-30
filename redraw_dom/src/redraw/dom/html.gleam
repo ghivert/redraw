@@ -721,4 +721,4 @@ pub fn wbr(attrs: List(Attribute)) -> Component {
 }
 
 @external(javascript, "./html.ffi.mjs", "toProps")
-fn to_props(attrs: List(Attribute)) -> b
+pub fn to_props(attrs: List(Attribute)) -> b

@@ -3,6 +3,11 @@ import gleam/option.{type Option}
 import gleam/uri
 import redraw.{type Component}
 
+/// Possible errors encountered by React DOM.
+pub type Error {
+  InvalidRoot(root: String)
+}
+
 /// Let you render some children into a different part of the DOM.
 /// Contrarily to JavaScript, `create_portal` returns a `Result` to avoid runtime
 /// error. Indeed, when the provided root does not exist in your HTML, `create_portal`
@@ -38,7 +43,7 @@ import redraw.{type Component}
 pub fn create_portal(
   children: Component,
   root: String,
-) -> Result(Component, Nil)
+) -> Result(Component, Error)
 
 /// Call `flushSync` to force React to flush any pending work and update the DOM
 /// synchronously. \
