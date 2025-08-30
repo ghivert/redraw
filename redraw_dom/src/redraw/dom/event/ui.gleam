@@ -2,7 +2,7 @@
 
 import gleam/dynamic
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/UIEvent)
 pub type UIEvent
@@ -16,6 +16,4 @@ pub fn detail(event: UIEvent) -> Int
 pub fn view(event: UIEvent) -> dynamic.Dynamic
 
 /// `UIEvent` inherits `Event`.
-pub fn as_event(event: UIEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(UIEvent) -> Event = unsafe.coerce

@@ -1,4 +1,12 @@
+import gleam/fetch/form_data.{type FormData}
+import gleam/option.{type Option}
+import gleam/uri
 import redraw.{type Component}
+
+/// Possible errors encountered by React DOM.
+pub type Error {
+  InvalidRoot(root: String)
+}
 
 /// Let you render some children into a different part of the DOM.
 /// Contrarily to JavaScript, `create_portal` returns a `Result` to avoid runtime
@@ -31,11 +39,11 @@ import redraw.{type Component}
 /// ```
 ///
 /// [Documentation](https://react.dev/reference/react-dom/createPortal)
-@external(javascript, "../dom.ffi.mjs", "createPortal")
+@external(javascript, "./dom.ffi.mjs", "createPortal")
 pub fn create_portal(
   children: Component,
   root: String,
-) -> Result(Component, Nil)
+) -> Result(Component, Error)
 
 /// Call `flushSync` to force React to flush any pending work and update the DOM
 /// synchronously. \
@@ -75,5 +83,129 @@ pub fn create_portal(
 /// Most of the time, flushSync can be avoided. Use flushSync as last resort.
 ///
 /// [Documentation](https://react.dev/reference/react-dom/flushSync)
-@external(javascript, "react-dom/client", "flushSync")
+@external(javascript, "react-dom", "flushSync")
 pub fn flush_sync(callback: fn() -> Nil) -> Nil
+
+/// Let you eagerly connect to a server that you expect to load resources from. \
+/// [Documentation](https://react.dev/reference/react-dom/preconnect)
+@external(javascript, "./dom.ffi.mjs", "preconnect")
+pub fn preconnect(
+  href: String,
+  cross_origin cross_origin: Option(CrossOrigin),
+) -> Nil
+
+/// Let you eagerly look up the IP of a server that you expect to load
+/// resources from. \
+/// [Documentation](https://react.dev/reference/react-dom/prefetchDNS)
+@external(javascript, "./dom.ffi.mjs", "prefetchDNS")
+pub fn prefetch_dns(href: String) -> Nil
+
+/// Let you eagerly fetch and evaluate a stylesheet or external script. \
+/// [Documentation](https://react.dev/reference/react-dom/preinit)
+@external(javascript, "./dom.ffi.mjs", "preinit")
+pub fn preinit(
+  uri: uri.Uri,
+  as_ as_: As,
+  precedence precedence: Option(String),
+  cross_origin cross_origin: Option(CrossOrigin),
+  integrity integrity: Option(String),
+  nonce nonce: Option(String),
+  fetch_priority fetch_priority: Option(String),
+) -> Nil
+
+/// Let you eagerly fetch and evaluate an ESM module. \
+/// [Documentation](https://react.dev/reference/react-dom/preinitModule)
+@external(javascript, "./dom.ffi.mjs", "preinitModule")
+pub fn preinit_module(
+  uri: uri.Uri,
+  cross_origin cross_origin: Option(CrossOrigin),
+  integrity integrity: Option(String),
+  nonce nonce: Option(String),
+) -> Nil
+
+/// Let you eagerly fetch a resource such as a stylesheet, font, or
+/// external script that you expect to use. \
+/// [Documentation](https://react.dev/reference/react-dom/preload)
+@external(javascript, "./dom.ffi.mjs", "preload")
+pub fn preload(
+  uri: uri.Uri,
+  as_ as_: Resource,
+  cross_origin cross_origin: Option(CrossOrigin),
+  referrer_policy referrer_policy: Option(ReferrerPolicy),
+  integrity integrity: Option(String),
+  type_ type_: Option(String),
+  nonce nonce: Option(String),
+  fetch_priority fetch_priority: Option(FetchPriority),
+  image_src_set image_src_set: Option(String),
+  image_sizes image_sizes: Option(String),
+) -> Nil
+
+/// Let you eagerly fetch an ESM module that you expect to use. \
+/// [Documentation](https://react.dev/reference/react-dom/preloadModule)
+@external(javascript, "./dom.ffi.mjs", "preloadModule")
+pub fn preload_module(
+  uri: uri.Uri,
+  cross_origin cross_origin: Option(CrossOrigin),
+  integrity integrity: Option(String),
+  nonce nonce: Option(String),
+) -> Nil
+
+/// Status returned by [`use_form_status`](#use_form_status). \
+/// [Documentation](https://react.dev/reference/react-dom/hooks/useFormStatus)
+pub type Status {
+  Status(
+    pending: Bool,
+    data: Option(FormData),
+    method: String,
+    action: Option(fn(FormData) -> Nil),
+  )
+}
+
+/// Give you status information of the last form submission. \
+/// [Documentation](https://react.dev/reference/react-dom/hooks/useFormStatus)
+@external(javascript, "./dom.ffi.mjs", "useFormStatus")
+pub fn use_form_status() -> Status
+
+/// Used in preloading functions.
+pub type As {
+  AsScript
+  AsStyle
+}
+
+/// Used in preloading functions.
+pub type CrossOrigin {
+  Anonymous
+  UseCredentials
+}
+
+/// Used in preloading functions.
+pub type FetchPriority {
+  Auto
+  Low
+  High
+}
+
+/// Used in preloading functions.
+pub type ReferrerPolicy {
+  NoReferrerWhenDowngrade
+  NoReferrer
+  Origin
+  OriginWhenCrossOrigin
+  UnsafeUrl
+}
+
+/// Used in preloading functions.
+pub type Resource {
+  Audio
+  Document
+  Embed
+  Fetch
+  Font
+  Image
+  Object
+  Script
+  Style
+  Track
+  Video
+  Worker
+}

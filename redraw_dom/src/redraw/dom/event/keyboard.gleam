@@ -8,7 +8,7 @@
 
 import redraw/dom/event/ui.{type UIEvent}
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/KeyboardEvent)
 pub type KeyboardEvent
@@ -54,11 +54,7 @@ pub fn shift_key(event: KeyboardEvent) -> Bool
 pub fn get_modifier_state(event: KeyboardEvent, key: String) -> Bool
 
 /// `KeyboardEvent` inherits `UIEvent`.
-pub fn as_ui_event(event: KeyboardEvent) -> UIEvent {
-  coerce(event)
-}
+pub const as_ui_event: fn(KeyboardEvent) -> UIEvent = unsafe.coerce
 
 /// `KeyboardEvent` inherits `Event`.
-pub fn as_event(event: KeyboardEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(KeyboardEvent) -> Event = unsafe.coerce

@@ -1,55 +1,79 @@
 import gleam/javascript/promise.{type Promise}
 import gleam/option.{type Option}
 import gleam/string
-import redraw/error.{type Error}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
+
+/// Main error type. Currently only used in conjuction with `Context` related
+/// functions.
+pub type Error {
+  /// Error returned from `create_context_`.
+  /// Context with the corresponding `name` already exists.
+  ExistingContext(name: String)
+  /// Error returned from `get_context`.
+  /// Context with the corresponding `name` does not exists.
+  UnknownContext(name: String)
+  /// Error returned from `capture_owner_stack`.
+  /// `capture_owner_stack` can only be used in development, and you're not
+  /// in development anymore.
+  DevelopmentOnly
+  /// Error returned from `capture_owner_stack`.
+  /// `capture_owner_stack` can sometimes return `null`, when the stack is
+  /// unavailable.
+  OwnerStackUnavailable
+}
 
 // Component creation
 
-/// Default Node in Redraw. Use `component`-family functions to create components.
-/// Forwarded ref can be constructed using `forward_ref`-family functions, while
-/// external components can be used with `to_component`-family functions.
+/// Default Node in Redraw. In Redraw, A component can be of three shapes:
+/// "components", accepting props and children, "elements", accepting props,
+/// like `<img>` tags, and "standalone" components, accepting nothing.
+/// Use respectively `component`, `element` or `standalone` to create
+/// one of them.
 pub type Component
 
-/// Create a Redraw component, with a `name`, and a `render` function. `render`
-/// will accept props, and a list of children.
+/// Create a Redraw component, with a `name`, and a `render` function.
+/// `render` will accept props, and a list of children.
 pub fn component(
   name name: String,
-  render render: fn(props, List(Component)) -> Component,
-) -> fn(props, List(Component)) -> Component {
+  render render: fn(props, children) -> Component,
+) -> fn(props, children) -> Component {
   render
   |> set_function_name(name)
-  |> add_children_proxy
+  |> wrap_component
 }
 
-/// Create a Redraw component, with a `name`, and a `render` function. This
-/// component does not accept children.
-pub fn component_(
+/// Create a Redraw Element, with a `name`, and a `render` function.
+/// Keep in mind this component does not accept children as second argument.
+pub fn element(
   name name: String,
   render render: fn(props) -> Component,
 ) -> fn(props) -> Component {
   render
   |> set_function_name(name)
-  |> add_proxy
+  |> wrap_element
 }
 
-/// Create a Redraw component, with a `name` and a `render` function. This
-/// component does not accept children nor props.
-pub fn component__(
+/// Create a Redraw standalone component, with a `name` and a `render` function.
+/// Keep in mind this component does not accept children nor props.
+pub fn standalone(
   name name: String,
   render render: fn() -> Component,
 ) -> fn() -> Component {
   render
   |> set_function_name(name)
-  |> add_empty_proxy
+  |> wrap_standalone
 }
 
 @external(javascript, "./external.ffi.mjs", "convertProps")
-fn convert_props(gleam_props: gleam_props) -> props
+fn convert_children(gleam_props: gleam_props) -> props
 
 /// Convert a React component to a React-redraw component with children. Give it a
 /// name, and send directly the FFI. Don't worry about the snake_case over
 /// camelCase, redraw take care of it for you.
+///
+/// Because `children` can accept anything, it's up to you to define the type of
+/// the children. If you send a `List`, it will be automatically converted to a
+/// JavaScript array.
 ///
 /// ```gleam
 /// import redraw
@@ -71,12 +95,13 @@ fn convert_props(gleam_props: gleam_props) -> props
 pub fn to_component(
   name name: String,
   component render: fn(props) -> Component,
-) -> fn(props, List(Component)) -> Component {
-  fn(props, children) { jsx(render, convert_props(props), children) }
-  |> set_function_name(name)
+) -> fn(props, children) -> Component {
+  use props, children <- set_function_name(_, name)
+  let props = convert_children(props)
+  jsx(type_: render, props:, children:, convert_children: True)
 }
 
-/// Convert a React Component to a redraw Component without children. Give it a
+/// Convert a React Component to a Redraw Element. Give it a
 /// name, and send directly the FFI. Don't worry about the snake_case over
 /// camelCase, redraw take care of it for you.
 ///
@@ -94,37 +119,16 @@ pub fn to_component(
 /// fn do_my_component(props: MyComponentProps) -> redraw.Component
 ///
 /// pub fn my_component() -> fn(MyComponentProps) -> redraw.Component {
-///   redraw.to_component_("MyComponent", do_my_component)
+///   redraw.to_element("MyComponent", do_my_component)
 /// }
 /// ```
-pub fn to_component_(
+pub fn to_element(
   name name: String,
   component render: fn(props) -> Component,
 ) -> fn(props) -> Component {
-  fn(props) { jsx(render, convert_props(props), Nil) }
-  |> set_function_name(name)
-}
-
-/// Create a Redraw component with children with forwarded ref. \
-/// [Documentation](https://fr.react.dev/reference/react/forwardRef)
-pub fn forward_ref(
-  name name: String,
-  render render: fn(props, Ref(ref), List(Component)) -> Component,
-) -> fn(props, Ref(ref), List(Component)) -> Component {
-  render
-  |> set_function_name(name)
-  |> add_children_forward_ref
-}
-
-/// Create a Redraw component without children with forwarded ref. \
-/// [Documentation](https://react.dev/reference/react/forwardRef)
-pub fn forward_ref_(
-  name name: String,
-  render render: fn(props, Ref(ref)) -> Component,
-) -> fn(props, Ref(ref)) -> Component {
-  render
-  |> set_function_name(name)
-  |> add_forward_ref
+  use props <- set_function_name(_, name)
+  let props = convert_children(props)
+  jsx(type_: render, props:, children: Nil, convert_children: False)
 }
 
 /// Memoizes a Redraw component with children. \
@@ -201,15 +205,36 @@ pub fn use_effect(value: fn() -> Nil, dependencies: a) -> Nil
 @external(javascript, "react", "useEffect")
 pub fn use_effect_(value: fn() -> fn() -> Nil, dependencies: a) -> Nil
 
-/// Version of useEffect that fires before the browser repaints the screen. \
-/// [Documentation](https://react.dev/reference/react/useLayoutEffect)
-@external(javascript, "react", "useLayoutEffect")
-pub fn use_layout_effect(value: fn() -> Nil, dependencies: a) -> Nil
-
 /// Generate unique IDs that can be passed to accessibility attributes. \
 /// [Documentation](https://react.dev/reference/react/useId)
 @external(javascript, "react", "useId")
 pub fn use_id() -> String
+
+/// Allow inserting elements into the DOM before any layout Effects fire.
+///
+/// > `use_insertion_effect` is for CSS-in-JS library authors. Unless you are
+/// > working on a CSS-in-JS library and need a place to inject the styles, you
+/// > probably want `use_effect` or `use_layout_effect` instead.
+///
+/// [Documentation](https://react.dev/reference/react/useInsertionEffect)
+@external(javascript, "react", "useInsertionEffect")
+pub fn use_insertion_effect(handler: fn() -> Nil, deps: deps) -> Nil
+
+/// Allow inserting elements into the DOM before any layout Effects fire and
+/// allow to return a cleanup function.
+///
+/// > `use_insertion_effect` is for CSS-in-JS library authors. Unless you are
+/// > working on a CSS-in-JS library and need a place to inject the styles, you
+/// > probably want `use_effect` or `use_layout_effect` instead.
+///
+/// [Documentation](https://react.dev/reference/react/useInsertionEffect)
+@external(javascript, "react", "useInsertionEffect")
+pub fn use_insertion_effect_(handler: fn() -> fn() -> Nil, deps: deps) -> Nil
+
+/// Version of useEffect that fires before the browser repaints the screen. \
+/// [Documentation](https://react.dev/reference/react/useLayoutEffect)
+@external(javascript, "react", "useLayoutEffect")
+pub fn use_layout_effect(value: fn() -> Nil, dependencies: a) -> Nil
 
 /// Let you cache the result of a calculation between re-renders. \
 /// [Documentation](https://react.dev/reference/react/useMemo)
@@ -263,6 +288,52 @@ pub fn use_lazy_state_(initial_value: fn() -> a) -> #(a, fn(fn(a) -> a) -> Nil)
 @external(javascript, "react", "useTransition")
 pub fn use_transition() -> #(Bool, fn() -> Nil)
 
+/// Async variant of [`use_transition`](#use_transition). \
+/// [Documentation](https://react.dev/reference/react/useTransition)
+@external(javascript, "react", "useTransition")
+pub fn use_async_transition() -> #(Bool, fn() -> Promise(Nil))
+
+/// Let you optimistically update the UI. \
+/// [Documentation](https://react.dev/reference/react/useOptimistic)
+@external(javascript, "react", "useOptimistic")
+pub fn use_optimistic(state: state) -> #(state, fn(state) -> Nil)
+
+/// Let you optimistically update the UI. \
+/// [Documentation](https://react.dev/reference/react/useOptimistic)
+@external(javascript, "react", "useOptimistic")
+pub fn use_optimistic_(state: state) -> #(state, fn(fn(state) -> state) -> Nil)
+
+/// Let you optimistically update the UI. \
+/// [Documentation](https://react.dev/reference/react/useOptimistic)
+@external(javascript, "react", "useOptimistic")
+pub fn use_optimistic_action(
+  state: state,
+  update: fn(state, action) -> state,
+) -> #(state, fn(action) -> Nil)
+
+/// Allow you to update state based on the result of a form action. \
+/// [Documentation](https://react.dev/reference/react/useActionState)
+@external(javascript, "react", "useActionState")
+pub fn use_action_state(
+  action: fn(state, payload) -> Nil,
+  initial_state: state,
+) -> #(state, fn(payload) -> nil, Bool)
+
+/// Let you subscribe to an external store. \
+/// [Documentation](https://react.dev/reference/react/useSyncExternalStore)
+@external(javascript, "react", "useSyncExternalStore")
+pub fn use_sync_external_store(
+  subscribe: fn(fn() -> Nil) -> fn() -> Nil,
+  get_snapshot: fn() -> snapshot,
+) -> snapshot
+
+/// Wait for a Promise and returns its content. Uses `use` under-the-hood.
+/// When the Promise is loading, it fallbacks to the nearest
+/// `Suspense` boundary. \
+/// [Documentation](https://react.dev/reference/react/use)
+@external(javascript, "react", "use")
+pub fn use_promise(promise: Promise(state)) -> state
+
 // Refs
 
 /// A Ref is a mutable data stored in React, persisted across renders.
@@ -300,7 +371,7 @@ pub fn use_ref_(initial_value: a) -> Ref(a)
 
 /// Let you customize the handle exposed as a [ref](https://react.dev/learn/manipulating-the-dom-with-refs).
 /// Use `use_imperative_handle` when you want to customize the data stored in
-/// a ref. It's mostly used in conjuction with `forward_ref`. \
+/// a ref. \
 /// [Documentation](https://react.dev/reference/react/useImperativeHandle)
 pub fn use_imperative_handle(
   ref: Ref(Option(a)),
@@ -311,8 +382,8 @@ pub fn use_imperative_handle(
 }
 
 /// Let you customize the handle exposed as a [ref](https://react.dev/learn/manipulating-the-dom-with-refs).
-/// Use `use_imperative_handle` by default, unless you really know what you're
-/// doing. \
+/// You should probably use `use_imperative_handle` by default with
+/// optional refs. \
 /// [Documentation](https://react.dev/reference/react/useImperativeHandle)
 @external(javascript, "react", "useImperativeHandle")
 pub fn use_imperative_handle_(
@@ -322,23 +393,22 @@ pub fn use_imperative_handle_(
 ) -> Nil
 
 // Contexts
-
 /// Pass data without props drilling. \
 /// [Documentation](https://react.dev/learn/passing-data-deeply-with-context)
 pub type Context(a)
 
-/// Let you read and subscribe to [context](https://react.dev/learn/passing-data-deeply-with-context) from your component. \
+/// Let you read and subscribe to [context](https://react.dev/learn/passing-data-deeply-with-context)
+/// from your component.
+///
+/// Under-the-hood, `use_context` uses the new `use` function. This means you
+/// can call `use_context` conditionnally! \
+///
 /// [Documentation](https://react.dev/reference/react/useContext)
-@external(javascript, "react", "useContext")
+@external(javascript, "react", "use")
 pub fn use_context(context: Context(a)) -> a
 
-/// Let you create a [context](https://react.dev/learn/passing-data-deeply-with-context) that components can provide or read. \
-/// [Documentation](https://react.dev/reference/react/createContext)
-@deprecated("Use redraw/create_context_ instead. redraw/create_context will be removed in 2.0.0. Unusable right now, due to how React handles Context.")
-@external(javascript, "react", "createContext")
-pub fn create_context(default_value default_value: Option(a)) -> Context(a)
-
-/// Wrap your components into a context provider to specify the value of this context for all components inside. \
+/// Wrap your components into a context provider to specify the value of this
+/// context for all components inside. \
 /// [Documentation](https://react.dev/reference/react/createContext#provider)
 @external(javascript, "./context.ffi.mjs", "contextProvider")
 pub fn provider(
@@ -381,7 +451,7 @@ pub fn provider(
 /// const context_name = "MyContextName"
 ///
 /// pub fn my_provider(children) {
-///   let assert Ok(context) = redraw.create_context_(context_name, default_value)
+///   let assert Ok(context) = redraw.create_context(context_name, default_value)
 ///   redraw.provider(context, value, children)
 /// }
 ///
@@ -391,13 +461,13 @@ pub fn provider(
 /// }
 /// ```
 ///
-/// Be careful, `create_context_` fails if the Context is already defined.
+/// Be careful, `create_context` fails if the Context is already defined.
 /// Choose a full qualified name, hard to overlap with inattention. If
 /// you want to get a Context in an idempotent way, take a look at [`context()`](#context).
 ///
 /// [Documentation](https://react.dev/reference/react/createContext)
 @external(javascript, "./context.ffi.mjs", "createContext")
-pub fn create_context_(
+pub fn create_context(
   name: String,
   default_value: a,
 ) -> Result(Context(a), Error)
@@ -431,7 +501,7 @@ pub fn create_context_(
 pub fn get_context(name: String) -> Result(Context(a), Error)
 
 /// `context` emulates classic Context usage in React. Instead of calling
-/// `create_context_` and `get_context`, it's possible to simply call `context`,
+/// `create_context` and `get_context`, it's possible to simply call `context`,
 /// which will get or create the context directly, and allows to write code as
 /// if Context is globally available. `context` also tries to preserve
 /// type-checking at most. `context.default_value` is lazily evaluated, meaning
@@ -470,13 +540,13 @@ pub fn get_context(name: String) -> Result(Context(a), Error)
 pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
   case get_context(name) {
     Ok(context) -> context
-    Error(get) ->
-      case create_context_(name, default_value()) {
+    Error(get) -> {
+      case create_context(name, default_value()) {
         Ok(context) -> context
         Error(create) -> {
-          let get = "  get_context: " <> string.inspect(get)
-          let create = "  create_context_: " <> string.inspect(create)
           let head = "[Redraw Internal Error] Unable to find or create context."
+          let get = "  get_context: " <> string.inspect(get)
+          let create = "  create_context: " <> string.inspect(create)
           let body =
             string.join(_, with: " ")([
               "context should never panic.",
@@ -488,6 +558,7 @@ pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
           panic as msg
         }
       }
+    }
   }
 }
 
@@ -497,6 +568,24 @@ pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
 /// [Documentation](https://react.dev/reference/react/act)
 @external(javascript, "react", "act")
 pub fn act(act_fn: fn() -> Promise(Nil)) -> Promise(Nil)
+
+/// Reads the current Owner Stack in development and returns it as a string
+/// if available.
+///
+/// Owner Stacks are available in
+/// - Component render
+/// - Effects (e.g. `use_effect`)
+/// - React’s event handlers (e.g. `button([a.on_click(fn (_) {...})])`)
+/// - React error handlers (React Root options onCaughtError, onRecoverableError, and onUncaughtError)
+///
+/// If no Owner Stack is available, null is returned (see Troubleshooting: The Owner Stack is null).
+///
+/// > Owner Stacks are only available in development. captureOwnerStack will
+/// > always return null outside of development.
+///
+/// [Documentation](https://react.dev/reference/react/act)
+@external(javascript, "./redraw.ffi.mjs", "captureOwnerStack")
+pub fn capture_owner_stack() -> Result(String, Error)
 
 /// Let you update the state without blocking the UI. \
 /// [Documentation](https://react.dev/reference/react/startTransition)
@@ -519,40 +608,41 @@ pub fn start_transition(scope scope: fn() -> Nil) -> Nil
 pub fn keyed(
   element: fn(List(Component)) -> Component,
   content: List(#(String, Component)),
-) {
-  content
-  |> coerce
-  |> element
+) -> Component {
+  let content = unsafe.coerce(content)
+  element(content)
 }
 
 // FFI
 // Those functions are used internally by Redraw, to setup things correctly.
 // They should not be accessible from the outside world.
+//
 
+/// `type_` should be either an HTML tag, or a valid React Component.
+/// `props` should be an object.
+/// `children` can be anything.
+/// `convert_children` indicates whether the props should be converted as an array,
+/// or not. If `convert_children` is `True`, then the list of children will be
+/// turned to arrays. Use it only for apex children.
 @external(javascript, "./redraw.ffi.mjs", "jsx")
 @internal
-pub fn jsx(value: a, props: props, children: b) -> Component
+pub fn jsx(
+  type_ type_: value,
+  props props: props,
+  children children: components,
+  convert_children convert_children: Bool,
+) -> Component
 
 @external(javascript, "./redraw.ffi.mjs", "setFunctionName")
 fn set_function_name(a: a, name: String) -> a
 
-@external(javascript, "./redraw.ffi.mjs", "addProxy")
-fn add_proxy(a: fn(props) -> Component) -> fn(props) -> Component
+@external(javascript, "./redraw.ffi.mjs", "wrapStandalone")
+fn wrap_standalone(a: fn() -> Component) -> fn() -> Component
 
-@external(javascript, "./redraw.ffi.mjs", "addEmptyProxy")
-fn add_empty_proxy(a: fn() -> Component) -> fn() -> Component
+@external(javascript, "./redraw.ffi.mjs", "wrapComponent")
+fn wrap_element(a: fn(props) -> Component) -> fn(props) -> Component
 
-@external(javascript, "./redraw.ffi.mjs", "addChildrenForwardRef")
-fn add_children_forward_ref(
-  a: fn(props, Ref(ref), List(Component)) -> Component,
-) -> fn(props, Ref(ref), List(Component)) -> Component
-
-@external(javascript, "./redraw.ffi.mjs", "addForwardRef")
-fn add_forward_ref(
-  a: fn(props, Ref(ref)) -> Component,
-) -> fn(props, Ref(ref)) -> Component
-
-@external(javascript, "./redraw.ffi.mjs", "addChildrenProxy")
-fn add_children_proxy(
-  a: fn(props, List(Component)) -> Component,
-) -> fn(props, List(Component)) -> Component
+@external(javascript, "./redraw.ffi.mjs", "wrapComponent")
+fn wrap_component(
+  a: fn(props, children) -> Component,
+) -> fn(props, children) -> Component

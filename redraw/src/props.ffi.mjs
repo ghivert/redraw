@@ -1,11 +1,11 @@
-import * as gleam from "./gleam.mjs"
+import { List, Empty, NonEmpty, CustomType } from "./gleam.mjs"
 
 export function propsToGleamProps(props, originalProps) {
   switch (props.__propsType) {
     case "List": {
-      let list = new gleam.Empty()
+      let list = new Empty()
       for (let i = props.__length; i > 0; i--)
-        list = new gleam.NonEmpty(props[i - 1], list)
+        list = new NonEmpty(props[i - 1], list)
       return list
     }
     case "Tuple": {
@@ -24,40 +24,44 @@ export function propsToGleamProps(props, originalProps) {
   }
 }
 
-export function gleamPropsToProps(props_, originalProps, ref) {
-  if (props_ instanceof gleam.CustomType) {
+export function gleamPropsToProps(props_, originalProps) {
+  if (props_ instanceof CustomType) {
     const prototype = Object.getPrototypeOf(props_)
     const name = prototype.constructor.name
     originalProps.current[name] ??= [prototype, props_]
     const props = { ...props_, __propsType: name }
-    if (ref) props.ref = ref
     return props
-  } else if (props_ instanceof gleam.List) {
+  } else if (props_ instanceof List) {
     const props = { __propsType: "List" }
     let index = 0
     for (const item of props_) props[index++] = item
     props.__length = index
-    if (ref) props.ref = ref
     return props
   } else if (Array.isArray(props_)) {
     const props = { __propsType: "Tuple" }
     let index = 0
     for (const item of props_) props[index++] = item
     props.__length = index
-    if (ref) props.ref = ref
     return props
   } else if (props_ === undefined) {
     const props = { __propsType: "Nil" }
-    if (ref) props.ref = ref
     return props
   } else {
-    console.warn(
-      `redraw only support custom types, list, tuples or Nil as props.
-      ${Component.displayName} received ${props_} as props.`.replace(
-        /\n( )*/g,
-        "\n",
-      ),
-    )
+    const msg = `redraw only support custom types, list, tuples or Nil as props.
+      Received ${props_} as props.`
+    const msg_ = msg.replace(/\n( )*/g, "\n")
+    console.warn(msg_)
     return null
+  }
+}
+
+// Add some Redraw helpers directly on `window` to simplify
+// development of Redraw Refresh.
+if (typeof window !== "undefined") {
+  window.redraw = {
+    props: {
+      toGleam: propsToGleamProps,
+      fromGleam: gleamPropsToProps,
+    },
   }
 }

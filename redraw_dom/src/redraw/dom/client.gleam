@@ -1,5 +1,6 @@
 import gleam/dynamic.{type Dynamic}
 import redraw.{type Component}
+import redraw/dom.{type Error}
 
 /// Root to display React DOM.
 ///
@@ -24,7 +25,7 @@ pub type Root
 ///
 /// [Documentation](https://react.dev/reference/react-dom/client/createRoot)
 @external(javascript, "./client.ffi.mjs", "createRoot")
-pub fn create_root(root: String) -> Result(Root, Nil)
+pub fn create_root(root: String) -> Result(Root, Error)
 
 /// Creates an HTML Element and attach a root on it.
 /// This creates a "virtual" root, in the sense that the root will not be attached
@@ -60,7 +61,7 @@ pub fn virtual_root() -> #(Dynamic, Root)
 ///
 /// [Documentation](https://react.dev/reference/react-dom/client/hydrateRoot)
 @external(javascript, "./client.ffi.mjs", "hydrateRoot")
-pub fn hydrate_root(root: String, node: Component) -> Result(Root, Nil)
+pub fn hydrate_root(root: String, node: Component) -> Result(Root, Error)
 
 /// Call `render(root)` to display a piece of JSX (“React node”) into the React
 /// root’s browser DOM node.

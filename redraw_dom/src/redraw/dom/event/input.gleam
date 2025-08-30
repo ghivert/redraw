@@ -1,7 +1,7 @@
 //// The `InputEvent` interface represents an event notifying the user of editable content changes.
 
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/InputEvent)
 pub type InputEvent
@@ -11,6 +11,4 @@ pub type InputEvent
 pub fn data(event: InputEvent) -> String
 
 /// `InputEvent` inherits `Event`.
-pub fn as_event(event: InputEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(InputEvent) -> Event = unsafe.coerce

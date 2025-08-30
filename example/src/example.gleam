@@ -20,7 +20,7 @@ pub fn main() {
 
 pub fn root() {
   let app = app()
-  use <- react.component__("Root")
+  use <- react.standalone("Root")
   app()
 }
 
@@ -29,7 +29,7 @@ pub type CounterProps {
 }
 
 fn counter() {
-  use props: CounterProps <- react.component_("Counter")
+  use props: CounterProps <- react.element("Counter")
   html.button(
     [events.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
     list.map([props.count], fn(count) {
@@ -54,7 +54,7 @@ fn nav_links() {
 
 pub fn app() {
   let counter = counter()
-  use <- react.component__("App")
+  use <- react.standalone("App")
   let #(count, set_count) = react.use_state_(0)
   react.fragment([
     nav_links(),

@@ -1,3 +1,8 @@
+## v19.0.0 - 2025-08-31
+
+- Integrates latest changes from React 19.
+- Integrates latest hooks from React 19.
+
 ## v2.1.0 - 2025-08-28
 
 - Add `html.element` function to support arbitrary HTML elements.

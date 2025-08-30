@@ -10,7 +10,7 @@ import gleam/dynamic
 import redraw/dom/event/mouse.{type MouseEvent}
 import redraw/dom/event/ui.{type UIEvent}
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/DragEvent)
 pub type DragEvent
@@ -20,16 +20,10 @@ pub type DragEvent
 pub fn data_transfer(event: DragEvent) -> dynamic.Dynamic
 
 /// `DragEvent` inherits from `MouseEvent`.
-pub fn as_mouse_event(event: DragEvent) -> MouseEvent {
-  coerce(event)
-}
+pub const as_mouse_event: fn(DragEvent) -> MouseEvent = unsafe.coerce
 
 /// `DragEvent` inherits from `UIEvent`.
-pub fn as_ui_event(event: DragEvent) -> UIEvent {
-  coerce(event)
-}
+pub const as_ui_event: fn(DragEvent) -> UIEvent = unsafe.coerce
 
 /// `DragEvent` inherits `Event`.
-pub fn as_event(event: DragEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(DragEvent) -> Event = unsafe.coerce

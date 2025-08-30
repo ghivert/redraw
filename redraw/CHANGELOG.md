@@ -1,3 +1,12 @@
+## v19.0.0 - 2025-08-31
+
+- Upgrade Redraw to React 19.
+- Integrates latest hooks from React 19.
+- Integrates latest API changes from React 19.
+- Rename `component_` to `element` and `component__` to `standalone`.
+- Changes `use_context` from `useContext` to `use`.
+- Add better errors.
+
 ## v2.0.3 - 2025-08-27
 
 - Bump `gleam_javascript` dependency.

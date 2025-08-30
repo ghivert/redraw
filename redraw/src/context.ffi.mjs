@@ -1,21 +1,25 @@
 import * as React from "react"
 import { jsx } from "./redraw.ffi.mjs"
-import * as gleam from "./gleam.mjs"
-import * as error from "./redraw/error.mjs"
+import { Error, Ok } from "./gleam.mjs"
+import { UnknownContext, ExistingContext } from "./redraw.mjs"
 
 const contexts = {}
 
 export function contextProvider(context, value, children) {
-  return jsx(context.Provider, { value }, children)
+  const props = { value }
+  const shouldConvertChildren = true
+  return jsx(context, props, children, shouldConvertChildren)
 }
 
 export function createContext(name, defaultValue) {
-  if (contexts[name]) return new gleam.Error(new error.ExistingContext(name))
+  if (contexts[name]) return new Error(new ExistingContext(name))
   contexts[name] = React.createContext(defaultValue)
-  return new gleam.Ok(contexts[name])
+  return new Ok(contexts[name])
 }
 
 export function getContext(name) {
-  if (!contexts[name]) return new gleam.Error(new error.UnknownContext(name))
-  return new gleam.Ok(contexts[name])
+  const context = contexts[name]
+  if (context) return new Ok(context)
+  const error = new UnknownContext(name)
+  return new Error(error)
 }

@@ -4,7 +4,7 @@
 //// [Input Method Editor Documentation](https://developer.mozilla.org/docs/Glossary/Input_method_editor).
 
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/CompositionEvent)
 pub type CompositionEvent
@@ -14,6 +14,4 @@ pub type CompositionEvent
 pub fn data(event: CompositionEvent) -> String
 
 /// `CompositionEvent` inherits `Event`.
-pub fn as_event(event: CompositionEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(CompositionEvent) -> Event = unsafe.coerce

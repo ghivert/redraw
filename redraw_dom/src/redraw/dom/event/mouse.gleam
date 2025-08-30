@@ -8,7 +8,7 @@
 import gleam/dynamic
 import redraw/dom/event/ui.{type UIEvent}
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/MouseEvent)
 pub type MouseEvent
@@ -86,11 +86,7 @@ pub fn shift_key(event: MouseEvent) -> Bool
 pub fn get_modifier_state(event: MouseEvent, key: String) -> Bool
 
 /// `MouseEvent` inherits `UIEvent`.
-pub fn as_ui_event(event: MouseEvent) -> UIEvent {
-  coerce(event)
-}
+pub const as_ui_event: fn(MouseEvent) -> UIEvent = unsafe.coerce
 
 /// `MouseEvent` inherits `Event`.
-pub fn as_event(event: MouseEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(MouseEvent) -> Event = unsafe.coerce

@@ -1,27 +1,25 @@
 import ReactDOM from "react-dom/client"
-import * as $gleam from "../../gleam.mjs"
+import { Error, Ok } from "../../gleam.mjs"
+import { InvalidRoot } from "../dom.mjs"
 
 export function createRoot(value) {
   const node = document.getElementById(value)
-  if (!node) return new $gleam.Error()
-  return new $gleam.Ok(ReactDOM.createRoot(node))
+  if (!node) return new Error(new InvalidRoot(value))
+  const root = ReactDOM.createRoot(node)
+  return new Ok(root)
 }
 
 export function virtualRoot() {
   const value = document.createElement("div")
-  return [value, ReactDOM.createRoot(value)]
+  const root = ReactDOM.createRoot(value)
+  return [value, root]
 }
 
 export function hydrateRoot(value, content) {
   const node = document.getElementById(value)
-  if (!node) return new $gleam.Error()
-  return new $gleam.Ok(ReactDOM.hydrateRoot(node, content))
-}
-
-export function createPortal(children, root) {
-  const node = document.getElementById(root)
-  if (!node) return new $gleam.Error()
-  return new $gleam.Ok(ReactDOM.createPortal(children, node))
+  if (!node) return new Error(new InvalidRoot(value))
+  const hydration = ReactDOM.hydrateRoot(node, content)
+  return new Ok(hydration)
 }
 
 export function render(root, children) {

@@ -6,7 +6,7 @@
 
 import gleam/dynamic
 import redraw/event.{type Event}
-import redraw/internals/coerce.{coerce}
+import redraw/internals/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/ClipboardEvent)
 pub type ClipboardEvent
@@ -16,6 +16,4 @@ pub type ClipboardEvent
 pub fn clipboard_data(event: ClipboardEvent) -> dynamic.Dynamic
 
 /// `ClipboardEvent` inherits `Event`.
-pub fn as_event(event: ClipboardEvent) -> Event {
-  coerce(event)
-}
+pub const as_event: fn(ClipboardEvent) -> Event = unsafe.coerce
