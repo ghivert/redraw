@@ -720,7 +720,5 @@ pub fn wbr(attrs: List(Attribute)) -> Component {
   redraw.jsx(type_: "wbr", props:, children: Nil, convert_children:)
 }
 
-// TODO expose it later
 @external(javascript, "./html.ffi.mjs", "toProps")
-@internal
-pub fn to_props(attrs: List(Attribute)) -> b
+fn to_props(attrs: List(Attribute)) -> b

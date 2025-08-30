@@ -8,6 +8,7 @@
 //// [MDN](https://developer.mozilla.org/docs/Web/API/Element).
 
 import gleam/dynamic.{type Dynamic}
+import gleam/fetch/form_data.{type FormData}
 import gleam/option
 import gleam/string
 import redraw
@@ -457,6 +458,11 @@ pub fn action(url: String) -> Attribute {
   attribute("action", url)
 }
 
+/// [Documentation](https://react.dev/reference/react-dom/components/form#handle-form-submission-on-the-client)
+pub fn action_(handler: fn(FormData) -> Nil) -> Attribute {
+  attribute("action", handler)
+}
+
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/enctype)
 pub fn enctype(value: String) -> Attribute {
   attribute("enctype", value)
@@ -474,7 +480,12 @@ pub fn novalidate(value: Bool) -> Attribute {
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/button#formaction)
 pub fn form_action(action: String) -> Attribute {
-  attribute("formaction", action)
+  attribute("formAction", action)
+}
+
+/// [Documentation](/// [Documentation](https://react.dev/reference/react-dom/components/form#handle-form-submission-on-the-client)
+pub fn form_action_(handler: fn(FormData) -> Nil) -> Attribute {
+  attribute("formAction", handler)
 }
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/button#formenctype)

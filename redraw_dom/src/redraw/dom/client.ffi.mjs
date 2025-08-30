@@ -21,13 +21,6 @@ export function hydrateRoot(value, content) {
   return new Ok(hydration)
 }
 
-export function createPortal(children, root) {
-  const node = document.getElementById(root)
-  if (!node) return new Error()
-  const portal = ReactDOM.createPortal(children, node)
-  return new Ok(portal)
-}
-
 export function render(root, children) {
   return root.render(children)
 }

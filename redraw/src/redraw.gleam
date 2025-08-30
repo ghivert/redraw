@@ -272,6 +272,22 @@ pub fn use_optimistic_action(
   update: fn(state, action) -> state,
 ) -> #(state, fn(action) -> Nil)
 
+/// Allow you to update state based on the result of a form action. \
+/// [Documentation](https://react.dev/reference/react/useActionState)
+@external(javascript, "react", "useActionState")
+pub fn use_action_state(
+  action: fn(state, payload) -> Nil,
+  initial_state: state,
+) -> #(state, fn(payload) -> nil, Bool)
+
+/// Let you subscribe to an external store. \
+/// [Documentation](https://react.dev/reference/react/useSyncExternalStore)
+@external(javascript, "react", "useSyncExternalStore")
+pub fn use_sync_external_store(
+  subscribe: fn(fn() -> Nil) -> fn() -> Nil,
+  get_snapshot: fn() -> snapshot,
+) -> snapshot
+
 /// Wait for a Promise and returns its content. Uses `use` under-the-hood.
 /// When the Promise is loading, it fallbacks to the nearest
 /// `Suspense` boundary. \
@@ -513,6 +529,24 @@ pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
 /// [Documentation](https://react.dev/reference/react/act)
 @external(javascript, "react", "act")
 pub fn act(act_fn: fn() -> Promise(Nil)) -> Promise(Nil)
+
+/// Reads the current Owner Stack in development and returns it as a string
+/// if available.
+///
+/// Owner Stacks are available in
+/// - Component render
+/// - Effects (e.g. `use_effect`)
+/// - React’s event handlers (e.g. `button([a.on_click(fn (_) {...})])`)
+/// - React error handlers (React Root options onCaughtError, onRecoverableError, and onUncaughtError)
+///
+/// If no Owner Stack is available, null is returned (see Troubleshooting: The Owner Stack is null).
+///
+/// > Owner Stacks are only available in development. captureOwnerStack will
+/// > always return null outside of development.
+///
+/// [Documentation](https://react.dev/reference/react/act)
+@external(javascript, "./redraw.ffi.mjs", "captureOwnerStack")
+pub fn capture_owner_stack() -> Result(String, Error)
 
 /// Let you update the state without blocking the UI. \
 /// [Documentation](https://react.dev/reference/react/startTransition)

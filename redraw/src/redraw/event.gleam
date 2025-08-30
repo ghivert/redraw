@@ -34,7 +34,7 @@
 ////
 //// [Documentation](https://react.dev/reference/react-dom/components/common#react-event-object)
 
-import gleam/dynamic/decode
+import gleam/dynamic.{type Dynamic}
 
 /// Synthetic Event sent by React.
 /// It conforms to the same standard as the underlying DOM events, but
@@ -55,7 +55,7 @@ pub fn cancelable(event: Event) -> Bool
 /// Returns the node to which the current handler is attached in the React tree. \
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
 @external(javascript, "./event.ffi.mjs", "currentTarget")
-pub fn current_target(event: Event) -> decode.Dynamic
+pub fn current_target(event: Event) -> Dynamic
 
 /// Returns whether `prevent_default` was called. \
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
@@ -75,7 +75,7 @@ pub fn is_trusted(event: Event) -> Bool
 /// Returns the node on which the event has occurred (which could be a distant child). \
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/Event/target)
 @external(javascript, "./event.ffi.mjs", "target")
-pub fn target(event: Event) -> decode.Dynamic
+pub fn target(event: Event) -> Dynamic
 
 /// Returns the time when the event occurred. \
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
@@ -85,7 +85,7 @@ pub fn time_stamp(event: Event) -> Int
 /// The original browser event object. \
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/Event)
 @external(javascript, "./event.ffi.mjs", "nativeEvent")
-pub fn native_event(event: Event) -> decode.Dynamic
+pub fn native_event(event: Event) -> Dynamic
 
 /// Prevents the default browser action for the event. \
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)

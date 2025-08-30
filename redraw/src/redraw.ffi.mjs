@@ -1,6 +1,10 @@
 import React from "react"
 import runtime from "react/jsx-runtime"
 import { List } from "./gleam.mjs"
+import {
+  DevelopmentOnly,
+  OwnerStackUnavailable,
+} from "./redraw/internals/error.mjs"
 import "./props.ffi.mjs"
 
 /**
@@ -154,4 +158,15 @@ export function setCurrent(ref, value) {
 
 export function getCurrent(ref) {
   return ref.current
+}
+
+export function captureOwnerStack() {
+  if ("captureOwnerStack" in React) {
+    const result = React.captureOwnerStack()
+    if (result) return new Ok(result)
+    const error = new OwnerStackUnavailable()
+    return new Error(error)
+  }
+  const error = new DevelopmentOnly()
+  return new Error(error)
 }
