@@ -1,3 +1,7 @@
+## v19.0.1 - 2025-09-02
+
+- Fix wrong external link.
+
 ## v19.0.0 - 2025-08-31
 
 - Integrates latest changes from React 19.

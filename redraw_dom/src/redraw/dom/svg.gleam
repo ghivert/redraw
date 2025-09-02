@@ -467,5 +467,5 @@ pub fn view(attrs: List(Attribute), children: List(Component)) -> Component {
   redraw.jsx(type_: "view", props:, children:, convert_children:)
 }
 
-@external(javascript, "../../attribute.ffi.mjs", "toProps")
+@external(javascript, "./html.ffi.mjs", "toProps")
 fn to_props(attrs: List(Attribute)) -> b
