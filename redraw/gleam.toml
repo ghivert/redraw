@@ -1,6 +1,6 @@
 name = "redraw"
 target = "javascript"
-version = "19.0.0"
+version = "19.0.2"
 
 description = "React bindings for Gleam! Supports everything modern React provides, with full Gleam Type-Checking system!"
 internal_modules = ["redraw/internals", "redraw/internals/*"]
