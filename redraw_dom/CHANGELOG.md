@@ -1,3 +1,8 @@
+## v19.0.2 - 2025-09-05
+
+- Fix `create_portal`.
+- Fix invalid FFI code.
+
 ## v19.0.1 - 2025-09-02
 
 - Fix wrong external link.

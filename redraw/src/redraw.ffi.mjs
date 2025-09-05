@@ -93,7 +93,12 @@ export function jsx(value, props, children, shouldConvertChildren = false) {
   // Props will only be converted for HTML elements. For anything else than
   // HTML elements, simply forward the children.
   if (shouldConvertChildren) {
-    children = children instanceof List ? children.toArray() : children
+    if (children instanceof List) {
+      children = children.toArray()
+      if (children.length === 0) {
+        children = undefined
+      }
+    }
     // Handle keyed elements like lustre does.
     // This allow to have a similar interface between Lustre and Redraw.
     // If children[0] is an array, it means it's a tuple #(key, element).

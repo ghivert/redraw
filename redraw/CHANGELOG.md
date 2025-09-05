@@ -1,3 +1,12 @@
+## v19.0.2 - 2025-09-05
+
+- Avoid passing `children` to props when `children` is an empty `List`. This
+  make sure to not mess with `dangerouslySetInnerHTML`.
+
+## v19.0.1 - 2025-09-02
+
+- No changes, keep in sync with `redraw_dom`.
+
 ## v19.0.0 - 2025-08-31
 
 - Upgrade Redraw to React 19.
