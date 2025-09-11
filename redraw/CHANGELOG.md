@@ -1,3 +1,7 @@
+## v19.0.3 - 2025-09-11
+
+- No changes, keep in sync with `redraw_dom`.
+
 ## v19.0.2 - 2025-09-05
 
 - Avoid passing `children` to props when `children` is an empty `List`. This

@@ -1,3 +1,8 @@
+## v19.0.3 - 2025-09-11
+
+- Fix `class`. `class` was destructive rather than additive. To make sure
+  everything stay 100% compatible with Lustre, `class` is now additive.
+
 ## v19.0.2 - 2025-09-05
 
 - Fix `create_portal`.

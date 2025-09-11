@@ -45,6 +45,9 @@ pub fn src(value: String) -> Attribute {
   attribute("src", value)
 }
 
+/// To follow Lustre pattern, `class` is additive. When using multiple `class`
+/// on a single element, they will all be applied on that element.
+///
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/class)
 pub fn class(value: String) -> Attribute {
   attribute("className", value)
