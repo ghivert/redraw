@@ -1,3 +1,7 @@
+## v19.0.4 - 2025-09-11
+
+- Add missing attributes.
+
 ## v19.0.3 - 2025-09-11
 
 - Fix `class`. `class` was destructive rather than additive. To make sure

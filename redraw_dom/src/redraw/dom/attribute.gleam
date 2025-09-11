@@ -146,10 +146,23 @@ pub fn auto_capitalize(value: String) -> Attribute {
   attribute("autoCapitalize", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/autofocus)
+pub fn auto_focus(value: Bool) -> Attribute {
+  attribute("autoFocus", value)
+}
+
 /// Alias of `class`. \
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/class)
 pub fn class_name(value: String) -> Attribute {
   attribute("className", value)
+}
+
+/// Specifies the value of a metadata name defined by the `<meta>` `name`
+/// attribute. It takes a string as its value, and the expected syntax varies
+/// depending on the `name` value used. \
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/content)
+pub fn content(value: String) -> Attribute {
+  attribute("content", value)
 }
 
 /// If true, the browser lets the user edit the rendered element directly.
@@ -160,6 +173,11 @@ pub fn class_name(value: String) -> Attribute {
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/HTML/Global_attributes/contenteditable)
 pub fn content_editable(value: Bool) -> Attribute {
   attribute("contentEditable", value)
+}
+
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/crossorigin)
+pub fn cross_origin(value: String) -> Attribute {
+  attribute("crossOrigin", value)
 }
 
 /// Data attributes let you attach some string data to the element, for example
@@ -186,16 +204,31 @@ pub fn dir(value: Dir) -> Attribute {
   attribute("dir", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/dirname)
+pub fn dirname(value: String) -> Attribute {
+  attribute("dirName", value)
+}
+
 /// Specifies whether the element is draggable. Part of HTML Drag and Drop API. \
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/draggable)
 pub fn draggable(value: Bool) -> Attribute {
   attribute("draggable", value)
 }
 
-/// Specifies which action to present for the enter key on virtual keyboards.\
+/// Specifies which action to present for the enter key on virtual keyboards. \
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/enterkeyhint)
 pub fn enter_key_hint(value: String) -> Attribute {
   attribute("enterKeyHint", value)
+}
+
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/exportparts)
+pub fn export_parts(value: List(String)) -> Attribute {
+  attribute("exportParts", string.join(value, with: ", "))
+}
+
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/elementtiming)
+pub fn element_timing(value: String) -> Attribute {
+  attribute("elementTiming", value)
 }
 
 /// For <label> and <output>, lets you associate the label with some control.
@@ -217,12 +250,24 @@ pub fn hidden(value: Bool) -> Attribute {
   attribute("hidden", value)
 }
 
+/// For `<input type="email">`, `<input type="file">` and `<select>`, indicates
+/// if it accepts one or more values. \
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Reference/multiple)
+pub fn multiple(value: Bool) -> Attribute {
+  attribute("multiple", value)
+}
+
 /// Specifies a unique identifier for this element, which can be used to find
 /// it later or connect it with other elements. Generate it with useId to avoid
 /// clashes between multiple instances of the same component. \
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/id)
 pub fn id(value: String) -> Attribute {
   attribute("id", value)
+}
+
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/inert)
+pub fn inert(value: Bool) -> Attribute {
+  attribute("inert", value)
 }
 
 /// If specified, the component will behave like a custom element. \
@@ -237,10 +282,30 @@ pub fn input_mode(value: String) -> Attribute {
   attribute("inputMode", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/itemid)
+pub fn item_id(value: String) -> Attribute {
+  attribute("itemId", value)
+}
+
 /// Specifies which property the element represents for structured data crawlers. \
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/itemprop)
 pub fn item_prop(value: String) -> Attribute {
   attribute("itemProp", value)
+}
+
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/itemref)
+pub fn item_ref(value: String) -> Attribute {
+  attribute("itemRef", value)
+}
+
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/itemscope)
+pub fn item_scope(value: String) -> Attribute {
+  attribute("itemScope", value)
+}
+
+/// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/itemtype)
+pub fn item_type(value: String) -> Attribute {
+  attribute("itemType", value)
 }
 
 /// Specifies the language of the element. \
@@ -332,6 +397,16 @@ pub fn checked(is_checked: Bool) -> Attribute {
   attribute("checked", is_checked)
 }
 
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/part)
+pub fn part(values: List(String)) -> Attribute {
+  attribute("part", string.join(values, " "))
+}
+
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/popover)
+pub fn popover(value: String) -> Attribute {
+  attribute("popover", value)
+}
+
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/placeholder)
 pub fn placeholder(text: String) -> Attribute {
   attribute("placeholder", text)
@@ -371,7 +446,8 @@ pub fn disabled(is_disabled: Bool) -> Attribute {
   attribute("disabled", is_disabled)
 }
 
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/name)
+/// [`<meta>` Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/name) \
+/// [`<form>` Documentation](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/name)
 pub fn name(name: String) -> Attribute {
   attribute("name", name)
 }
@@ -396,9 +472,19 @@ pub fn max(val: String) -> Attribute {
   attribute("max", val)
 }
 
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/maxlength)
+pub fn max_length(value: String) -> Attribute {
+  attribute("maxLength", value)
+}
+
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/min)
 pub fn min(val: String) -> Attribute {
   attribute("min", val)
+}
+
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/minlength)
+pub fn min_length(value: String) -> Attribute {
+  attribute("minLength", value)
 }
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Attributes/step)
@@ -446,6 +532,11 @@ pub fn autoplay(should_autoplay: Bool) -> Attribute {
   attribute("autoplay", should_autoplay)
 }
 
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/size)
+pub fn size(value: Int) -> Attribute {
+  attribute("size", value)
+}
+
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/controls)
 pub fn controls(visible: Bool) -> Attribute {
   attribute("controls", visible)
@@ -481,6 +572,11 @@ pub fn novalidate(value: Bool) -> Attribute {
   attribute("novalidate", value)
 }
 
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/form)
+pub fn form(value: String) -> Attribute {
+  attribute("form", value)
+}
+
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Element/button#formaction)
 pub fn form_action(action: String) -> Attribute {
   attribute("formAction", action)
@@ -514,6 +610,11 @@ pub fn form_target(target: String) -> Attribute {
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLDetailsElement/open)
 pub fn open(is_open: Bool) -> Attribute {
   attribute("open", is_open)
+}
+
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/lang)
+pub fn nonce(nonce: String) -> Attribute {
+  attribute("nonce", nonce)
 }
 
 /// `none` will not appear in HTML attributes. Use it for conditional rendering.
