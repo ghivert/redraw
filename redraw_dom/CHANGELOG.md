@@ -1,3 +1,7 @@
+## v19.0.5 - 2025-09-15
+
+- Fix `input.data` and add `input.value`.
+
 ## v19.0.4 - 2025-09-11
 
 - Add missing attributes.

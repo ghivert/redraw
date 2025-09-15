@@ -6,7 +6,8 @@ export const detail = (event) => event.detail
 export const view = (event) => event.view
 export const dataTransfer = (event) => event.dataTransfer
 export const relatedTarget = (event) => event.relatedTarget
-export const data = (event) => event.data
+export const data = (event) => event.nativeEvent.data ?? ""
+export const value = (event) => event.target.value
 export const altKey = (event) => event.altKey
 export const code = (event) => event.code
 export const button = (event) => event.button

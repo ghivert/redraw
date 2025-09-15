@@ -1,3 +1,7 @@
+## v19.0.5 - 2025-09-15
+
+- No changes, keep in sync with `redraw_dom`.
+
 ## v19.0.4 - 2025-09-11
 
 - No changes, keep in sync with `redraw_dom`.
