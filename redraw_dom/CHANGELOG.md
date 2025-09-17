@@ -1,3 +1,7 @@
+## v19.0.6 - 2025-09-17
+
+- No changes, keep in sync with `redraw`.
+
 ## v19.0.5 - 2025-09-15
 
 - Fix `input.data` and add `input.value`.

@@ -1,3 +1,7 @@
+## v19.0.6 - 2025-09-17
+
+- Add `use_layout_effect_` to be able to return a cleanup function.
+
 ## v19.0.5 - 2025-09-15
 
 - No changes, keep in sync with `redraw_dom`.

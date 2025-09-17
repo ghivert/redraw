@@ -236,6 +236,12 @@ pub fn use_insertion_effect_(handler: fn() -> fn() -> Nil, deps: deps) -> Nil
 @external(javascript, "react", "useLayoutEffect")
 pub fn use_layout_effect(value: fn() -> Nil, dependencies: a) -> Nil
 
+/// Version of useEffect that fires before the browser repaints the screen and
+/// allow to return a cleanup function. \
+/// [Documentation](https://react.dev/reference/react/useLayoutEffect)
+@external(javascript, "react", "useLayoutEffect")
+pub fn use_layout_effect_(value: fn() -> fn() -> Nil, dependencies: a) -> Nil
+
 /// Let you cache the result of a calculation between re-renders. \
 /// [Documentation](https://react.dev/reference/react/useMemo)
 @external(javascript, "react", "useMemo")
