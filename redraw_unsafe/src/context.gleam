@@ -10,7 +10,6 @@ pub type Error {
   UnknownContext(name: String)
 }
 
-///
 /// To simplify and mimic that usage, Redraw wraps Context creation with some
 /// caching, to emulate a similar behaviour.
 ///
