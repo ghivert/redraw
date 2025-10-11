@@ -1,4 +1,4 @@
-name = "example"
+name = "redraw_unsafe"
 version = "1.0.0"
 target = "javascript"
 
@@ -14,10 +14,8 @@ target = "javascript"
 # https://gleam.run/writing-gleam/gleam-toml/.
 
 [dependencies]
-gleam_stdlib = ">= 0.34.0 and < 2.0.0"
-redraw = { path = "../redraw" }
-redraw_dom = { path = "../redraw_dom" }
-redraw_safer = { path = "../redraw_safer" }
+gleam_stdlib = ">= 0.44.0 and < 2.0.0"
+redraw = ">= 19.0.6 and < 20.0.0"
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

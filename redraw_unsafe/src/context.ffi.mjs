@@ -1,18 +1,15 @@
 import * as React from "react"
 import { jsx } from "./redraw.ffi.mjs"
+import { Error, Ok } from "./gleam.mjs"
+import { UnknownContext, ExistingContext } from "./redraw.mjs"
+
+const contexts = {}
 
 export function contextProvider(context, value, children) {
   const props = { value }
   const shouldConvertChildren = true
   return jsx(context, props, children, shouldConvertChildren)
 }
-
-// That part of the file is deprecated, named contexts have been removed
-// from Redraw. Will be removed in Redraw 20.
-import { Error, Ok } from "./gleam.mjs"
-import { UnknownContext, ExistingContext } from "./redraw.mjs"
-
-const contexts = {}
 
 export function createContext(name, defaultValue) {
   if (contexts[name]) return new Error(new ExistingContext(name))
