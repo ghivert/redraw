@@ -6,8 +6,8 @@ pub type Ref(a)
 
 /// Set the current value of a ref, overriding its existing content.
 @external(javascript, "./ref.ffi.mjs", "setCurrent")
-pub fn set(of ref: Ref(a), with value: a) -> Nil
+pub fn assign(of ref: Ref(a), with value: a) -> Nil
 
 /// Get the current value of a ref.
 @external(javascript, "./ref.ffi.mjs", "getCurrent")
-pub fn get(from ref: Ref(a)) -> a
+pub fn current(from ref: Ref(a)) -> a

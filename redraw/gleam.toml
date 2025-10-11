@@ -3,8 +3,13 @@ target = "javascript"
 version = "19.1.1"
 
 description = "React bindings for Gleam! Supports everything modern React provides, with full Gleam Type-Checking system!"
-internal_modules = ["redraw/internals", "redraw/internals/*"]
 licences = ["MIT"]
+internal_modules = [
+  "redraw/internals",
+  "redraw/internals/*",
+  "redraw/internal",
+  "redraw/internal/*",
+]
 
 [[links]]
 title = "Sponsor"

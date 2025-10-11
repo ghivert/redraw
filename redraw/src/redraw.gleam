@@ -27,7 +27,7 @@ pub type Error {
 // Component creation
 
 /// React has two notions built-in: elements and components. Element is
-/// sometimes referred as `JSX` in other React bindings. \
+/// sometimes referred as `JSX` or `JSX.Element` in other React bindings. \
 /// An `Element` can be a DOM node or the result of the execution of a
 /// component. Any time you need to draw on the screen, whether it's in the
 /// DOM or on your smartphone screen with React Native, you need to return an
@@ -307,7 +307,7 @@ pub fn use_promise(promise: Promise(state)) -> state
 /// Most used ref you'll want to create. They're automatically created to `None`,
 /// and can be passed to `ref` prop or `use_imperative_handle`.
 /// You probably don't want the ref value to be anything than `Option(a)`, unless
-/// you have really strong reasons. \
+/// you have really good reasons. In that case, use `use_ref_`. \
 /// [Documentation](https://react.dev/reference/react/useRef)
 pub fn use_ref() -> ref.Ref(Option(a)) {
   use_ref_(None)
@@ -316,8 +316,8 @@ pub fn use_ref() -> ref.Ref(Option(a)) {
 /// Let you reference a value that’s not needed for rendering.
 /// Use `use_ref` if you're trying to acquire a reference to a child or to a
 /// component. Use `use_ref_` when you want to keep track of a data, like if
-/// you're doing some side-effects, in conjuction with `get_current` and
-/// `set_current`. \
+/// you're doing some side-effects, in conjuction with `ref.current` and
+/// `ref.assign`. \
 /// [Documentation](https://react.dev/reference/react/useRef)
 @external(javascript, "react", "useRef")
 pub fn use_ref_(initial_value: a) -> ref.Ref(a)
@@ -518,16 +518,8 @@ pub fn jsx(
 @external(javascript, "./redraw.ffi.mjs", "setDisplayName")
 fn set_display_name(a: a, name: String) -> a
 
-@external(javascript, "./redraw.ffi.mjs", "wrapStandalone")
-fn wrap_standalone(a: fn() -> Element) -> fn() -> Element
-
 @external(javascript, "./redraw.ffi.mjs", "wrapComponent")
 fn wrap_element(a: fn(props) -> Element) -> fn(props) -> Element
-
-@external(javascript, "./redraw.ffi.mjs", "wrapComponent")
-fn wrap_component(
-  a: fn(props, children) -> Element,
-) -> fn(props, children) -> Element
 
 // DEPRECATIONS, WILL BE REMOVED IN REDRAW 20
 
@@ -542,6 +534,11 @@ pub fn component(
   |> set_display_name(name)
   |> wrap_component
 }
+
+@external(javascript, "./redraw.ffi.mjs", "wrapComponent")
+fn wrap_component(
+  a: fn(props, children) -> Element,
+) -> fn(props, children) -> Element
 
 @deprecated("Components in Redraw have changed. Use `component_` instead.")
 pub fn element(
@@ -562,6 +559,9 @@ pub fn standalone(
   |> set_display_name(name)
   |> wrap_standalone
 }
+
+@external(javascript, "./redraw.ffi.mjs", "wrapStandalone")
+fn wrap_standalone(a: fn() -> Element) -> fn() -> Element
 
 @external(javascript, "./external.ffi.mjs", "convertProps")
 fn convert_children(gleam_props: gleam_props) -> props
@@ -652,21 +652,23 @@ pub type Ref(a) =
   ref.Ref(a)
 
 /// Set the current value of a ref, overriding its existing content.
-@deprecated("Refs now have their dedicated module. Use `ref.set` instead.")
+@deprecated("Refs now have their dedicated module. Use `ref.assign` instead.")
 pub fn set_current(of ref: ref.Ref(a), with value: a) -> Nil {
-  ref.set(of: ref, with: value)
+  ref.assign(of: ref, with: value)
 }
 
 /// Get the current value of a ref.
-@deprecated("Refs now have their dedicated module. Use `ref.get` instead.")
+@deprecated("Refs now have their dedicated module. Use `ref.current` instead.")
 pub fn get_current(from ref: ref.Ref(a)) -> a {
-  ref.get(from: ref)
+  ref.current(from: ref)
 }
 
-/// Components are deprecated, as they don't represent anything meaningful
-/// in React. Thinking in "Component" can be harmful, to understand the
-/// difference between plain elements and components. Use [`Element`](#Element)
-/// type instead.
+/// Components are deprecated, as they don't represent a component in React.
+/// React defines components as function that generates elements, while Redraw
+/// was defining components as the result of component running. \
+/// Currently, thinking with `Component` can be harmful, to understand the
+/// difference between plain elements and components. \
+/// Use [`Element`](#Element) type instead.
 ///
 /// > As a matter of backward compatibility, `Component` is now aliased to
 /// > `Element`, and will be removed in further versions.
