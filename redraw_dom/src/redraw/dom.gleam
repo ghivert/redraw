@@ -26,7 +26,6 @@ pub type Error {
 /// }
 ///
 /// fn app() {
-///   let modal = modal()
 ///   use <- redraw.component__("App")
 ///   let assert Ok(modal) = client.create_portal(modal, "modal")
 ///   html.div([], [html.text("Hello World!"), modal])

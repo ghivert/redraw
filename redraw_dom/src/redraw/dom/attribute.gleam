@@ -622,6 +622,16 @@ pub fn key(key: String) -> Attribute {
   attribute("key", key)
 }
 
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableCellElement/colSpan)
+pub fn col_span(value: Int) -> Attribute {
+  attribute("colSpan", value)
+}
+
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableCellElement/rowSpan)
+pub fn row_span(value: Int) -> Attribute {
+  attribute("rowSpan", value)
+}
+
 /// `none` will not appear in HTML attributes. Use it for conditional rendering.
 pub fn none() -> Attribute {
   attribute("none_", Nil)

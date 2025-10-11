@@ -2,7 +2,10 @@ import React from "react"
 import runtime from "react/jsx-runtime"
 import { List } from "./gleam.mjs"
 import { DevelopmentOnly, OwnerStackUnavailable } from "./redraw.mjs"
-import "./props.ffi.mjs"
+import * as $props from "./props.ffi.mjs"
+
+const memoize$ = Symbol("Redraw:Memo:Use")
+const children$ = Symbol("Redraw:Children")
 
 /**
  * The conversion is a bit hard to follow, so here's the road:
@@ -44,37 +47,44 @@ function propagateDisplayName(Component, Wrapper) {
 }
 
 /** Adds a wrapper that converts props from React props to Gleam props. */
-function wrapConvertProps(Component, originalProps) {
+function wrapConvertProps(Component) {
   return propagateDisplayName(Component, (props_) => {
-    const { children, ...props } = props_
-    const newProps = window.redraw.props.toGleam(props, originalProps)
+    const { [children$]: children, ...props } = props_
+    const newProps = $props.propsToGleamProps(props)
     if (children !== undefined) return Component(newProps, children)
     return Component(newProps)
   })
 }
 
 /** In Gleam, a `component` will have shape
- * `fn (props, children) -> Component`. `wrapComponent` turns it
+ * `fn (props) -> Component`. `wrapComponent` turns it
  * into `fn (props) -> jsx(Component)`. It will then be transformed once again
- * to `fn (props, children) -> jsx(Component)` by extracting the children
+ * to `fn (props) -> jsx(Component)` by extracting the children
  * from the props. */
 export function wrapComponent(Component) {
-  const originalProps = { current: {} }
-  const PropsConverted = wrapConvertProps(Component, originalProps)
-  return propagateDisplayName(Component, (props_, children) => {
-    const props = window.redraw.props.fromGleam(props_, originalProps)
-    if (props) return jsx(PropsConverted, props, children)
-    const render = propagateDisplayName(Component, () => null)
-    return jsx(render, {})
-  })
+  const PropsConverted = wrapConvertProps(Component)
+  // Comparing to `true`
+  const Memoized = React.memo(PropsConverted, $props.areEqual)
+  return function render(props_, children) {
+    const props = $props.gleamPropsToProps(props_)
+    const shouldUseMemo = render.memoize ?? Component.memoize
+    const isMemo = shouldUseMemo === memoize$
+    const Comp = isMemo ? Memoized : PropsConverted
+    return jsx(Comp, props, children)
+  }
+}
+
+export function memoize(render) {
+  if (!render) return render
+  render.memoize = memoize$
+  return render
 }
 
 /** In Gleam, a `standalone` will have shape `fn () -> Component`.
  * `wrapStandalone` turns it into `fn () -> jsx(Component)`. */
 export function wrapStandalone(Component) {
-  return propagateDisplayName(Component, () => {
-    return jsx(Component, {})
-  })
+  const Memoized = React.memo(Component, $props.areEqual)
+  return () => jsx(Memoized, {})
 }
 
 /**  Generate JSX using the JSX factory.
@@ -128,7 +138,14 @@ export function jsx(value, props, children, shouldConvertChildren = false) {
   // Append the children in the props. They potentially have been converted, or
   // are propagated as-is. JavaScript makes no differences if `children` are
   // undefined or not.
-  if (children !== undefined) props.children = children
+  if (children !== undefined) {
+    // When converting children, it means we're in an `Element`.
+    // To satisfy the React API, children should be put in `children` property.
+    if (shouldConvertChildren) props.children = children
+    // When not converting children, it means we're in a `Component`.
+    // As such, children should be reconverted after conversion.
+    else props[children$] = children
+  }
 
   // `key` cannot be used in props, it should be injected as last argument to
   // `runtime.jsxs?`. As such, if it exists in `props`, it is kept, deleted
@@ -145,37 +162,29 @@ export function jsx(value, props, children, shouldConvertChildren = false) {
 
 /** Set the display name function. Essential to display the correct name in
  * the devtools. */
-export function setFunctionName(component, name) {
+export function setDisplayName(component, name) {
   component.displayName = name
   return component
 }
 
 export function strictMode(children) {
-  return jsx(React.StrictMode, {}, children, true)
+  const shouldConvertChildren = true
+  return jsx(React.StrictMode, {}, children, shouldConvertChildren)
 }
 
 export function fragment(children) {
-  return jsx(React.Fragment, {}, children, true)
+  const shouldConvertChildren = true
+  return jsx(React.Fragment, {}, children, shouldConvertChildren)
 }
 
 export function profiler(children) {
-  return jsx(React.Profiler, {}, children, true)
+  const shouldConvertChildren = true
+  return jsx(React.Profiler, {}, children, shouldConvertChildren)
 }
 
 export function suspense(props, children) {
-  return jsx(React.Suspense, props, children, true)
-}
-
-export function coerce(value) {
-  return value
-}
-
-export function setCurrent(ref, value) {
-  ref.current = value
-}
-
-export function getCurrent(ref) {
-  return ref.current
+  const shouldConvertChildren = true
+  return jsx(React.Suspense, props, children, shouldConvertChildren)
 }
 
 export function captureOwnerStack() {

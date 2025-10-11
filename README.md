@@ -91,7 +91,7 @@ yarn add -D vite-gleam
 # @chouqueth/gleam provides a local version of the Gleam compiler installed in
 # your node_modules. You can freely skip that step if you don't need to build
 # your application remotely or if you're in control of the environment.
-yarn add -D @chouqueth/gleam
+yarn add -D @chouquette/gleam
 
 # Remove the files needed for `gleam new` to work.
 mv README.md README.md.old
@@ -225,26 +225,6 @@ pub fn counter() {
 
 Don't worry about the translation of data from and to React, Redraw handles the
 hard task for you!
-
-### `component`-family functions
-
-To define components, you should use `component`, `component_` or `component__`.
-The difference between the three is the signature of the resulting component.
-`component` accepts props and children, `component_` accepts only props, and
-`component__` do not accept anything. See it as a way to create an empty
-component, used with contexts or internal state for instance. You cannot create
-a component that accept children but no props. While it can feel boilerplaty at
-first, that is a design decision. Most of the time, components that accept
-children also accept props, so it's not worth creating another API and add
-overhead for a function that will almost not be used.
-
-### `forward_ref`-family functions
-
-Defining components sometimes involves to forward a ref to internal component.
-React uses the mechanism of `forwardRef` to push a ref, from the parent to a
-nested child. Redraw fully implements forwarded ref components! Use
-`forward_ref` or `forward_ref_` to create a component with props, ref and
-children, or only with props and children!
 
 ## Some reminders on hooks
 

@@ -1,57 +1,122 @@
-import { List, Empty, NonEmpty, CustomType } from "./gleam.mjs"
+import {
+  List,
+  Empty,
+  NonEmpty,
+  CustomType,
+  BitArray,
+  isEqual,
+} from "./gleam.mjs"
 
-export function propsToGleamProps(props, originalProps) {
-  switch (props.__propsType) {
-    case "List": {
+const type$ = Symbol("Type")
+const prototype$ = Symbol("Prototype")
+const length$ = Symbol("Length")
+const original$ = Symbol("Original")
+
+const list$ = Symbol("List")
+const tuple$ = Symbol("Tuple")
+const number$ = Symbol("Number")
+const string$ = Symbol("String")
+const function$ = Symbol("Function")
+const bitArray$ = Symbol("BitArray")
+const unknown$ = Symbol("Unknown")
+const boolean$ = Symbol("Boolean")
+const nil$ = Symbol("Nil")
+const customType$ = Symbol("CustomType")
+
+export function areEqual(before, after) {
+  if (before[type$] !== after[type$]) return false
+  switch (after[type$]) {
+    case nil$:
+      return true
+    case tuple$:
+    case list$: {
+      if (before[length$] !== after[length$]) return false
+      for (let i = after[length$]; i > 0; i--)
+        if (!isEqual(before[i], after[i])) return false
+      return true
+    }
+    case string$:
+    case function$:
+    case bitArray$:
+    case unknown$:
+    case boolean$:
+    case number$: {
+      return Object.is(before.value, after.value)
+    }
+    case customType$: {
+      return isEqual(before[original$], after[original$])
+    }
+  }
+}
+
+export function propsToGleamProps(props) {
+  switch (props[type$]) {
+    case list$: {
       let list = new Empty()
-      for (let i = props.__length; i > 0; i--)
+      for (let i = props[length$]; i > 0; i--)
         list = new NonEmpty(props[i - 1], list)
       return list
     }
-    case "Tuple": {
-      const tuple = new Array(props.__length)
-      for (let i = 0; i < props.__length; i++) tuple[i] = props[i]
+    case tuple$: {
+      const tuple = new Array(props[length$])
+      for (let i = 0; i < props[length$]; i++) tuple[i] = props[i]
       return tuple
     }
-    case "Nil": {
+    case nil$: {
       return undefined
     }
-    default: {
-      const [Prototype, firstProps] = originalProps.current[props.__propsType]
+    case string$:
+    case function$:
+    case bitArray$:
+    case unknown$:
+    case boolean$:
+    case number$: {
+      return props.value
+    }
+    case customType$: {
+      const Prototype = props[prototype$]
+      const firstProps = props[original$]
       const values = Object.keys(firstProps).map((key) => props[key])
       return new Prototype.constructor(...values)
     }
   }
 }
 
-export function gleamPropsToProps(props_, originalProps) {
+export function gleamPropsToProps(props_) {
   if (props_ instanceof CustomType) {
     const prototype = Object.getPrototypeOf(props_)
-    const name = prototype.constructor.name
-    originalProps.current[name] ??= [prototype, props_]
-    const props = { ...props_, __propsType: name }
+    const props = { ...props_, [type$]: customType$ }
+    Object.defineProperties(props, {
+      [prototype$]: { enumerable: true, value: prototype, writable: false },
+      [original$]: { enumerable: true, value: props_, writable: false },
+    })
     return props
   } else if (props_ instanceof List) {
-    const props = { __propsType: "List" }
+    const props = { [type$]: list$ }
     let index = 0
     for (const item of props_) props[index++] = item
-    props.__length = index
+    props[length$] = index
     return props
+  } else if (props_ instanceof BitArray) {
+    return { [type$]: bitArray$, value: props_ }
   } else if (Array.isArray(props_)) {
-    const props = { __propsType: "Tuple" }
+    const props = { [type$]: tuple$ }
     let index = 0
     for (const item of props_) props[index++] = item
-    props.__length = index
+    props[length$] = index
     return props
   } else if (props_ === undefined) {
-    const props = { __propsType: "Nil" }
-    return props
+    return { [type$]: nil$ }
+  } else if (typeof props_ === "number") {
+    return { [type$]: number$, value: props_ }
+  } else if (typeof props_ === "string") {
+    return { [type$]: string$, value: props_ }
+  } else if (typeof props_ === "function") {
+    return { [type$]: function$, value: props_ }
+  } else if (typeof props_ === "boolean") {
+    return { [type$]: boolean$, value: props_ }
   } else {
-    const msg = `redraw only support custom types, list, tuples or Nil as props.
-      Received ${props_} as props.`
-    const msg_ = msg.replace(/\n( )*/g, "\n")
-    console.warn(msg_)
-    return null
+    return { [type$]: unknown$, value: props_ }
   }
 }
 
@@ -62,6 +127,7 @@ if (typeof window !== "undefined") {
     props: {
       toGleam: propsToGleamProps,
       fromGleam: gleamPropsToProps,
+      areEqual,
     },
   }
 }
