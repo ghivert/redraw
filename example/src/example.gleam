@@ -40,13 +40,13 @@ fn counter() {
 
 fn nav_links() {
   html.div([], [
-    html.a([a.href("https://vitejs.dev"), a.target("_blank")], [
+    html.a([a.href("https://vitejs.dev"), a.target("_blank"), a.key("vite")], [
       html.img([a.src("/vite.svg"), a.class("logo"), a.alt("Vite logo")]),
     ]),
-    html.a([a.href("https://gleam.run"), a.target("_blank")], [
+    html.a([a.href("https://gleam.run"), a.target("_blank"), a.key("gleam")], [
       html.img([a.src("/lucy.svg"), a.class("logo lucy"), a.alt("Gleam logo")]),
     ]),
-    html.a([a.href("https://react.dev"), a.target("_blank")], [
+    html.a([a.href("https://react.dev"), a.target("_blank"), a.key("react")], [
       html.img([a.src("/react.svg"), a.class("logo react"), a.alt("React logo")]),
     ]),
   ])

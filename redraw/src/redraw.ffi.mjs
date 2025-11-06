@@ -94,6 +94,9 @@ export function jsx(value, props, children, shouldConvertChildren = false) {
   // HTML elements, simply forward the children.
   if (shouldConvertChildren) {
     if (children instanceof List) {
+      // TODO should change to dynamic if any of the children holds a `key`.
+      // It would help the API, by not having to use `keyed` if needed, and
+      // would make sure that every node in a keyed list have a key.
       children = children.toArray()
       if (children.length === 0) {
         children = undefined
@@ -107,10 +110,17 @@ export function jsx(value, props, children, shouldConvertChildren = false) {
     // converted.
     if (children?.[0] && Array.isArray(children[0])) {
       isStatic = false
-      children = children.map((c) => {
-        const [key, node] = c
-        if ("key" in node) return React.cloneElement(node, { key })
-        return node
+      children = children.map((child) => {
+        const [key, node] = child
+        // When a component goes through `runtime.jsxs?`, React
+        // automatically injects a `key` prop, as `null` if not set.
+        // If the component is `null`, a boolean, `undefined` or a string,
+        // React simply injects it in the children list. Keyed children should
+        // duplicate the component and inject the key iif the component is a
+        // real React component.
+        if (typeof node !== "object") return node
+        if (node === null) return node
+        return React.cloneElement(node, { key })
       })
     }
   }
@@ -120,10 +130,16 @@ export function jsx(value, props, children, shouldConvertChildren = false) {
   // undefined or not.
   if (children !== undefined) props.children = children
 
+  // `key` cannot be used in props, it should be injected as last argument to
+  // `runtime.jsxs?`. As such, if it exists in `props`, it is kept, deleted
+  // from the props, and injected in the runtime function.
+  const key = props.key
+  delete props.key
+
   if (isStatic && Array.isArray(props.children)) {
-    return runtime.jsxs(value, props)
+    return runtime.jsxs(value, props, key)
   } else {
-    return runtime.jsx(value, props)
+    return runtime.jsx(value, props, key)
   }
 }
 
