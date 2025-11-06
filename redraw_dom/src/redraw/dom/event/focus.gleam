@@ -7,7 +7,7 @@
 import gleam/dynamic
 import redraw/dom/event/ui.{type UIEvent}
 import redraw/event.{type Event}
-import redraw/internals/unsafe
+import redraw/internal/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/FocusEvent)
 pub type FocusEvent

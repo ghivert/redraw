@@ -1,20 +1,20 @@
 import gleam/int
 import gleam/list
+import redraw as react
 import redraw/dom/attribute as a
 import redraw/dom/client
 import redraw/dom/events
 import redraw/dom/html
-import safer/redraw
 
 pub fn main() {
   let assert Ok(node) = client.create_root("root")
-  use root <- redraw.render(node, root())
-  redraw.strict_mode([root(Nil)])
+  use root <- client.render(node, root)
+  react.strict_mode([root(Nil)])
 }
 
 pub fn root() {
-  use app <- redraw.compose(app())
-  use _ <- redraw.component("Root")
+  use app <- react.compose(app)
+  use _ <- react.component("Root")
   app(Nil)
 }
 
@@ -23,7 +23,7 @@ pub type CounterProps {
 }
 
 fn counter() {
-  use props: CounterProps <- redraw.component("Counter")
+  use props: CounterProps <- react.component("Counter")
   html.button(
     [events.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
     list.map([props.count], fn(count) {
@@ -47,10 +47,10 @@ fn nav_links() {
 }
 
 fn app() {
-  use counter <- redraw.compose(counter() |> redraw.memoize)
-  use _ <- redraw.component("App")
-  use #(count, set_count) <- use_counter()
-  redraw.fragment([
+  use counter <- react.compose(counter |> react.memoize)
+  use _ <- react.component("App")
+  let #(count, set_count) = use_counter()
+  react.fragment([
     nav_links(),
     html.h1([], [html.text("Vite + Gleam + React")]),
     html.div([a.class("card")], [
@@ -67,7 +67,7 @@ fn app() {
   ])
 }
 
-fn use_counter(return) {
-  use #(count, set_count) <- redraw.use_state_(0)
-  return(#(count, set_count))
+fn use_counter() {
+  let #(count, set_count) = react.use_state_(0)
+  #(count, set_count)
 }

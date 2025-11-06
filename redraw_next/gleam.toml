@@ -1,0 +1,23 @@
+name = "redraw"
+target = "javascript"
+version = "19.0.6"
+
+description = "React bindings for Gleam! Supports everything modern React provides, with full Gleam Type-Checking system!"
+licences = ["MIT"]
+
+[[links]]
+title = "Sponsor"
+href = "https://github.com/sponsors/ghivert"
+
+[repository]
+type = "github"
+user = "ghivert"
+repo = "redraw"
+path = "redraw"
+
+[dependencies]
+gleam_javascript = ">= 1.0.0 and < 2.0.0"
+gleam_stdlib = ">= 0.60.0 and < 2.0.0"
+
+[dev-dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"

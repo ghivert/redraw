@@ -4,7 +4,7 @@
 //// [Input Method Editor Documentation](https://developer.mozilla.org/docs/Glossary/Input_method_editor).
 
 import redraw/event.{type Event}
-import redraw/internals/unsafe
+import redraw/internal/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/CompositionEvent)
 pub type CompositionEvent

@@ -6,7 +6,7 @@
 
 import gleam/dynamic
 import redraw/event.{type Event}
-import redraw/internals/unsafe
+import redraw/internal/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/ClipboardEvent)
 pub type ClipboardEvent
