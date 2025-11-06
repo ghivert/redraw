@@ -617,6 +617,11 @@ pub fn nonce(nonce: String) -> Attribute {
   attribute("nonce", nonce)
 }
 
+/// [Documentation](https://react.dev/learn/rendering-lists)
+pub fn key(key: String) -> Attribute {
+  attribute("key", key)
+}
+
 /// `none` will not appear in HTML attributes. Use it for conditional rendering.
 pub fn none() -> Attribute {
   attribute("none_", Nil)

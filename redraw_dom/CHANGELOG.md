@@ -1,3 +1,7 @@
+## v19.1.0 - 2025-11-06
+
+- Add `key` attribute to simplify using keys in lists.
+
 ## v19.0.6 - 2025-09-17
 
 - No changes, keep in sync with `redraw`.
