@@ -1,3 +1,7 @@
+## v19.1.1 - 2025-11-06
+
+- Add missing `on_drag_leave` event handler.
+
 ## v19.1.0 - 2025-11-06
 
 - Add `key` attribute to simplify using keys in lists.

@@ -1,3 +1,7 @@
+## v19.1.1 - 2025-11-06
+
+- No changes, keep in sync with `redraw_dom`.
+
 ## v19.1.0 - 2025-11-06
 
 - Fix `keyed` children.

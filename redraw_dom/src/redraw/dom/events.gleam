@@ -202,64 +202,76 @@ pub fn on_double_click_capture(handler: fn(MouseEvent) -> Nil) {
   attribute.attribute("onDoubleClickCapture", handler)
 }
 
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/drag_event)
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/drag_event)
 pub fn on_drag(handler: fn(DragEvent) -> Nil) {
   attribute.attribute("onDrag", handler)
 }
 
 /// Alternative version of [`on_drag`](#on_drag) that runs during
 /// [capture phase](https://react.dev/learn/responding-to-events#capture-phase-events). \
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/drag_event)
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/drag_event)
 pub fn on_drag_capture(handler: fn(DragEvent) -> Nil) {
   attribute.attribute("onDragCapture", handler)
 }
 
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/dragend_event)
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragend_event)
 pub fn on_drag_end(handler: fn(DragEvent) -> Nil) {
   attribute.attribute("onDragEnd", handler)
 }
 
 /// Alternative version of [`on_drag_end`](#on_drag_end) that runs during
 /// [capture phase](https://react.dev/learn/responding-to-events#capture-phase-events). \
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/dragend_event)
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragend_event)
 pub fn on_drag_end_capture(handler: fn(DragEvent) -> Nil) {
   attribute.attribute("onDragEndCapture", handler)
 }
 
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/dragenter_event)
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragenter_event)
 pub fn on_drag_enter(handler: fn(DragEvent) -> Nil) {
   attribute.attribute("onDragEnter", handler)
 }
 
 /// Alternative version of [`on_drag_enter`](#on_drag_enter) that runs during
 /// [capture phase](https://react.dev/learn/responding-to-events#capture-phase-events). \
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/dragenter_event)
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragenter_event)
 pub fn on_drag_enter_capture(handler: fn(DragEvent) -> Nil) {
   attribute.attribute("onDragEnterCapture", handler)
 }
 
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/dragover_event)
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragover_event)
 pub fn on_drag_over(handler: fn(DragEvent) -> Nil) {
   attribute.attribute("onDragOver", handler)
 }
 
 /// Alternative version of [`on_drag_over`](#on_drag_over) that runs during
 /// [capture phase](https://react.dev/learn/responding-to-events#capture-phase-events). \
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/dragover_event)
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragover_event)
 pub fn on_drag_over_capture(handler: fn(DragEvent) -> Nil) {
   attribute.attribute("onDragOverCapture", handler)
 }
 
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/dragstart_event)
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragstart_event)
 pub fn on_drag_start(handler: fn(DragEvent) -> Nil) {
   attribute.attribute("onDragStart", handler)
 }
 
 /// Alternative version of [`on_drag_start`](#on_drag_start) that runs during
 /// [capture phase](https://react.dev/learn/responding-to-events#capture-phase-events). \
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/dragstart_event)
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragstart_event)
 pub fn on_drag_start_capture(handler: fn(DragEvent) -> Nil) {
   attribute.attribute("onDragStartCapture", handler)
+}
+
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragleave_event)
+pub fn on_drag_leave(handler: fn(DragEvent) -> Nil) {
+  attribute.attribute("onDragLeave", handler)
+}
+
+/// Alternative version of [`on_drag_leave`](#on_drag_leave) that runs during
+/// [capture phase](https://react.dev/learn/responding-to-events#capture-phase-events). \
+/// [Documentation](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragleave_event)
+pub fn on_drag_leave_capture(handler: fn(DragEvent) -> Nil) {
+  attribute.attribute("onDragLeaveCapture", handler)
 }
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/drop_event)
@@ -934,26 +946,26 @@ pub fn on_time_update_capture(handler: fn(Event) -> Nil) {
   attribute.attribute("onTimeUpdateCapture", handler)
 }
 
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/volumechange_event)
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/volumechange_event)
 pub fn on_volume_change(handler: fn(Event) -> Nil) {
   attribute.attribute("onVolumeChange", handler)
 }
 
 /// Alternative version of [`on_volume_change`](#on_volume_change) that runs during
 /// [capture phase](https://react.dev/learn/responding-to-events#capture-phase-events). \
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/volumechange_event)
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Element/volumechange_event)
 pub fn on_volume_change_capture(handler: fn(Event) -> Nil) {
   attribute.attribute("onVolumeChangeCapture", handler)
 }
 
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/waiting_event)
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/waiting_event)
 pub fn on_waiting(handler: fn(Event) -> Nil) {
   attribute.attribute("onWaiting", handler)
 }
 
 /// Alternative version of [`on_waiting`](#on_waiting) that runs during
 /// [capture phase](https://react.dev/learn/responding-to-events#capture-phase-events). \
-/// [Documentation](https://developer.mozilla.org/docs/Web/API/Element/waiting_event)
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/waiting_event)
 pub fn on_waiting_capture(handler: fn(Event) -> Nil) {
   attribute.attribute("onWaitingCapture", handler)
 }
