@@ -44,6 +44,19 @@ pub type Error {
 /// > [`component_`](#component_).
 pub type Element
 
+/// > `ComponentR` stands for `ComponentReact`. In previous versions of `redraw`,
+/// > `Component` was used to designate `Element`. In newer versions of `redraw`,
+/// > `Component` is kept for backward-compatibility, and `ComponentR` is used
+/// > instead. `ComponentR` will be removed in favour of `Component` when the
+/// > future version of React will be live.
+///
+/// A `ComponentR` represents a function, accepting inputs (i.e. `props`) and
+/// returning React elements. A `ComponentR` is the only place that can hold
+/// state in a React component-tree. It has a lifecycle and can run side-effects.
+///
+/// Defining `ComponentR` is achieved using `redraw.component_`, and they can
+/// be used with `redraw.compose`. `redraw.compose` makes sure no components
+/// can be used outside of the bootstrap phase or Redraw.
 pub opaque type ComponentR(props) {
   ComponentB(render: fn(props) -> Element, memoize: Bool)
 }
@@ -78,6 +91,20 @@ pub fn component_(
   |> ComponentB(render: _, memoize: False)
 }
 
+/// Allow to compose and use other components within a component. `compose` is
+/// the only way to use components with other components. `compose` should be
+/// called during the bootstrap phase of `redraw`, and let you access the
+/// underlying component.
+///
+/// ```gleam
+/// fn component() {
+///   use other_component <- redraw.compose(other_component())
+///   h.div([], [
+///     other_component(),
+///     h.div([], []),
+///   ])
+/// }
+/// ```
 pub fn compose(
   component: ComponentR(props),
   return: fn(fn(props) -> Element) -> ComponentR(p),
@@ -105,7 +132,7 @@ pub fn memoize(render: fn(props) -> Element) -> fn(props) -> Element
 /// ```gleam
 /// pub fn my_component() {
 ///   // Create your other Redraw components before defining the others.
-///   let my_other_component = my_other_component()
+///   use my_other_component <- redraw.compose(my_other_component())
 ///   // Define your component.
 ///   redraw.component_("MyComponent", fn (props: MyComponentProps) {
 ///     // Define some hooks.
@@ -324,8 +351,10 @@ pub fn use_promise(promise: Promise(state)) -> state
 /// Let you reference a value that’s not needed for rendering.
 /// Most used ref you'll want to create. They're automatically created to `None`,
 /// and can be passed to `ref` prop or `use_imperative_handle`.
-/// You probably don't want the ref value to be anything than `Option(a)`, unless
-/// you have really good reasons. In that case, use `use_ref_`. \
+/// `Ref` are most of the time used to reference DOM node, in order to run
+/// side-effects. In this case, you probably don't want the ref value to be
+/// anything than `Option(a)`, unless you need to persist a value across renders
+/// which is not part of the DOM. In that case, use `use_ref_`. \
 /// [Documentation](https://react.dev/reference/react/useRef)
 pub fn use_ref() -> ref.Ref(Option(a)) {
   use_ref_(None)

@@ -9,9 +9,9 @@ const children$ = Symbol("Redraw:Children")
 
 /**
  * The conversion is a bit hard to follow, so here's the road:
- * 1. Write a Redraw Component: i.e. a Gleam function wrapped in redraw.component.
- * 2. The Gleam function has the shape fn (props, children) -> Component.
- * 3. The output when executing that function will be something like `jsx(Compoment, props)`.
+ * 1. Write a Redraw Component: i.e. a Gleam function wrapped in redraw.component_.
+ * 2. The Gleam function has the shape fn (props) -> Component.
+ * 3. The output when executing that function will be something like `jsx(Component, props)`.
  * 4. Because props are simple JS objects, they can't be sent as-is to React.
  *    They're converted first.
  * 5. After they have been converted, to be read in the component, they should
@@ -29,10 +29,10 @@ const children$ = Symbol("Redraw:Children")
  * a constructor), and one that will convert props. The structure is then as
  * follows (pseudo-code in Gleam):
  *
- * fn create_component(render: fn (props, children) -> Component) {
+ * fn create_component(render: fn (props) -> Component) {
  *   // Component here should be considered as "global", otherwise bad things happen.
- *   let component = fn (props, children) { render(props.to_gleam(props), children )}
- *   fn (props, children) {
+ *   let component = fn (props) { render(props.to_gleam(props))}
+ *   fn (props) {
  *     let props = props.from_gleam(props)
  *     jsx(component, props, children)
  *   }

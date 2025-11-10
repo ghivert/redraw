@@ -1,4 +1,4 @@
 # Redraw DOM
 
-Redraw DOM is the renderer for Redraw, for browser. Take a look at
-[Redraw](https://hexdocs.pm/redraw) to get the whole package.
+Redraw DOM is the DOM renderer for Redraw for browsers. Refer to
+[Redraw](https://hexdocs.pm/redraw) for the full documentation.

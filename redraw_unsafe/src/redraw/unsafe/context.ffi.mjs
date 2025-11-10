@@ -1,15 +1,8 @@
 import * as React from "react"
-import { jsx } from "./redraw.ffi.mjs"
-import { Error, Ok } from "./gleam.mjs"
-import { UnknownContext, ExistingContext } from "./redraw.mjs"
+import { Error, Ok } from "../../gleam.mjs"
+import { UnknownContext, ExistingContext } from "./context.mjs"
 
 const contexts = {}
-
-export function contextProvider(context, value, children) {
-  const props = { value }
-  const shouldConvertChildren = true
-  return jsx(context, props, children, shouldConvertChildren)
-}
 
 export function createContext(name, defaultValue) {
   if (contexts[name]) return new Error(new ExistingContext(name))
