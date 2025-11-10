@@ -74,6 +74,31 @@ export function wrapComponent(Component) {
   }
 }
 
+/** Adds a wrapper that converts props from React props to Gleam props.
+ *
+ * In Gleam, a `component` will have shape
+ * `fn (props) -> Component`. `wrapComponent` turns it
+ * into `fn (props) -> jsx(Component)`. It will then be transformed once again
+ * to `fn (props) -> jsx(Component)` by extracting the children
+ * from the props. */
+export function wrapComponentR(Component) {
+  return propagateDisplayName(Component, (props) => {
+    const newProps = $props.propsToGleamProps(props)
+    return Component(newProps)
+  })
+}
+
+export function wrapCall(Component) {
+  const PropsConverted = Component.render
+  const Comp = Component.memoize
+    ? React.memo(PropsConverted, $props.areEqual)
+    : PropsConverted
+  return function (props_) {
+    const props = $props.gleamPropsToProps(props_)
+    return jsx(Comp, props)
+  }
+}
+
 export function memoize(render) {
   if (!render) return render
   render.memoize = memoize$

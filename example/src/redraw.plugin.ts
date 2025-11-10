@@ -7,12 +7,12 @@ import { type PluginItem, type PluginObj } from "@babel/core"
 
 export default function redraw(babel: any): PluginObj {
   return {
-    visitor: {
-      FunctionDeclaration(path) {
-        console.log(path.node.id?.name)
-      },
-      Identifier(path, state) {},
-    },
+    // visitor: {
+    //   FunctionDeclaration(path) {
+    //     console.log(path.node.id?.name)
+    //   },
+    //   Identifier(path, state) {},
+    // },
   }
 }
 

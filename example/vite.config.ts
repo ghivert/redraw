@@ -5,7 +5,7 @@ import redraw from "./src/redraw.plugin"
 
 const reactPlugin = react({
   babel: {
-    plugins: [redraw],
+    // plugins: [redraw],
   },
 })
 

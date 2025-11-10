@@ -17,7 +17,7 @@ import redraw/ref
 /// > state, and cannot have side-effects.
 /// >
 /// > Creating an `Element` is as simple as calling functions from
-/// > `redraw/dom/html`, while creating copmonents can be done with
+/// > `redraw/dom/html`, while creating components can be done with
 /// > [`component`](#component).
 pub type Element =
   redraw.Element

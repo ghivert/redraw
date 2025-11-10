@@ -8,13 +8,13 @@ import redraw/dom/html
 
 pub fn main() {
   let assert Ok(node) = client.create_root("root")
-  use root <- client.render(node, root)
+  use root <- client.render_(node, root())
   react.strict_mode([root(Nil)])
 }
 
-pub fn root() {
-  use app <- react.compose(app)
-  use _ <- react.component("Root")
+pub fn root() -> react.ComponentR(Nil) {
+  use app <- react.compose(app())
+  use Nil <- react.component_("Root")
   app(Nil)
 }
 
@@ -23,7 +23,7 @@ pub type CounterProps {
 }
 
 fn counter() {
-  use props: CounterProps <- react.component("Counter")
+  use props: CounterProps <- react.component_("Counter")
   html.button(
     [events.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
     list.map([props.count], fn(count) {
@@ -47,8 +47,8 @@ fn nav_links() {
 }
 
 fn app() {
-  use counter <- react.compose(counter |> react.memoize)
-  use _ <- react.component("App")
+  use counter <- react.compose(react.memoize_(counter()))
+  use Nil <- react.component_("App")
   let #(count, set_count) = use_counter()
   react.fragment([
     nav_links(),

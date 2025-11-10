@@ -1,4 +1,3 @@
-import gleam/dynamic.{type Dynamic}
 import gleam/javascript/promise.{type Promise}
 import gleam/option.{type Option, None, Some}
 import redraw/internal/unsafe
@@ -32,12 +31,12 @@ pub type Error {
 /// > state, and cannot have side-effects.
 /// >
 /// > Creating an `Element` is as simple as calling functions from
-/// > `redraw/dom/html`, while creating copmonents can be done with
+/// > `redraw/dom/html`, while creating components can be done with
 /// > [`component_`](#component_).
 pub type Element
 
-pub opaque type Component(a) {
-  Component(render: fn(Dynamic) -> Element)
+pub opaque type Component(props) {
+  Component(render: fn(props) -> Element)
 }
 
 /// Create a Redraw component, with a `name`, and a `render` function. A
@@ -71,7 +70,7 @@ pub fn component(
 }
 
 pub fn compose(
-  component: fn() -> Component(props),
+  component: Component(props),
   return: fn(fn(props) -> Element) -> Component(p),
 ) -> Component(p) {
   let render = wrap_call(component)
@@ -109,7 +108,7 @@ pub fn compose(
 /// }
 /// ```
 @external(javascript, "./redraw.ffi.mjs", "memoize")
-pub fn memoize(component: fn() -> Component(props)) -> fn() -> Component(props)
+pub fn memoize(component: Component(props)) -> Component(props)
 
 // Components
 
@@ -524,7 +523,7 @@ pub fn jsx(
 fn set_display_name(a: a, name: String) -> a
 
 @external(javascript, "./redraw.ffi.mjs", "wrapComponent")
-fn wrap_component(a: fn(props) -> Element) -> fn(Dynamic) -> Element
+fn wrap_component(a: fn(props) -> Element) -> fn(props) -> Element
 
 @external(javascript, "./redraw.ffi.mjs", "wrapCall")
-fn wrap_call(a: fn() -> Component(props)) -> fn(props) -> Element
+fn wrap_call(a: Component(props)) -> fn(props) -> Element

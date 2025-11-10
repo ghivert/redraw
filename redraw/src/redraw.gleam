@@ -40,9 +40,13 @@ pub type Error {
 /// > state, and cannot have side-effects.
 /// >
 /// > Creating an `Element` is as simple as calling functions from
-/// > `redraw/dom/html`, while creating copmonents can be done with
+/// > `redraw/dom/html`, while creating components can be done with
 /// > [`component_`](#component_).
 pub type Element
+
+pub opaque type ComponentR(props) {
+  ComponentB(render: fn(props) -> Element, memoize: Bool)
+}
 
 /// Create a Redraw component, with a `name`, and a `render` function. A
 /// `render` function is simply a function accepting props, and returning
@@ -51,7 +55,7 @@ pub type Element
 /// ```gleam
 /// pub fn my_component() {
 ///   // Create your other Redraw components before defining the others.
-///   let my_other_component = my_other_component()
+///   use my_other_component <- redraw.compose(my_other_component())
 ///   // Define your component.
 ///   use props: MyComponentProps <- redraw.component_("MyComponent")
 ///   // Define some hooks.
@@ -67,11 +71,24 @@ pub type Element
 pub fn component_(
   name name: String,
   render render: fn(props) -> Element,
-) -> fn(props) -> Element {
+) -> ComponentR(props) {
   render
   |> set_display_name(name)
-  |> wrap_element
+  |> wrap_component_r
+  |> ComponentB(render: _, memoize: False)
 }
+
+pub fn compose(
+  component: ComponentR(props),
+  return: fn(fn(props) -> Element) -> ComponentR(p),
+) -> ComponentR(p) {
+  let render = wrap_call(component)
+  return(render)
+}
+
+@deprecated("Components in Redraw have changed. Use `memoize_` instead, in conjunction with `component_`.")
+@external(javascript, "./redraw.ffi.mjs", "memoize")
+pub fn memoize(render: fn(props) -> Element) -> fn(props) -> Element
 
 /// Accepts a Component, and wrapp it in `React.memo`. `React.memo` ensures
 /// that a component will never repaint when props are identical between two
@@ -100,11 +117,12 @@ pub fn component_(
 ///       my_other_component(MyOtherComponentProps),
 ///     ])
 ///   })
-///   |> redraw.memoize
+///   |> redraw.memoize_
 /// }
 /// ```
-@external(javascript, "./redraw.ffi.mjs", "memoize")
-pub fn memoize(render: fn(props) -> Element) -> fn(props) -> Element
+pub fn memoize_(component: ComponentR(props)) -> ComponentR(props) {
+  ComponentB(..component, memoize: True)
+}
 
 // Components
 
@@ -373,9 +391,8 @@ pub fn provider(
 
 /// Create a [context](https://react.dev/learn/passing-data-deeply-with-context)
 /// that components can provide or read.
-/// Each context is referenced by its name, a little bit like actors in OTP
-/// (if you're familiar with Erlang). Because Gleam cannot execute code outside of
-/// `main` function, creating a context should do some side-effect at startup.
+/// Because Gleam cannot execute code outside of `main` function, creating a
+/// context should do some side-effect at startup.
 ///
 /// In traditional React code, Context usage is usually written like this.
 ///
@@ -406,6 +423,7 @@ pub fn provider(
 ///
 /// ```gleam
 /// import redraw
+/// import redraw/dom/client
 ///
 /// type MyContext {
 ///   MyContext(
@@ -430,7 +448,8 @@ pub fn provider(
 ///     name: String,
 ///   )
 /// }
-/// fn app(ctx: Context(a)) {
+///
+/// fn app(ctx: Context(a)) -> redraw.Component(AppProps) {
 ///   use props: AppProps <- redraw.element("App")
 ///   let context = redraw.use_context(ctx)
 ///   html.div([], [
@@ -521,6 +540,9 @@ fn set_display_name(a: a, name: String) -> a
 @external(javascript, "./redraw.ffi.mjs", "wrapComponent")
 fn wrap_element(a: fn(props) -> Element) -> fn(props) -> Element
 
+@external(javascript, "./redraw.ffi.mjs", "wrapCall")
+fn wrap_call(a: ComponentR(props)) -> fn(props) -> Element
+
 // DEPRECATIONS, WILL BE REMOVED IN REDRAW 20
 
 /// Create a Redraw component, with a `name`, and a `render` function.
@@ -540,17 +562,22 @@ fn wrap_component(
   a: fn(props, children) -> Element,
 ) -> fn(props, children) -> Element
 
+@external(javascript, "./redraw.ffi.mjs", "wrapComponentR")
+fn wrap_component_r(a: fn(props) -> Element) -> fn(props) -> Element
+
 @deprecated("Components in Redraw have changed. Use `component_` instead.")
 pub fn element(
   name name: String,
   render render: fn(c) -> Element,
 ) -> fn(c) -> Element {
-  component_(name:, render:)
+  render
+  |> set_display_name(name)
+  |> wrap_element
 }
 
 /// Create a Redraw standalone component, with a `name` and a `render` function.
 /// Keep in mind this component does not accept children nor props.
-@deprecated("Creating component is now standardized through `component_`.")
+@deprecated("Components in Redraw have changed. Use `component_` instead.")
 pub fn standalone(
   name name: String,
   render render: fn() -> Element,

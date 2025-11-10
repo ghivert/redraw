@@ -15,7 +15,7 @@ target = "javascript"
 
 [dependencies]
 gleam_stdlib = ">= 0.34.0 and < 2.0.0"
-redraw = { path = "../redraw_next" }
+redraw = { path = "../redraw" }
 redraw_dom = { path = "../redraw_dom" }
 
 [dev-dependencies]

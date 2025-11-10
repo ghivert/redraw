@@ -1,5 +1,5 @@
 import gleam/dynamic.{type Dynamic}
-import redraw.{type Component, type Element}
+import redraw.{type Element}
 import redraw/dom.{type Error}
 import redraw/internal/unsafe
 
@@ -68,9 +68,26 @@ pub fn hydrate_root(root: String, node: Element) -> Result(Root, Error)
 /// root’s browser DOM node.
 ///
 /// [Documentation](https://react.dev/reference/react-dom/client/createRoot#root-render)
+@deprecated("Components in Redraw have changed. Use `render_` instead")
 pub fn render(
   root: Root,
-  child: fn() -> Component(Nil),
+  child: fn(Nil) -> Element,
+  return: fn(fn(Nil) -> Element) -> Element,
+) -> Nil {
+  unsafe.coerce({
+    let children = return(child)
+    do_render(root, children)
+    |> unsafe.coerce
+  })
+}
+
+/// Call `render(root)` to display a piece of JSX (“React node”) into the React
+/// root’s browser DOM node.
+///
+/// [Documentation](https://react.dev/reference/react-dom/client/createRoot#root-render)
+pub fn render_(
+  root: Root,
+  child: redraw.ComponentR(Nil),
   return: fn(fn(Nil) -> Element) -> Element,
 ) -> Nil {
   unsafe.coerce({

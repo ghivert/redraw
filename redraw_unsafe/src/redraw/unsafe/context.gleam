@@ -2,10 +2,10 @@ import gleam/string
 import redraw.{type Context}
 
 pub type Error {
-  /// Error returned from `create_context_`.
+  /// Error returned from `create_`.
   /// Context with the corresponding `name` already exists.
   ExistingContext(name: String)
-  /// Error returned from `get_context`.
+  /// Error returned from `get`.
   /// Context with the corresponding `name` does not exists.
   UnknownContext(name: String)
 }
@@ -15,32 +15,34 @@ pub type Error {
 ///
 /// ```gleam
 /// import redraw
+/// import redraw/unsafe/context
 ///
 /// const context_name = "MyContextName"
 ///
 /// pub fn my_provider(children) {
-///   let assert Ok(context) = redraw.create_context(context_name, default_value)
+///   let assert Ok(context) = context.create(context_name, default_value)
 ///   redraw.provider(context, value, children)
 /// }
 ///
 /// pub fn use_my_context() {
-///   let assert Ok(context) = redraw.get_context(context_name)
+///   let assert Ok(context) = context.get(context_name)
 ///   redraw.use_context(context)
 /// }
 /// ```
 ///
-/// Be careful, `create_context` fails if the Context is already defined.
+/// Be careful, `create` fails if the Context is already defined.
 /// Choose a full qualified name, hard to overlap with inattention. If
 /// you want to get a Context in an idempotent way, take a look at [`context()`](#context).
 ///
-/// Get a context. Because of FFI, `get_context` breaks the type-checker. It
-/// should be considered as unsafe code. As a library author, never exposes
-/// your context and expect users will call `get_context` themselves, but rather
-/// exposes a `use_my_context()` function, handling the type-checking for the
-/// user.
+/// Get a context. Because of FFI, `get` breaks the type-checker. It
+/// should be considered as unsafe code. As a library author, if you need to use
+/// custom context, never exposes it and expect users will call `get` themselves,
+/// but rather exposes a `use_my_context()` function, handling the type-checking
+/// for the user.
 ///
 /// ```gleam
 /// import redraw
+/// import redraw/unsafe/context
 ///
 /// pub type MyContext {
 ///   MyContext(value: Int)
@@ -49,7 +51,7 @@ pub type Error {
 /// /// `use_context` returns `Context(a)`, should it can be safely returned as
 /// /// `Context(MyContext)`.
 /// pub fn use_my_context() -> redraw.Context(MyContext) {
-///   let context = case redraw.get_context("MyContextName") {
+///   let context = case context.get("MyContextName") {
 ///     // Context has been found in the context cache, use it as desired.
 ///     Ok(context) -> context
 ///     // Context has not been found. It means the user did not initialised it.
@@ -60,10 +62,10 @@ pub type Error {
 /// ```
 ///
 @external(javascript, "./context.ffi.mjs", "getContext")
-pub fn get_context(name: String) -> Result(Context(a), redraw.Error)
+pub fn get(name: String) -> Result(Context(a), redraw.Error)
 
 /// `context` emulates classic Context usage in React. Instead of calling
-/// `create_context` and `get_context`, it's possible to simply call `context`,
+/// `create` and `get`, it's possible to simply call `context`,
 /// which will get or create the context directly, and allows to write code as
 /// if Context is globally available. `context` also tries to preserve
 /// type-checking at most. `context.default_value` is lazily evaluated, meaning
@@ -71,6 +73,7 @@ pub fn get_context(name: String) -> Result(Context(a), redraw.Error)
 ///
 /// ```gleam
 /// import redraw
+/// import redraw/unsafe/context
 ///
 /// const context_name = "MyContextName"
 ///
@@ -86,39 +89,35 @@ pub fn get_context(name: String) -> Result(Context(a), redraw.Error)
 ///
 /// pub fn provider() {
 ///   use _, children <- redraw.component()
-///   let context = redraw.context(context_name, default_value)
+///   let context = context.context(context_name, default_value)
 ///   let #(count, set_count) = redraw.use_state(0)
 ///   redraw.provider(context, MyContext(count:, set_count:), children)
 /// }
 ///
 /// pub fn use_my_context() {
-///   let context = redraw.context(context_name, default_value)
+///   let context = context.context(context_name, default_value)
 ///   redraw.use_context(context)
 /// }
 /// ```
 ///
 /// `context` should never fail, but it can be wrong if you use an already used
 /// name.
-@deprecated("Named contexts are not part of Redraw anymore. Use `redraw_unsafe` if you want to use an unsafe API.")
 pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
-  case get_context(name) {
+  case get(name) {
     Ok(context) -> context
     Error(get) -> {
-      case create_context(name, default_value()) {
+      case create(name, default_value()) {
         Ok(context) -> context
         Error(create) -> {
-          let head = "[Redraw Internal Error] Unable to find or create context."
-          let get = "  get_context: " <> string.inspect(get)
-          let create = "  create_context: " <> string.inspect(create)
-          let body =
-            string.join(_, with: " ")([
-              "context should never panic.",
-              "Please, open an issue on https://github.com/ghivert/redraw,",
-              "and join the error details.\n",
-            ])
-          let details = "Error details:"
-          let msg = string.join([head, body, details, get, create], "\n")
-          panic as msg
+          panic as {
+            "[Redraw Internal Error] Unable to find or create context.\n"
+            |> string.append("context should never panic. Please, open an ")
+            |> string.append("issue on https://github.com/ghivert/redraw, ")
+            |> string.append("and join the error details.\n")
+            |> string.append("Error details:\n")
+            |> string.append("  get: " <> string.inspect(get) <> "\n")
+            |> string.append("  create: " <> string.inspect(create))
+          }
         }
       }
     }
@@ -155,27 +154,25 @@ pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
 ///
 /// ```gleam
 /// import redraw
+/// import redraw/unsafe/context
 ///
 /// const context_name = "MyContextName"
 ///
 /// pub fn my_provider(children) {
-///   let assert Ok(context) = redraw.create_context(context_name, default_value)
+///   let assert Ok(context) = context.create(context_name, default_value)
 ///   redraw.provider(context, value, children)
 /// }
 ///
 /// pub fn use_my_context() {
-///   let assert Ok(context) = redraw.get_context(context_name)
+///   let assert Ok(context) = context.get(context_name)
 ///   redraw.use_context(context)
 /// }
 /// ```
 ///
-/// Be careful, `create_context` fails if the Context is already defined.
+/// Be careful, `create` fails if the Context is already defined.
 /// Choose a full qualified name, hard to overlap with inattention. If
 /// you want to get a Context in an idempotent way, take a look at [`context()`](#context).
 ///
 /// [Documentation](https://react.dev/reference/react/createContext)
 @external(javascript, "./context.ffi.mjs", "createContext")
-pub fn create_context(
-  name: String,
-  default_value: a,
-) -> Result(Context(a), Error)
+pub fn create(name: String, default_value: a) -> Result(Context(a), Error)
