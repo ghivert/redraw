@@ -12,7 +12,7 @@ pub fn main() {
   react.strict_mode([root(Nil)])
 }
 
-pub fn root() -> react.ComponentR(Nil) {
+pub fn root() -> react.ReactComponent(Nil) {
   use app <- react.compose(app())
   use Nil <- react.component_("Root")
   app(Nil)

@@ -1,40 +1,14 @@
 import * as ReactDOM from "react-dom"
-import {
-  Anonymous,
-  Auto,
-  High,
-  Low,
-  AsScript,
-  UseCredentials,
-  NoReferrerWhenDowngrade,
-  NoReferrer,
-  Origin,
-  OriginWhenCrossOrigin,
-  UnsafeUrl,
-  Audio,
-  Document,
-  Embed,
-  Fetch,
-  Font,
-  Image,
-  Object,
-  Script,
-  Style,
-  Track,
-  Video,
-  Worker,
-  Status,
-  InvalidRoot,
-} from "./dom.mjs"
-import { Ok, Error } from "../gleam.mjs"
+import * as $dom from "./dom.mjs"
+import * as $gleam from "../gleam.mjs"
 import * as $uri from "../../gleam_stdlib/gleam/uri.mjs"
-import { None, Some } from "../../gleam_stdlib/gleam/option.mjs"
+import * as $option from "../../gleam_stdlib/gleam/option.mjs"
 
 export function createPortal(children, root) {
   const node = document.getElementById(root)
-  if (!node) return new Error(new InvalidRoot(root))
+  if (!node) return $gleam.Result$Error($dom.Error$InvalidRoot(root))
   const portal = ReactDOM.createPortal(children, node)
-  return new Ok(portal)
+  return $gleam.Result$Ok(portal)
 }
 
 export function preconnect(uri, crossOrigin) {
@@ -59,7 +33,7 @@ export function preinit(
 ) {
   const href = $uri.to_string(uri)
   return ReactDOM.preinit(href, {
-    as: as instanceof AsScript ? "script" : "style",
+    as: $dom.As$isAsScript(as) ? "script" : "style",
     precedence: precedence[0],
     crossOrigin: convertCrossOrigin(crossOrigin[0]),
     integrity: integrity[0],
@@ -116,49 +90,49 @@ export function preloadModule(uri, crossOrigin, integrity, nonce) {
 
 export function useFormStatus() {
   const status = ReactDOM.useFormStatus()
-  return new Status(
+  return $dom.Status$Status(
     status.pending,
-    status.data ? new Some(status.data) : new None(),
+    status.data ? $option.Option$Some(status.data) : $option.Option$None(),
     status.method,
-    status.action ? new Some(status.action) : new None(),
+    status.action ? $option.Option$Some(status.action) : $option.Option$None(),
   )
 }
 
 function convertCrossOrigin(crossOrigin) {
   if (!crossOrigin) return
-  if (crossOrigin instanceof Anonymous) return "anonymous"
-  if (crossOrigin instanceof UseCredentials) return "use-credentials"
+  if ($dom.CrossOrigin$isAnonymous(crossOrigin)) return "anonymous"
+  if ($dom.CrossOrigin$isUseCredentials(crossOrigin)) return "use-credentials"
 }
 
 function convertFetchPriority(fetchPriority) {
   if (!fetchPriority) return
-  if (fetchPriority instanceof Auto) return "auto"
-  if (fetchPriority instanceof High) return "high"
-  if (fetchPriority instanceof Low) return "low"
+  if ($dom.FetchPriority$isAuto(fetchPriority)) return "auto"
+  if ($dom.FetchPriority$isHigh(fetchPriority)) return "high"
+  if ($dom.FetchPriority$isLow(fetchPriority)) return "low"
 }
 
 function convertReferrerPolicy(referrerPolicy) {
   if (!referrerPolicy) return
-  if (referrerPolicy instanceof NoReferrerWhenDowngrade)
+  if ($dom.ReferrerPolicy$isNoReferrerWhenDowngrade(referrerPolicy))
     return "no-referrer-when-downgrade"
-  if (referrerPolicy instanceof NoReferrer) return "no-referrer"
-  if (referrerPolicy instanceof Origin) return "origin"
-  if (referrerPolicy instanceof OriginWhenCrossOrigin)
+  if ($dom.ReferrerPolicy$isNoReferrer(referrerPolicy)) return "no-referrer"
+  if ($dom.ReferrerPolicy$isOrigin(referrerPolicy)) return "origin"
+  if ($dom.ReferrerPolicy$isOriginWhenCrossOrigin(referrerPolicy))
     return "origin-when-cross-origin"
-  if (referrerPolicy instanceof UnsafeUrl) return "unsafe-url"
+  if ($dom.ReferrerPolicy$isUnsafeUrl(referrerPolicy)) return "unsafe-url"
 }
 
 function convertResource(resource) {
-  if (resource instanceof Audio) return "audio"
-  if (resource instanceof Document) return "document"
-  if (resource instanceof Embed) return "embed"
-  if (resource instanceof Fetch) return "fetch"
-  if (resource instanceof Font) return "font"
-  if (resource instanceof Image) return "image"
-  if (resource instanceof Object) return "object"
-  if (resource instanceof Script) return "script"
-  if (resource instanceof Style) return "style"
-  if (resource instanceof Track) return "track"
-  if (resource instanceof Video) return "video"
-  if (resource instanceof Worker) return "worker"
+  if ($dom.Resource$isAudio(resource)) return "audio"
+  if ($dom.Resource$isDocument(resource)) return "document"
+  if ($dom.Resource$isEmbed(resource)) return "embed"
+  if ($dom.Resource$isFetch(resource)) return "fetch"
+  if ($dom.Resource$isFont(resource)) return "font"
+  if ($dom.Resource$isImage(resource)) return "image"
+  if ($dom.Resource$isObject(resource)) return "object"
+  if ($dom.Resource$isScript(resource)) return "script"
+  if ($dom.Resource$isStyle(resource)) return "style"
+  if ($dom.Resource$isTrack(resource)) return "track"
+  if ($dom.Resource$isVideo(resource)) return "video"
+  if ($dom.Resource$isWorker(resource)) return "worker"
 }

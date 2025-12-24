@@ -10,8 +10,8 @@ pub type Error {
   UnknownContext(name: String)
 }
 
-/// To simplify and mimic that usage, Redraw wraps Context creation with some
-/// caching, to emulate a similar behaviour.
+/// To simplify and mimic React's context usage, Redraw wraps Context creation
+/// with some caching, to emulate the same behaviour.
 ///
 /// ```gleam
 /// import redraw

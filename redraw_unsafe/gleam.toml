@@ -1,6 +1,7 @@
 name = "redraw_unsafe"
 version = "1.0.0"
 target = "javascript"
+gleam = ">= 1.13.0"
 
 # Fill out these fields if you intend to generate HTML documentation or publish
 # your project to the Hex package manager.

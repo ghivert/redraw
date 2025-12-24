@@ -1,13 +1,15 @@
 import React from "react"
 import runtime from "react/jsx-runtime"
-import { List } from "./gleam.mjs"
-import { DevelopmentOnly, OwnerStackUnavailable } from "./redraw.mjs"
+import * as $gleam from "./gleam.mjs"
+import * as $redraw from "./redraw.mjs"
 import * as $props from "./props.ffi.mjs"
 
 const memoize$ = Symbol("Redraw:Memo:Use")
 const children$ = Symbol("Redraw:Children")
 
 /**
+ * TODO: Review that comment, I'm not sure it's up to date.
+ * ---
  * The conversion is a bit hard to follow, so here's the road:
  * 1. Write a Redraw Component: i.e. a Gleam function wrapped in redraw.component_.
  * 2. The Gleam function has the shape fn (props) -> Component.
@@ -51,6 +53,8 @@ function wrapConvertProps(Component) {
   return propagateDisplayName(Component, (props_) => {
     const { [children$]: children, ...props } = props_
     const newProps = $props.propsToGleamProps(props)
+    // Having `children` as second argument is deprecated, and will be
+    // removed in further iterations of Redraw.
     if (children !== undefined) return Component(newProps, children)
     return Component(newProps)
   })
@@ -81,7 +85,7 @@ export function wrapComponent(Component) {
  * into `fn (props) -> jsx(Component)`. It will then be transformed once again
  * to `fn (props) -> jsx(Component)` by extracting the children
  * from the props. */
-export function wrapComponentR(Component) {
+export function wrapReactComponent(Component) {
   return propagateDisplayName(Component, (props) => {
     const newProps = $props.propsToGleamProps(props)
     return Component(newProps)
@@ -128,7 +132,7 @@ export function jsx(value, props, children, shouldConvertChildren = false) {
   // Props will only be converted for HTML elements. For anything else than
   // HTML elements, simply forward the children.
   if (shouldConvertChildren) {
-    if (children instanceof List) {
+    if (children instanceof $gleam.List) {
       // TODO should change to dynamic if any of the children holds a `key`.
       // It would help the API, by not having to use `keyed` if needed, and
       // would make sure that every node in a keyed list have a key.
@@ -215,10 +219,10 @@ export function suspense(props, children) {
 export function captureOwnerStack() {
   if ("captureOwnerStack" in React) {
     const result = React.captureOwnerStack()
-    if (result) return new Ok(result)
-    const error = new OwnerStackUnavailable()
-    return new Error(error)
+    if (result) return $gleam.Result$Ok(result)
+    const error = $redraw.Error$OwnerStackUnavailable()
+    return $gleam.Result$Error(error)
   }
-  const error = new DevelopmentOnly()
-  return new Error(error)
+  const error = $redraw.Error$DevelopmentOnly()
+  return $gleam.Result$Error(error)
 }

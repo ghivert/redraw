@@ -1,18 +1,19 @@
 import * as React from "react"
-import { Error, Ok } from "../../gleam.mjs"
-import { UnknownContext, ExistingContext } from "./context.mjs"
+import * as $gleam from "../../gleam.mjs"
+import * as $context from "./context.mjs"
 
 const contexts = {}
 
 export function createContext(name, defaultValue) {
-  if (contexts[name]) return new Error(new ExistingContext(name))
+  if (contexts[name])
+    return $gleam.Result$Error($context.Error$ExistingContext(name))
   contexts[name] = React.createContext(defaultValue)
-  return new Ok(contexts[name])
+  return $gleam.Result$Ok(contexts[name])
 }
 
 export function getContext(name) {
   const context = contexts[name]
-  if (context) return new Ok(context)
-  const error = new UnknownContext(name)
-  return new Error(error)
+  if (context) return $gleam.Result$Ok(context)
+  const error = $context.Error$UnknownContext(name)
+  return $gleam.Result$Error(error)
 }

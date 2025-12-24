@@ -9,20 +9,21 @@ export function contextProvider(context, value, children) {
 
 // That part of the file is deprecated, named contexts have been removed
 // from Redraw. Will be removed in Redraw 20.
-import { Error, Ok } from "./gleam.mjs"
-import { UnknownContext, ExistingContext } from "./redraw.mjs"
+import * as $gleam from "./gleam.mjs"
+import * as $redraw from "./redraw.mjs"
 
 const contexts = {}
 
 export function createContext(name, defaultValue) {
-  if (contexts[name]) return new Error(new ExistingContext(name))
+  if (contexts[name])
+    return $gleam.Result$Error($redraw.Error$ExistingContext(name))
   contexts[name] = React.createContext(defaultValue)
-  return new Ok(contexts[name])
+  return $gleam.Result$Ok(contexts[name])
 }
 
 export function getContext(name) {
   const context = contexts[name]
-  if (context) return new Ok(context)
-  const error = new UnknownContext(name)
-  return new Error(error)
+  if (context) return $gleam.Result$Ok(context)
+  const error = $redraw.Error$UnknownContext(name)
+  return $gleam.Result$Error(error)
 }

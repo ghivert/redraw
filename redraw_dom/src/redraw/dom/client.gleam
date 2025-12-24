@@ -1,5 +1,5 @@
 import gleam/dynamic.{type Dynamic}
-import redraw.{type Element}
+import redraw.{type Element, type ReactComponent}
 import redraw/dom.{type Error}
 import redraw/internal/unsafe
 
@@ -87,7 +87,7 @@ pub fn render(
 /// [Documentation](https://react.dev/reference/react-dom/client/createRoot#root-render)
 pub fn render_(
   root: Root,
-  child: redraw.ComponentR(Nil),
+  child: ReactComponent(Nil),
   return: fn(fn(Nil) -> Element) -> Element,
 ) -> Nil {
   unsafe.coerce({

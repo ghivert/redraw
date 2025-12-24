@@ -3,8 +3,9 @@ import * as $gleam from "../../gleam.mjs"
 
 export function createPortal(children, root) {
   const node = document.getElementById(root)
-  if (!node) return new $gleam.Error()
-  return new $gleam.Ok(ReactDOM.createPortal(children, node))
+  if (!node) return $gleam.Result$Error()
+  const portal = ReactDOM.createPortal(children, node)
+  return $gleam.Result$Ok(portal)
 }
 
 /** Turns a `List(#(String, String))` into an object `{ [key: string]: string }`

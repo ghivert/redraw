@@ -9,7 +9,6 @@ import redraw/internal/unsafe
 /// // BOOM
 /// ```
 @deprecated("Use `redraw/internal/unsafe` instead.")
-@external(javascript, "./unsafe.ffi.mjs", "coerce")
 pub fn coerce(a: a) -> b {
   unsafe.coerce(a)
 }

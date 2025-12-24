@@ -1,6 +1,6 @@
 // That file is deprecated, and will be removed in React 20.
 
-import { None, Some } from "../gleam_stdlib/gleam/option.mjs"
+import * as $gleam from "../gleam_stdlib/gleam/option.mjs"
 
 export function convertProps(props) {
   const entries = Object.entries(props)
@@ -9,8 +9,8 @@ export function convertProps(props) {
 }
 
 function convertOption(value) {
-  if (value instanceof None) return null
-  if (value instanceof Some) return value[0]
+  if ($gleam.Option$isNone(value)) return null
+  if ($gleam.Option$isSome(value)) return value[0]
   return value
 }
 

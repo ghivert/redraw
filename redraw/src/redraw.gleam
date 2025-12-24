@@ -8,11 +8,11 @@ import redraw/ref
 pub type Error {
   /// Error returned from `create_context_`.
   /// Context with the corresponding `name` already exists.
-  @deprecated("Named contexts are not part of Redraw anymore. Use `redraw_unsafe` if you want to use an unsafe API.")
+  @deprecated("Named contexts are not part of Redraw anymore.")
   ExistingContext(name: String)
   /// Error returned from `get_context`.
   /// Context with the corresponding `name` does not exists.
-  @deprecated("Named contexts are not part of Redraw anymore. Use `redraw_unsafe` if you want to use an unsafe API.")
+  @deprecated("Named contexts are not part of Redraw anymore.")
   UnknownContext(name: String)
   /// Error returned from `capture_owner_stack`.
   /// `capture_owner_stack` can only be used in development, and you're not
@@ -44,21 +44,21 @@ pub type Error {
 /// > [`component_`](#component_).
 pub type Element
 
-/// > `ComponentR` stands for `ComponentReact`. In previous versions of `redraw`,
-/// > `Component` was used to designate `Element`. In newer versions of `redraw`,
-/// > `Component` is kept for backward-compatibility, and `ComponentR` is used
-/// > instead. `ComponentR` will be removed in favour of `Component` when the
+/// > `In previous versions of `redraw`, `Component` was used to designate
+/// > `Element`. In newer versions of `redraw`, `Component` is kept for
+/// > backward-compatibility, and `ReactComponent` is used instead.
+/// > `ReactComponent` will be removed in favour of `Component` when the
 /// > future version of React will be live.
 ///
-/// A `ComponentR` represents a function, accepting inputs (i.e. `props`) and
-/// returning React elements. A `ComponentR` is the only place that can hold
+/// A `ReactComponent` represents a function, accepting inputs (i.e. `props`) and
+/// returning React elements. A `ReactComponent` is the only place that can hold
 /// state in a React component-tree. It has a lifecycle and can run side-effects.
 ///
-/// Defining `ComponentR` is achieved using `redraw.component_`, and they can
+/// Defining `ReactComponent` is achieved using `redraw.component_`, and they can
 /// be used with `redraw.compose`. `redraw.compose` makes sure no components
-/// can be used outside of the bootstrap phase or Redraw.
-pub opaque type ComponentR(props) {
-  ComponentB(render: fn(props) -> Element, memoize: Bool)
+/// can be used outside of the bootstrap phase of Redraw.
+pub opaque type ReactComponent(props) {
+  ReactComponent(render: fn(props) -> Element, memoize: Bool)
 }
 
 /// Create a Redraw component, with a `name`, and a `render` function. A
@@ -84,11 +84,11 @@ pub opaque type ComponentR(props) {
 pub fn component_(
   name name: String,
   render render: fn(props) -> Element,
-) -> ComponentR(props) {
+) -> ReactComponent(props) {
   render
   |> set_display_name(name)
-  |> wrap_component_r
-  |> ComponentB(render: _, memoize: False)
+  |> wrap_react_component
+  |> ReactComponent(render: _, memoize: False)
 }
 
 /// Allow to compose and use other components within a component. `compose` is
@@ -106,16 +106,12 @@ pub fn component_(
 /// }
 /// ```
 pub fn compose(
-  component: ComponentR(props),
-  return: fn(fn(props) -> Element) -> ComponentR(p),
-) -> ComponentR(p) {
+  component: ReactComponent(props),
+  return: fn(fn(props) -> Element) -> ReactComponent(p),
+) -> ReactComponent(p) {
   let render = wrap_call(component)
   return(render)
 }
-
-@deprecated("Components in Redraw have changed. Use `memoize_` instead, in conjunction with `component_`.")
-@external(javascript, "./redraw.ffi.mjs", "memoize")
-pub fn memoize(render: fn(props) -> Element) -> fn(props) -> Element
 
 /// Accepts a Component, and wrapp it in `React.memo`. `React.memo` ensures
 /// that a component will never repaint when props are identical between two
@@ -147,8 +143,8 @@ pub fn memoize(render: fn(props) -> Element) -> fn(props) -> Element
 ///   |> redraw.memoize_
 /// }
 /// ```
-pub fn memoize_(component: ComponentR(props)) -> ComponentR(props) {
-  ComponentB(..component, memoize: True)
+pub fn memoize_(component: ReactComponent(props)) -> ReactComponent(props) {
+  ReactComponent(..component, memoize: True)
 }
 
 // Components
@@ -570,7 +566,7 @@ fn set_display_name(a: a, name: String) -> a
 fn wrap_element(a: fn(props) -> Element) -> fn(props) -> Element
 
 @external(javascript, "./redraw.ffi.mjs", "wrapCall")
-fn wrap_call(a: ComponentR(props)) -> fn(props) -> Element
+fn wrap_call(a: ReactComponent(props)) -> fn(props) -> Element
 
 // DEPRECATIONS, WILL BE REMOVED IN REDRAW 20
 
@@ -586,13 +582,17 @@ pub fn component(
   |> wrap_component
 }
 
+@deprecated("Components in Redraw have changed. Use `memoize_` instead, in conjunction with `component_`.")
+@external(javascript, "./redraw.ffi.mjs", "memoize")
+pub fn memoize(render: fn(props) -> Element) -> fn(props) -> Element
+
 @external(javascript, "./redraw.ffi.mjs", "wrapComponent")
 fn wrap_component(
   a: fn(props, children) -> Element,
 ) -> fn(props, children) -> Element
 
-@external(javascript, "./redraw.ffi.mjs", "wrapComponentR")
-fn wrap_component_r(a: fn(props) -> Element) -> fn(props) -> Element
+@external(javascript, "./redraw.ffi.mjs", "wrapReactComponent")
+fn wrap_react_component(a: fn(props) -> Element) -> fn(props) -> Element
 
 @deprecated("Components in Redraw have changed. Use `component_` instead.")
 pub fn element(
@@ -690,7 +690,7 @@ pub fn to_element(
 
 /// Memoizes a Redraw component with children. \
 /// [Documentation](https://react.dev/reference/react/memo)
-@deprecated("Redraw now automatically applies `memo` to every created components.")
+@deprecated("Memoization should be done with `memoize_`.")
 @external(javascript, "react", "memo")
 pub fn memo(
   component: fn(props, List(Element)) -> Element,
@@ -698,7 +698,7 @@ pub fn memo(
 
 /// Memoizes a Redraw component without children. \
 /// [Documentation](https://react.dev/reference/react/memo)
-@deprecated("Redraw now automatically applies `memo` to every created components.")
+@deprecated("Memoization should be done with `memoize_`.")
 @external(javascript, "react", "memo")
 pub fn memo_(component: fn(props) -> Element) -> fn(props) -> Element
 
@@ -758,7 +758,7 @@ pub type Component =
 /// }
 /// ```
 ///
-@deprecated("Named contexts are not part of Redraw anymore. Use `redraw_unsafe` if you want to use an unsafe API.")
+@deprecated("Named contexts are not part of Redraw anymore.")
 @external(javascript, "./context.ffi.mjs", "getContext")
 pub fn get_context(name: String) -> Result(Context(a), Error)
 
@@ -799,7 +799,7 @@ pub fn get_context(name: String) -> Result(Context(a), Error)
 ///
 /// `context` should never fail, but it can be wrong if you use an already used
 /// name.
-@deprecated("Named contexts are not part of Redraw anymore. Use `redraw_unsafe` if you want to use an unsafe API.")
+@deprecated("Named contexts are not part of Redraw anymore.")
 pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
   case get_context(name) {
     Ok(context) -> context
@@ -874,7 +874,7 @@ pub fn context(name: String, default_value: fn() -> a) -> Context(a) {
 /// you want to get a Context in an idempotent way, take a look at [`context()`](#context).
 ///
 /// [Documentation](https://react.dev/reference/react/createContext)
-@deprecated("Named contexts are not part of Redraw anymore. Use `redraw_unsafe` if you want to use an unsafe API. Use `create_context_` instead.")
+@deprecated("Named contexts are not part of Redraw anymore. Use `create_context_` instead.")
 @external(javascript, "./context.ffi.mjs", "createContext")
 pub fn create_context(
   name: String,

@@ -1,27 +1,20 @@
-import {
-  List,
-  Empty,
-  NonEmpty,
-  CustomType,
-  BitArray,
-  isEqual,
-} from "./gleam.mjs"
+import * as $gleam from "./gleam.mjs"
 
-const type$ = Symbol("Type")
-const prototype$ = Symbol("Prototype")
-const length$ = Symbol("Length")
-const original$ = Symbol("Original")
+const type$ = Symbol("Redraw:Gleam:Type")
+const prototype$ = Symbol("Redraw:Gleam:Prototype")
+const length$ = Symbol("Redraw:Gleam:Length")
+const original$ = Symbol("Redraw:Gleam:Original")
 
-const list$ = Symbol("List")
-const tuple$ = Symbol("Tuple")
-const number$ = Symbol("Number")
-const string$ = Symbol("String")
-const function$ = Symbol("Function")
-const bitArray$ = Symbol("BitArray")
-const unknown$ = Symbol("Unknown")
-const boolean$ = Symbol("Boolean")
-const nil$ = Symbol("Nil")
-const customType$ = Symbol("CustomType")
+const list$ = Symbol("Redraw:Gleam:List")
+const tuple$ = Symbol("Redraw:Gleam:Tuple")
+const number$ = Symbol("Redraw:Gleam:Number")
+const string$ = Symbol("Redraw:Gleam:String")
+const function$ = Symbol("Redraw:Gleam:Function")
+const bitArray$ = Symbol("Redraw:Gleam:BitArray")
+const unknown$ = Symbol("Redraw:Gleam:Unknown")
+const boolean$ = Symbol("Redraw:Gleam:Boolean")
+const nil$ = Symbol("Redraw:Gleam:Nil")
+const customType$ = Symbol("Redraw:Gleam:CustomType")
 
 export function areEqual(before, after) {
   if (before[type$] !== after[type$]) return false
@@ -32,7 +25,7 @@ export function areEqual(before, after) {
     case list$: {
       if (before[length$] !== after[length$]) return false
       for (let i = after[length$]; i > 0; i--)
-        if (!isEqual(before[i], after[i])) return false
+        if (!$gleam.isEqual(before[i], after[i])) return false
       return true
     }
     case string$:
@@ -44,7 +37,7 @@ export function areEqual(before, after) {
       return Object.is(before.value, after.value)
     }
     case customType$: {
-      return isEqual(before[original$], after[original$])
+      return $gleam.isEqual(before[original$], after[original$])
     }
   }
 }
@@ -52,9 +45,9 @@ export function areEqual(before, after) {
 export function propsToGleamProps(props) {
   switch (props[type$]) {
     case list$: {
-      let list = new Empty()
+      let list = $gleam.List$Empty()
       for (let i = props[length$]; i > 0; i--)
-        list = new NonEmpty(props[i - 1], list)
+        list = $gleam.List$NonEmpty(props[i - 1], list)
       return list
     }
     case tuple$: {
@@ -83,7 +76,7 @@ export function propsToGleamProps(props) {
 }
 
 export function gleamPropsToProps(props_) {
-  if (props_ instanceof CustomType) {
+  if (props_ instanceof $gleam.CustomType) {
     const prototype = Object.getPrototypeOf(props_)
     const props = { ...props_, [type$]: customType$ }
     Object.defineProperties(props, {
@@ -91,13 +84,13 @@ export function gleamPropsToProps(props_) {
       [original$]: { enumerable: true, value: props_, writable: false },
     })
     return props
-  } else if (props_ instanceof List) {
+  } else if (props_ instanceof $gleam.List) {
     const props = { [type$]: list$ }
     let index = 0
     for (const item of props_) props[index++] = item
     props[length$] = index
     return props
-  } else if (props_ instanceof BitArray) {
+  } else if (props_ instanceof $gleam.BitArray) {
     return { [type$]: bitArray$, value: props_ }
   } else if (Array.isArray(props_)) {
     const props = { [type$]: tuple$ }
