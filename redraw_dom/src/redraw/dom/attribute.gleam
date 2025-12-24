@@ -11,8 +11,8 @@ import gleam/dynamic.{type Dynamic}
 import gleam/fetch/form_data.{type FormData}
 import gleam/option
 import gleam/string
-import redraw
-import redraw/internals/unsafe
+import redraw/internal/unsafe
+import redraw/ref
 
 /// Attribute linked on an HTML or SVG node. Think about like a `prop` in React.
 pub opaque type Attribute {
@@ -89,10 +89,9 @@ pub fn dangerously_set_inner_html(inner_html: InnerHTML) -> Attribute {
 /// of the reference, you won't have any data. Use `ref_` when you want full
 /// control over the ref you send to the Component. \
 /// [Documentation](https://react.dev/reference/react-dom/components/common#manipulating-a-dom-node-with-a-ref)
-pub fn ref(ref: redraw.Ref(option.Option(a))) -> Attribute {
-  attribute("ref", fn(dom_ref) -> Nil {
-    redraw.set_current(ref, option.Some(dom_ref))
-  })
+pub fn ref(ref: ref.Ref(option.Option(a))) -> Attribute {
+  use dom_ref <- attribute("ref")
+  ref.assign(ref, option.Some(dom_ref))
 }
 
 /// A ref callback function. The callback will be provided with the DOM element
@@ -620,6 +619,16 @@ pub fn nonce(nonce: String) -> Attribute {
 /// [Documentation](https://react.dev/learn/rendering-lists)
 pub fn key(key: String) -> Attribute {
   attribute("key", key)
+}
+
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableCellElement/colSpan)
+pub fn col_span(value: Int) -> Attribute {
+  attribute("colSpan", value)
+}
+
+/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableCellElement/rowSpan)
+pub fn row_span(value: Int) -> Attribute {
+  attribute("rowSpan", value)
 }
 
 /// `none` will not appear in HTML attributes. Use it for conditional rendering.

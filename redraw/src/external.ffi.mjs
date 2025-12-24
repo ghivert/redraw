@@ -1,17 +1,19 @@
-import { None, Some } from "../gleam_stdlib/gleam/option.mjs"
+// That file is deprecated, and will be removed in React 20.
 
-function camelize(key) {
-  return key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
-}
-
-function convertOption(value) {
-  if (value instanceof None) return null
-  if (value instanceof Some) return value[0]
-  return value
-}
+import * as $gleam from "../gleam_stdlib/gleam/option.mjs"
 
 export function convertProps(props) {
   const entries = Object.entries(props)
   const converted = entries.map(([k, v]) => [camelize(k), convertOption(v)])
   return Object.fromEntries(converted)
+}
+
+function convertOption(value) {
+  if ($gleam.Option$isNone(value)) return null
+  if ($gleam.Option$isSome(value)) return value[0]
+  return value
+}
+
+function camelize(key) {
+  return key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
 }

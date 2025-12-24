@@ -6,22 +6,16 @@ import redraw/dom/client
 import redraw/dom/events
 import redraw/dom/html
 
-pub type Root
-
-pub type Node(props)
-
-pub type Children
-
 pub fn main() {
-  let root = root()
   let assert Ok(node) = client.create_root("root")
-  client.render(node, react.strict_mode([root()]))
+  use root <- client.render_(node, root())
+  react.strict_mode([root(Nil)])
 }
 
-pub fn root() {
-  let app = app()
-  use <- react.standalone("Root")
-  app()
+pub fn root() -> react.ReactComponent(Nil) {
+  use app <- react.compose(app())
+  use Nil <- react.component_("Root")
+  app(Nil)
 }
 
 pub type CounterProps {
@@ -29,7 +23,7 @@ pub type CounterProps {
 }
 
 fn counter() {
-  use props: CounterProps <- react.element("Counter")
+  use props: CounterProps <- react.component_("Counter")
   html.button(
     [events.on_click(fn(_) { props.set_count(fn(count) { count + 1 }) })],
     list.map([props.count], fn(count) {
@@ -52,10 +46,10 @@ fn nav_links() {
   ])
 }
 
-pub fn app() {
-  let counter = counter()
-  use <- react.standalone("App")
-  let #(count, set_count) = react.use_state_(0)
+fn app() {
+  use counter <- react.compose(react.memoize_(counter()))
+  use Nil <- react.component_("App")
+  let #(count, set_count) = use_counter()
   react.fragment([
     nav_links(),
     html.h1([], [html.text("Vite + Gleam + React")]),
@@ -71,4 +65,9 @@ pub fn app() {
       html.text("Click on the Vite, Gleam and React logos to learn more"),
     ]),
   ])
+}
+
+fn use_counter() {
+  let #(count, set_count) = react.use_state_(0)
+  #(count, set_count)
 }

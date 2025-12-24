@@ -1,63 +1,73 @@
 # Redraw
 
 React opinionated bindings for Gleam. Use React directly from Gleam, with a
-friendly API that will never go in your path. Redraw tries to stick to React
+friendly API that will never get in your way. Redraw tries to stick to React
 conventions, while providing idiomatic Gleam code. Write interoperable code
-between React and Gleam code, reuse existing components, and leverage type-safe
-components & immutable data structure. Forget runtime errors, and write React
-components that just works.
+between React and Gleam, reuse existing components, and leverage type-safe
+components & immutable data structures. Forget runtime errors, and write
+production-grade React components that just work.
 
-> [!TIP]
->
-> Have you tried [Lustre](https://lustre.build)? Lustre requires almost no
-> knowledge of JavaScript, no complicated runtimes to get like Node.js, few
-> knowledge of HTML/CSS and other web technologies, less code interfaces to
-> write than Redraw, and is supported by the entire Gleam community! Before
-> launching into Redraw, you should take a look at Lustre, it provides a
-> user-friendly, awesome experience right out-of-the-box for every gleamlins!
->
-> As a bonus, Lustre is isomorphic, i.e. it can be used as well on client and on
-> server with the same codebase!
->
-> Redraw assumes you have minimal knowledge on frontend development, and will
-> neither try to ease your learning curve nor simplify and hide the frontend
-> technology stack and complexities. In case you're not sure what you really
-> need, pick Lustre.
+## Before you begin
+
+Gleam developers come from different horizons, some from JavaScript, some from
+the BEAM, and the rest from various backgrounds, like Go, Python, or Java. To
+help all of them find their way through the language, Gleam is a user-friendly
+language that helps you take the right decisions. Similarly, Redraw embraces
+this philosophy by simplifying things as much as possible. However, some prior
+knowledge of frontend development is required.
+
+Being a suite of React-bindings, Redraw assumes you know how React works and how
+to write an application. Redraw does not help you begin your journey in frontend
+development, and sometimes requires you to write JavaScript code or to
+understand how to connect existing React components. If you know what NPM is,
+what is a Single-Page Application, or how to use Vite, skip that section and
+[jump directly to the beginning](#overview). Otherwise, there's high chances
+you'll need to learn all of this before jumping into Redraw! If you don't feel
+comfortable enough with frontend development, JavaScript ecosystem, or anything
+related, you should take a look at [Lustre](https://lustre.build). In contrast
+to Redraw, Lustre requires little to no knowledge of JavaScript to begin with.
+Lustre does also not require you to manage your runtimes like Node.js, and will
+help you build your dream application with HTML/CSS and other web technologies!
+\
+Lustre is user-friendly and focused on providing the best developer experience,
+right out-of-the-box! In case you're hesitant between jumping into Redraw or
+starting Lustre, try the latter.
+
+If, despite all of this, you still feel uncomfortable with frontend development
+but still _need_ to use React (at work for example), don't worry! Redraw will be
+there to support you.
+[Start by reading the React documentation](https://react.dev/), and
+[follow the amazing tutorials made by the React team](https://react.dev/learn/tutorial-tic-tac-toe).
+Before you know it, you'll get comfortable with React, components and Redraw,
+and you'll be able to build great applications!
 
 ## Overview
 
-Redraw is a package that let you use React in a frontend-only Gleam project. By
-leveraging on the entire JS ecosystem, Redraw help you interop with existing
-current React codebases, or allows you to build your custom codebase and
-cherry-picking the existing components you know and love! Redraw tries to keep
-everything at the lowest level possible, turning all the React niceties into
-Gleam niceties. Wherever possible, Redraw tries to stick with Lustre API, to
-help you create a codebase mixing the two frameworks. For instance, you could
-build libraries targeting both Lustre and Redraw, and using the same design
-system for all your products!
+Redraw is a package that lets you use React in a frontend-only Gleam project. By
+leveraging the entire JS ecosystem, Redraw helps you interop with existing
+existing React codebases, or allows you to build your custom codebase and
+cherry-pick the existing components you know and love! Redraw tries to stick
+with the React runtime and API, in order to let you reuse your existing React
+knowledge. Every skill used in React can be used in Redraw, and vice-versa.
+Wherever possible, Redraw also tries to stick with the Lustre API, once again to
+let you reuse your existing skills between Redraw and Lustre across different
+projects, or to help you migrate to Redraw from Lustre or from Lustre to Redraw.
 
 ## Prerequisites
 
-Redraw assumes that you're a fluent frontend developer and already understand
-how React works. If you don't, it's best to first learn React and the frontend
-ecosystem, and come back here later. Meanwhile, you could also take a look at
-[Lustre](https://lustre.build) to create your own application. You'll find some
-good tutorials on [react.dev](https://react.dev/), more specifically on
-["Get Started" page](https://react.dev/learn).
-
 Redraw assumes you have [`node.js`](https://nodejs.org/en) or equivalent as well
 as a modern package manager, i.e. `npm`, `yarn`, `pnpm`, or even `bun`. Redraw
-also assumes you're using [`Vite`](https://vitejs.dev/) or an equivalent as
+also assumes you're using [`Vite`](https://vitejs.dev/) or an equivalent as a
 build tool, and will not provide any interface to build your application. In the
-rest of that README, `Vite` will be used as example. It's up to you to use
+rest of this README, `Vite` will be used as an example. It's up to you to use
 another bundler if you prefer. Redraw sticks with the modern, up-to-date
 frontend stack.
 
 ## Getting started
 
 Create the project, and add everything needed to make it work. Choose your
-prefered bundler to start. Create a Vite application, and choose to use
-JavaScript and React. Vite should bundle everything for you directly.
+preferred bundler to start. Create a Vite application, and choose to use
+JavaScript/TypeScript and React. Vite should bundle everything for you directly.
 
 ```sh
 npm create vite@latest
@@ -75,8 +85,8 @@ pnpm create vite
 bun create vite
 ```
 
-From the follow-on, `yarn` will be used to illustrate the commands, it's up to
-you to see how to use your desired package manager. Then, it's time to setup the
+From now on, `yarn` will be used to illustrate the commands, it's up to you to
+see how to use your desired package manager. Then, it's time to set up the
 project correctly.
 
 ```sh
@@ -88,21 +98,21 @@ yarn install
 yarn add -D vite-gleam
 
 # If you want to build the project on Vercel or Netlify.
-# @chouqueth/gleam provides a local version of the Gleam compiler installed in
+# @chouquette/gleam provides a local version of the Gleam compiler installed in
 # your node_modules. You can freely skip that step if you don't need to build
 # your application remotely or if you're in control of the environment.
-yarn add -D @chouqueth/gleam
+yarn add -D @chouquette/gleam
 
 # Remove the files needed for `gleam new` to work.
 mv README.md README.md.old
 mv .gitignore .gitignore.old
 
-# Setup the project.
+# Set up the project.
 gleam new .
 gleam add redraw redraw_dom
 ```
 
-Now that everyting is setup, you have to add the `vite-gleam` plugin in
+Now that everything is set up, you need to add the `vite-gleam` plugin in
 `vite.config.js`. An example of a `vite.config.js` should look like this.
 
 ```javascript
@@ -120,8 +130,8 @@ You're good to go!
 
 ## Writing Redraw components
 
-Writing Redraw components is the same as writing React component, with one small
-difference: wrap the component in `use <- redraw.component()`!
+Writing Redraw components is the same as writing React components, with one
+small difference: wrap the component in `use props <- redraw.component_()`!
 
 ```gleam
 import redraw
@@ -129,16 +139,18 @@ import redraw/dom/attribute
 import redraw/dom/html
 
 pub fn gleam_is_awesome() {
-  use <- redraw.component__("GleamIsAwesome")
+  use Nil <- redraw.component_("GleamIsAwesome")
   html.div([attribute.class("oh-yeah")], [
     html.text("Yeah, for sure")
   ])
 }
 ```
 
-While this could feels strange at first, you'll get used to it quickly. To call
-the component, you'll need to call the function first, _before definining a new
-component_.
+While this might feel strange at first, you'll get used to it quickly. To call
+the component, you'll need to compose it in your component. In order to compose
+it, you need to call `redraw.compose` _before defining a new component_. This
+process "creates" every component in a Redraw application at startup, during
+what is called a "bootstrap phase".
 
 ```gleam
 import redraw
@@ -147,37 +159,42 @@ import redraw/dom/client
 import redraw/dom/html
 
 pub fn main() {
-  let root = root()
   let assert Ok(root) = client.create_root("root")
-  client.render(root, redraw.strict_mode([root()]))
+  client.render(root, redraw.strict_mode([app(Nil)]))
 }
 
-fn root() {
-  // Call `gleam_is_awesome` here, before component creation, otherwise a new
-  // component will be created at each refresh.
-  let gleam_is_awesome = gleam_is_awesome()
-  use <- redraw.component__("Root")
+fn app() {
+  // Compose `gleam_is_awesome` here, before component creation,
+  // during the bootstrap phase.
+  use gleam_is_awesome <- redraw.compose(gleam_is_awesome())
+  use Nil <- redraw.component_("Root")
   html.div([], [
-    gleam_is_awesome()
+    gleam_is_awesome(Nil),
   ])
 }
 
 fn gleam_is_awesome() {
-  use <- redraw.component__("GleamIsAwesome")
+  use Nil <- redraw.component_("GleamIsAwesome")
   html.div([attribute.class("oh-yeah")], [
-    html.text("Yeah, for sure")
+    html.text("Yeah, for sure"),
   ])
 }
 ```
 
 And you know everything to create Redraw components!
 
-## What is the kind of components?
+## `Element`, `Component` and passing props
 
-Components can have different kinds, accepting props, children, ref, or other
-things. To provide a simpler, usable API in Gleam, props components in Gleam can
-be List, Tuple, CustomTypes or Nil. It means you can totally define your
-component like this:
+React has two main built-in notions: elements and components. In React, an
+element is a part of the UI, and is the result of components renders. For
+example, a `<div>` is an element, but the execution of a `Counter` is also an
+element. On the other hand, a component is a function, accepting props,
+returning elements. Those elements can be the result of calling other
+components!
+
+A component has always the same shape: it accepts some properties, or props, and
+returns an `Element`. The props can be of any nature: from a simple, basic
+`String`, to a complex record, anything is possible.
 
 ```gleam
 pub type CounterProps {
@@ -223,45 +240,90 @@ pub fn counter() {
 }
 ```
 
-Don't worry about the translation of data from and to React, Redraw handles the
-hard task for you!
+React accepts mainly one shape of props: a JavaScript object. Don't worry about
+it though, Redraw takes care of the hard translation work for you. When you send
+some Gleam props to a Redraw component, Redraw will convert the props in a
+suitable React format, and will convert them once again when going back in the
+Gleam world. Everything is done in a transparent way, and DevTools friendly: you
+can even see what is sent to React components directly in your browser!
 
-### `component`-family functions
+## Using contexts
 
-To define components, you should use `component`, `component_` or `component__`.
-The difference between the three is the signature of the resulting component.
-`component` accepts props and children, `component_` accepts only props, and
-`component__` do not accept anything. See it as a way to create an empty
-component, used with contexts or internal state for instance. You cannot create
-a component that accept children but no props. While it can feel boilerplaty at
-first, that is a design decision. Most of the time, components that accept
-children also accept props, so it's not worth creating another API and add
-overhead for a function that will almost not be used.
+Contexts are a powerful tool in your toolbox, and prevents what is called _props
+drilling_. In traditional React code, passing a lot of props to children
+components is often seen as a bad practice. In Gleam, passing arguments to
+function is considered as normal and absolutely usual. You should not be afraid
+to pass props. If you need lot of props on your component, you can implement
+something like a [builder pattern](https://www.youtube.com/watch?v=3lYHFctx2Ks)
+and use your component as-is. However, sometimes you need to integrate with
+existing data, living outside of your props. Maybe to hold state, maybe to
+manage some effects outside of your current components. You can use
+[context](https://react.dev/learn/passing-data-deeply-with-context). To use
+them, all you need to do is to pass them _during the bootstrap phase_. Let's
+take an example.
 
-### `forward_ref`-family functions
+```gleam
+import redraw
+import redraw/dom/attribute
+import redraw/dom/client
+import redraw/dom/html
 
-Defining components sometimes involves to forward a ref to internal component.
-React uses the mechanism of `forwardRef` to push a ref, from the parent to a
-nested child. Redraw fully implements forwarded ref components! Use
-`forward_ref` or `forward_ref_` to create a component with props, ref and
-children, or only with props and children!
+pub fn main() {
+  // Create a context.
+  let assert Ok(root) = client.create_root("root")
+  client.render(root, redraw.strict_mode([app(Nil)]))
+}
+
+type Shared = #(Int, fn (Int) -> Nil)
+
+fn app() {
+  // Create your context during the bootstrap phase.
+  let default_state: Shared = #(0, fn(_) { Nil })
+  let my_context: redraw.Context(Shared) = redraw.create_context_(default_state)
+  // Pass your context during the bootstrap.
+  use gleam_is_awesome <- redraw.compose(gleam_is_awesome(my_context))
+  use Nil <- redraw.component_("Root")
+  let #(state, set_state) = redraw.use_state(0)
+  // Provide the context in the component tree to make it accesible below.
+  redraw.provider(my_context, #(state, set_state), [
+    html.div([], [
+      gleam_is_awesome(Nil),
+    ]),
+  ])
+}
+
+// Component factory have to accept the context.
+fn gleam_is_awesome(my_context: redraw.Context(Shared)) {
+  use Nil <- redraw.component_("GleamIsAwesome")
+  // Access the context inside your component.
+  let #(state, set_state) = redraw.use_context(my_context)
+  html.div([attribute.class("oh-yeah")], [
+    html.text("Yeah, for sure"),
+  ])
+}
+```
+
+If you're used to Erlang/OTP, you will recognise a similar pattern in
+`gleam_otp`, with named processes, where you need to instanciate your names in
+your `main` function and pass it along the way!
 
 ## Some reminders on hooks
 
-Never use hooks outside of custom hooks (functions named `use_[something]`) or
-in components! It means you should never use something like `use_effect` or
-`use_state` outside of the body of `component`-related functions. If you break
-that rule, while it could seem to work, it's actually breaking the runtime, and
-it can explode at any time. So keep that rule anytime: no hooks outside of
-custom hooks or component body.
+Hooks are powerful, but they can be dangerous to use. You should never use hooks
+outside of custom hooks (functions named `use_[something]`) or outside of
+components! This means you should never use something like `use_effect` or
+`use_state` outside of the body of `component_`. If you break that rule, while
+it could seem to work, it could at any time break the runtime, and explode. So
+keep that rule anytime: no hooks outside of custom hooks or component body.
 
 ## Type-checking of hooks
 
-You could see that hooks often use dependencies array, to determine if they have
-to rerun or not. This is totally supported by Redraw, and leverages on Gleam
-abilities! Always pass a tuple of dependencies to hooks. No type-checking are
-done at this stage, and probably none will be implemented later, exactly like
-it's done with React currently. Be careful to provide the correct dependencies.
+You may notice that hooks in React often use a dependencies array, to determine
+if they have to rerun or not. This is fully supported by Redraw, and leverages
+Gleam's abilities! Always pass a tuple of dependencies to hooks. No
+type-checking is done at this stage, and probably none will be implemented
+later, exactly like it's done with React currently. Be careful to provide the
+correct dependencies.
 
 ```gleam
 import gleam/io
@@ -282,143 +344,60 @@ fn gleam_is_awesome() {
 
 ## Using external components
 
-React is greatly used everywhere. It means a lot of components are already
-usable out-of-the-box. Happily, Redraw provides a way to interop directly with
-them! Use `to_component` and `to_component_` to integrate a foreign function
-directly. Define the correct props, and your work is done! Don't worry about
-snake_case and camelCase of props name, Redraw take care of the translation for
-you. Everytime you put an `Option(a)`, Redraw will also translate it to
-`a | null`, because React use the convention to pass `null` everywhere instead
-of optionals.
+React is widely used everywhere. It means a lot of components are already usable
+out-of-the-box. To do this, you'll have to write some FFI code. The FFI code is
+written in usual JavaScript code, using JSX.
 
-```gleam
-import gleam/option.{type Option}
-import redraw
-import redraw/dom/html
+> More to come later…
 
-// This type will be converted to correct JS props.
-pub type ExternalComponentProps {
-  ExternalComponentProps(
-    first_field: Bool,             // firstField: bool
-    second_field: Bool,            // secondField: bool
-    optional_field: Option(String) // optionalField: string | null
-  )
-}
+## Is Redraw production-ready?
 
-@external(javascript, "external_module", "ExternalComponent")
-fn external_component_ffi(props: a) -> redraw.Component
+Of course! Redraw is more than production-ready: it is already used in
+production! While Redraw started as a side-project by a single developer, it is
+now developed with the help of Steerlab, and is heavily used throughout the
+company for various things, from single-page applications to Chrome Extensions.
 
-fn external_component() -> fn(ExternalComponentProps) -> redraw.Component {
-  redraw.to_component_("ExternalComponent", external_component_ffi)
-}
+Redraw supports the latest version of React, and follows its release cycle:
+Redraw will never break backwards-compatibility outside of the existing breaking
+changes of React. You can expect Redraw to not break your codebase in a
+suspicious way, and most new features are pushed as minor changes.
 
-pub fn my_other_component() {
-  let external_component = external_component()
-  use <- redraw.component__("OtherComponent")
-  html.div([], [
-    external_component(
-      ExternalComponentProps(
-        first_field: True,
-        second_field: False,
-        optional_field: option.None,
-      )
-    )
-  ])
-}
-```
+## Future plans — Redraw Linter
 
-## Miscellaneous
+At the moment, Redraw leverages the Gleam compiler and does not offer linter
+support for critical parts like hooks dependencies. In the future, a
+complementary linter is planned, and should bridge that gap between Gleam and
+React. While the Gleam compiler provides all useful information about Gleam
+code, the Redraw linter will focus on specific Redraw requirements.
 
-Some questions, answers, and various informations.
+## Future plans — Fast Refresh support
 
-### Is there no linter for Redraw?
+> More to come later…
 
-At the moment, Redraw leverages on the Gleam compiler and does not offer linter
-support for critical parts like hooks dependencies. A future, complementary
-linter is planned, and should bridge that gap between Gleam and React. While
-Gleam compiler provides all useful information about Gleam code, Redraw linter
-will focus on specific Redraw requirements.
+## Future plans — React Native support
 
-### What is the state of support for React Native, or any other React flavor?
-
-React is an isolated packages, and renderers can be various. Redraw has
+React is an isolated package, and renderers can be various. Redraw has
 successfully been used with Raycast. You can also easily add a `redraw_native`
 package, and provide an interface for native components. Everything can be done
-quickly and easily, because the entire package is written with as few JS as
-possible. Everything should work almost out-of-the box, because React is already
-working there. You should take inspiration at how is working `redraw/html`, and
-it could work in the exact same way. It's only a matter of providing the correct
-Component to `jsx`.
+quickly and easily, because the entire package is written with as little
+JavaScript code as possible. Everything should work almost out-of-the-box,
+because React is already working there. You should take inspiration from how
+`redraw/html` works, as it will work in the exact same way. It's only a matter
+of providing the correct `Element` to `jsx`.
 
-### Contributing
+## Why `redraw.component_` instead of `redraw.component`?
 
-Do you love the package? You can contribute! Feel free to open a PR, or open an
+You may see `redraw.component` also exists in the code. It's because Redraw
+started with multiple ways to create components, and that included
+`redraw.component`, as well a `redraw.element` and `redraw.standalone`. It was
+merely a first try, and some exploration to make React work with Gleam.
+Unfortunately, it was a messy way to implement bindings, and an unsafe one on
+top of that. Those functions are now deprecated, and wil be remove in the
+future. Meanwhile, `redraw.component_` has been introduced to provide support
+for the new component API, and will fully replace `redraw.component` when the
+existing `redraw.component` will be removed.
+
+## Contributing
+
+Enjoying Redraw? Contributions are welcome! Feel free to open a PR, or open an
 issue!
-
-### Why wrapping every components in `use props <- component(name)`?
-
-If you're used to React, you know a component is no more than a function,
-returning a `ReactNode`. Something like this:
-
-```javascript
-function GleamIsAwesome(props) {
-  return <div className="oh-yeah">Yeah, for sure</div>
-}
-```
-
-Actually, because of JSX, React is a bit lying to all of us, and compiles it to:
-
-```javascript
-import { jsx } from "react/runtime-jsx"
-
-function GleamIsAwesome(props) {
-  return jsx("div", { className: "oh-yeah", children: "Yeah, for sure" })
-}
-```
-
-React injects a call to `jsx` before every JSX render. This allows for the
-runtime to determine if the function should be called once again with the new
-provided props. It's also true for functions.
-
-```javascript
-// That code
-function ILoveBeam(props) {
-  return <div>BEAM 💜</div>
-}
-
-function GleamIsAwesome(props) {
-  return (
-    <div className="oh-yeah">
-      <ILoveBeam />
-      Yeah, for sure
-    </div>
-  )
-}
-
-// Turns into
-import { jsx, jsxs } from "react/runtime-jsx"
-
-function ILoveBeam(props) {
-  return jsx("div", { children: "BEAM 💜" })
-}
-
-function GleamIsAwesome(props) {
-  return jsxs("div", {
-    className: "oh-yeah",
-    children: [jsx(ILoveBeam, {}), "Yeah, for sure"],
-  })
-}
-```
-
-Here, we got a problem: we cannot inject the `jsx` call before `ILoveBeam` in
-Gleam. What we could do is write a function that generate the `jsx` call with an
-other function with `use`, but anonymous functions cannot be used with React:
-React is doing referential equality for Functional Components. Every component
-should be defined once and for all.
-
-To inject the `jsx` call properly, it would requires an additional
-compilation-step. Because we cannot do this, we pass by a generator function.
-That's what `use props <- component(name)` is doing. To get the correct result,
-we go to a _Component creator_, a function that create a component once and for
-all from a `render` function. Everytime we create a component, we use a render
-function and turns it into a proper component to be used with React.

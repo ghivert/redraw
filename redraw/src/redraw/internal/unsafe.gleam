@@ -1,5 +1,3 @@
-import redraw/internal/unsafe
-
 /// Transtype any data. It should never be used, unless the underlying runtime
 /// is able to react to both data types.
 ///
@@ -8,7 +6,5 @@ import redraw/internal/unsafe
 /// let data: String = unsafe.coerce(data)
 /// // BOOM
 /// ```
-@deprecated("Use `redraw/internal/unsafe` instead.")
-pub fn coerce(a: a) -> b {
-  unsafe.coerce(a)
-}
+@external(javascript, "./unsafe.ffi.mjs", "coerce")
+pub fn coerce(a: a) -> b

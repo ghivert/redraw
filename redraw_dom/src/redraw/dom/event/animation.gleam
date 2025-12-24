@@ -2,7 +2,7 @@
 //// related to [animations](https://developer.mozilla.org/docs/Web/CSS/CSS_animations/Using_CSS_animations).
 
 import redraw/event.{type Event}
-import redraw/internals/unsafe
+import redraw/internal/unsafe
 
 /// [Documentation](https://developer.mozilla.org/docs/Web/API/AnimationEvent)
 pub type AnimationEvent

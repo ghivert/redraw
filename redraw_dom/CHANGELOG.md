@@ -1,3 +1,11 @@
+## v19.2.0 - 2025-12-24
+
+Redraw transitioned its API, from `redraw.component` to a more composable API,
+using `redraw.component_` and `redraw.compose`. It requires some changes from
+`redraw_dom`, mainly being able to run a `ReactComponent` with `render` instead
+of the old way of simply calling a component. `render` is now deprecated in
+favour of `render_`.
+
 ## v19.1.1 - 2025-11-06
 
 - Add missing `on_drag_leave` event handler.

@@ -1,6 +1,7 @@
 import gleam/dynamic.{type Dynamic}
-import redraw.{type Component}
+import redraw.{type Element, type ReactComponent}
 import redraw/dom.{type Error}
+import redraw/internal/unsafe
 
 /// Root to display React DOM.
 ///
@@ -61,14 +62,44 @@ pub fn virtual_root() -> #(Dynamic, Root)
 ///
 /// [Documentation](https://react.dev/reference/react-dom/client/hydrateRoot)
 @external(javascript, "./client.ffi.mjs", "hydrateRoot")
-pub fn hydrate_root(root: String, node: Component) -> Result(Root, Error)
+pub fn hydrate_root(root: String, node: Element) -> Result(Root, Error)
 
 /// Call `render(root)` to display a piece of JSX (“React node”) into the React
 /// root’s browser DOM node.
 ///
 /// [Documentation](https://react.dev/reference/react-dom/client/createRoot#root-render)
+@deprecated("Components in Redraw have changed. Use `render_` instead")
+pub fn render(
+  root: Root,
+  child: fn(Nil) -> Element,
+  return: fn(fn(Nil) -> Element) -> Element,
+) -> Nil {
+  unsafe.coerce({
+    let children = return(child)
+    do_render(root, children)
+    |> unsafe.coerce
+  })
+}
+
+/// Call `render(root)` to display a piece of JSX (“React node”) into the React
+/// root’s browser DOM node.
+///
+/// [Documentation](https://react.dev/reference/react-dom/client/createRoot#root-render)
+pub fn render_(
+  root: Root,
+  child: ReactComponent(Nil),
+  return: fn(fn(Nil) -> Element) -> Element,
+) -> Nil {
+  unsafe.coerce({
+    use child <- redraw.compose(child)
+    let children = return(child)
+    do_render(root, children)
+    |> unsafe.coerce
+  })
+}
+
 @external(javascript, "./client.ffi.mjs", "render")
-pub fn render(root: Root, child: Component) -> Nil
+pub fn do_render(root: Root, child: Element) -> Nil
 
 /// Call `unmount(root)` to destroy a rendered tree inside a React root.
 ///

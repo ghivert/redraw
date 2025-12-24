@@ -1,7 +1,7 @@
 import gleam/fetch/form_data.{type FormData}
 import gleam/option.{type Option}
 import gleam/uri
-import redraw.{type Component}
+import redraw.{type Element}
 
 /// Possible errors encountered by React DOM.
 pub type Error {
@@ -26,7 +26,6 @@ pub type Error {
 /// }
 ///
 /// fn app() {
-///   let modal = modal()
 ///   use <- redraw.component__("App")
 ///   let assert Ok(modal) = client.create_portal(modal, "modal")
 ///   html.div([], [html.text("Hello World!"), modal])
@@ -40,10 +39,7 @@ pub type Error {
 ///
 /// [Documentation](https://react.dev/reference/react-dom/createPortal)
 @external(javascript, "./dom.ffi.mjs", "createPortal")
-pub fn create_portal(
-  children: Component,
-  root: String,
-) -> Result(Component, Error)
+pub fn create_portal(children: Element, root: String) -> Result(Element, Error)
 
 /// Call `flushSync` to force React to flush any pending work and update the DOM
 /// synchronously. \
