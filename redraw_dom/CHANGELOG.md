@@ -1,3 +1,7 @@
+## v19.2.1 - 2025-12-26
+
+- Fix broken backwards-compatibility. Deprecated 19.2.0.
+
 ## v19.2.0 - 2025-12-24
 
 Redraw transitioned its API, from `redraw.component` to a more composable API,
