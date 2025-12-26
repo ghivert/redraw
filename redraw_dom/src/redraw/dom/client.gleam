@@ -69,16 +69,8 @@ pub fn hydrate_root(root: String, node: Element) -> Result(Root, Error)
 ///
 /// [Documentation](https://react.dev/reference/react-dom/client/createRoot#root-render)
 @deprecated("Components in Redraw have changed. Use `render_` instead")
-pub fn render(
-  root: Root,
-  child: fn(Nil) -> Element,
-  return: fn(fn(Nil) -> Element) -> Element,
-) -> Nil {
-  unsafe.coerce({
-    let children = return(child)
-    do_render(root, children)
-    |> unsafe.coerce
-  })
+pub fn render(root: Root, child: Element) -> Nil {
+  do_render(root, child)
 }
 
 /// Call `render(root)` to display a piece of JSX (“React node”) into the React
@@ -99,7 +91,7 @@ pub fn render_(
 }
 
 @external(javascript, "./client.ffi.mjs", "render")
-pub fn do_render(root: Root, child: Element) -> Nil
+fn do_render(root: Root, child: Element) -> Nil
 
 /// Call `unmount(root)` to destroy a rendered tree inside a React root.
 ///
