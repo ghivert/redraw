@@ -1,3 +1,7 @@
+## v19.2.2 - 2025-01-20
+
+- Improves interoperability between different Redraw packages.
+
 ## v19.2.1 - 2025-12-26
 
 - Fix broken backwards-compatibility. Deprecated 19.2.0.

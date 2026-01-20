@@ -1,20 +1,20 @@
 import * as $gleam from "./gleam.mjs"
 
-const type$ = Symbol("Redraw:Gleam:Type")
-const prototype$ = Symbol("Redraw:Gleam:Prototype")
-const length$ = Symbol("Redraw:Gleam:Length")
-const original$ = Symbol("Redraw:Gleam:Original")
+const type$ = Symbol.for("Redraw:Gleam:Type")
+const prototype$ = Symbol.for("Redraw:Gleam:Prototype")
+const length$ = Symbol.for("Redraw:Gleam:Length")
+const original$ = Symbol.for("Redraw:Gleam:Original")
 
-const list$ = Symbol("Redraw:Gleam:List")
-const tuple$ = Symbol("Redraw:Gleam:Tuple")
-const number$ = Symbol("Redraw:Gleam:Number")
-const string$ = Symbol("Redraw:Gleam:String")
-const function$ = Symbol("Redraw:Gleam:Function")
-const bitArray$ = Symbol("Redraw:Gleam:BitArray")
-const unknown$ = Symbol("Redraw:Gleam:Unknown")
-const boolean$ = Symbol("Redraw:Gleam:Boolean")
-const nil$ = Symbol("Redraw:Gleam:Nil")
-const customType$ = Symbol("Redraw:Gleam:CustomType")
+const list$ = Symbol.for("Redraw:Gleam:List")
+const tuple$ = Symbol.for("Redraw:Gleam:Tuple")
+const number$ = Symbol.for("Redraw:Gleam:Number")
+const string$ = Symbol.for("Redraw:Gleam:String")
+const function$ = Symbol.for("Redraw:Gleam:Function")
+const bitArray$ = Symbol.for("Redraw:Gleam:BitArray")
+const unknown$ = Symbol.for("Redraw:Gleam:Unknown")
+const boolean$ = Symbol.for("Redraw:Gleam:Boolean")
+const nil$ = Symbol.for("Redraw:Gleam:Nil")
+const customType$ = Symbol.for("Redraw:Gleam:CustomType")
 
 export function areEqual(before, after) {
   if (before[type$] !== after[type$]) return false
