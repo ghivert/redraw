@@ -1,5 +1,5 @@
 name = "redraw_batteries"
-version = "1.0.0"
+version = "1.1.0"
 target = "javascript"
 
 description = "Experimentations with Redraw, to provide better or simpler API."
@@ -12,6 +12,9 @@ user = "ghivert"
 repo = "redraw"
 path = "redraw_batteries"
 tag_prefix = "redraw_batteries_"
+
+[javascript]
+typescript_declarations = true
 
 [dependencies]
 gleam_stdlib = ">= 1.0.0 and < 2.0.0"

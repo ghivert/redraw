@@ -2,5 +2,6 @@
   "printWidth": 80,
   "semi": false,
   "proseWrap": "always",
-  "trailingComma": "all"
+  "trailingComma": "all",
+  "quotes": true
 }
