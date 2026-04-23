@@ -1,0 +1,21 @@
+name = "redraw_batteries"
+version = "1.0.0"
+target = "javascript"
+
+description = "Experimentations with Redraw, to provide better or simpler API."
+licences = ["MIT"]
+gleam = ">= 1.15.0"
+
+[repository]
+type = "github"
+user = "ghivert"
+repo = "redraw"
+path = "redraw_batteries"
+tag_prefix = "redraw_batteries_"
+
+[dependencies]
+gleam_stdlib = ">= 1.0.0 and < 2.0.0"
+redraw = ">= 19.2.0 and < 20.0.0"
+
+[dev_dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"
