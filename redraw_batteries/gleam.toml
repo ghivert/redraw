@@ -1,5 +1,5 @@
 name = "redraw_batteries"
-version = "1.1.0"
+version = "1.1.1"
 target = "javascript"
 
 description = "Experimentations with Redraw, to provide better or simpler API."
