@@ -88,7 +88,7 @@ pub type Props {
 /// |> error_boundary.on_error(send_to_error_logger)
 /// |> error_boundary.render
 /// ```
-@external(javascript, "./boundary.redraw.mjs", "errorBoundary")
+@external(javascript, "./boundary.ffi.mjs", "errorBoundary")
 pub fn render(props: Props) -> Element
 
 /// Children to display when the error boundary did not catch any errors.
