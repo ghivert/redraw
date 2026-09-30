@@ -635,12 +635,3 @@ pub fn row_span(value: Int) -> Attribute {
 pub fn none() -> Attribute {
   attribute("none_", Nil)
 }
-
-/// [Documentation](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-expanded)
-pub fn aria_expanded(value: Bool) -> Attribute {
-  let value =
-    value
-    |> unsafe.coerce
-    |> string.lowercase
-  aria("expanded", value)
-}
