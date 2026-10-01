@@ -10,7 +10,7 @@ import gleam/int
 import gleam/string
 import redraw/dom/attribute.{type Attribute}
 
-fn aria(key: String, value: String) -> Attribute {
+pub fn aria(key: String, value: String) -> Attribute {
   attribute.attribute("aria-" <> key, value)
 }
 
