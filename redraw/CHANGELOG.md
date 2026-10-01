@@ -1,4 +1,8 @@
-## v19.2.2 - 2025-01-20
+## v19.2.3 - 2026-10-01
+
+- No changes, keep in sync with `redraw_dom`.
+
+## v19.2.2 - 2026-01-20
 
 - Improves interoperability between different Redraw packages.
 

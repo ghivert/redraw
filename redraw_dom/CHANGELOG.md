@@ -1,4 +1,8 @@
-## v19.2.2 - 2025-01-20
+## v19.2.3 - 2026-10-01
+
+- Add `aria` namespace, to support existing ARIA attributes.
+
+## v19.2.2 - 2026-01-20
 
 - No changes, keep in sync with `redraw`.
 
