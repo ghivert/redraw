@@ -130,11 +130,6 @@ pub fn style(styles: List(#(String, String))) -> Attribute {
   attribute("style", convert_style(styles))
 }
 
-/// Set aria attribute on the node. Should be used like `aria("valuenow", "75")`.
-pub fn aria(key: String, value: String) -> Attribute {
-  attribute("aria-" <> key, value)
-}
-
 /// [Documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/accesskey)
 pub fn access_key(value: String) -> Attribute {
   attribute("accessKey", value)
