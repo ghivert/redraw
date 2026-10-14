@@ -57,7 +57,7 @@ fn app() {
       counter(CounterProps(count, set_count)),
       html.p([], [
         html.text("Edit "),
-        html.code([], [html.text("src/main.gleam")]),
+        html.code([], [html.text("src/example.gleam")]),
         html.text(" and save to test HMR"),
       ]),
     ]),

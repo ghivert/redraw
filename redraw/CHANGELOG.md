@@ -1,3 +1,11 @@
+## Unreleased
+
+- Add support for React Fast Refresh, through the `vite-plugin-redraw` Vite
+  plugin. Components created with `component_` and `compose` are registered
+  with React Refresh in development, so that editing a component updates it in
+  place without losing its state. No change is required in user code, and
+  nothing is enabled when the plugin is not installed.
+
 ## v19.2.4 - 2026-11-24
 
 - No changes, keep in sync with `redraw_dom`.

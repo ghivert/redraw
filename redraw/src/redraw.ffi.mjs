@@ -3,6 +3,7 @@ import runtime from "react/jsx-runtime"
 import * as $gleam from "./gleam.mjs"
 import * as $redraw from "./redraw.mjs"
 import * as $props from "./props.ffi.mjs"
+import * as $hot from "./redraw/internal/hot.ffi.mjs"
 
 const memoize$ = Symbol("Redraw:Memo:Use")
 const children$ = Symbol("Redraw:Children")
@@ -86,16 +87,24 @@ export function wrapComponent(Component) {
  * to `fn (props) -> jsx(Component)` by extracting the children
  * from the props. */
 export function wrapReactComponent(Component) {
-  return propagateDisplayName(Component, (props) => {
+  const Wrapper = propagateDisplayName(Component, (props) => {
     const newProps = $props.propsToGleamProps(props)
     return Component(newProps)
   })
+  // Development only: give the wrapper a stable id for React Fast Refresh.
+  return $hot.register(Wrapper, Component)
 }
 
 export function wrapCall(Component) {
   const PropsConverted = Component.render
+  // Development only: the memoized type is a new object at every `compose`,
+  // it needs its own stable id for React Fast Refresh.
   const Comp = Component.memoize
-    ? React.memo(PropsConverted, $props.areEqual)
+    ? $hot.register(
+        React.memo(PropsConverted, $props.areEqual),
+        PropsConverted,
+        " memo",
+      )
     : PropsConverted
   return function (props_) {
     const props = $props.gleamPropsToProps(props_)

@@ -97,6 +97,11 @@ yarn install
 # read Gleam files.
 yarn add -D vite-gleam
 
+# Install the Vite Redraw plugin. That plugin is optional, and enables React
+# Fast Refresh for Redraw components: edit a component, and see the change
+# without losing the state of your application.
+yarn add -D vite-plugin-redraw
+
 # If you want to build the project on Vercel or Netlify.
 # @chouquette/gleam provides a local version of the Gleam compiler installed in
 # your node_modules. You can freely skip that step if you don't need to build
@@ -113,16 +118,19 @@ gleam add redraw redraw_dom
 ```
 
 Now that everything is set up, you need to add the `vite-gleam` plugin in
-`vite.config.js`. An example of a `vite.config.js` should look like this.
+`vite.config.js`, and the `vite-plugin-redraw` plugin if you want Fast Refresh.
+An example of a `vite.config.js` should look like this.
 
 ```javascript
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import gleam from "vite-gleam"
+import redraw from "vite-plugin-redraw"
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), gleam()],
+  // `gleam()` must come before `redraw()`.
+  plugins: [gleam(), react(), redraw()],
 })
 ```
 
