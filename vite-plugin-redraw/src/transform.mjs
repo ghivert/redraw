@@ -210,9 +210,12 @@ function findFactories(program, redraw, moduleId) {
       factories.set(name, { name, kind: "plain" })
       continue
     }
-    // A parameterized function creating no component of its own has no
-    // identity to refresh. One with destructured or rest parameters is not
-    // produced by Gleam, so it is left alone too.
+    // A parameterized function calling `compose` or `memoize_` without
+    // `component_` is a helper receiving a component created elsewhere, like
+    // `fn memo(c) { memoize_(c) }` or `render_` in `redraw_dom`. It holds no
+    // render code, so there is nothing to replay. A function with
+    // destructured or rest parameters is not produced by Gleam, so it is left
+    // alone too.
     if (!creates || !params.every((param) => t.isIdentifier(param))) {
       factories.set(name, { name, kind: "skip" })
       continue

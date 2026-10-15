@@ -173,9 +173,12 @@ function setSignature(refresh, type, signature, customHooks) {
 
 /** Structural, deterministic serialization of Gleam values, used to tell
  * apart the components built by a parameterized factory. Gleam values are
- * never cyclic. Functions are serialized by their name, which covers Redraw
- * components passed as arguments, but not anonymous functions: two
- * instantiations differing only by anonymous functions share an identity. */
+ * never cyclic. Named functions are serialized by their name, which covers
+ * Redraw components passed as arguments. Anonymous functions are serialized
+ * by a hash of their source code: it is stable across factory re-runs, which
+ * recreate every closure, and differs between closures with different code.
+ * Two closures with the same code capturing different values still share an
+ * identity. */
 const MAX_LENGTH = 200
 
 function serialize(value) {
@@ -198,8 +201,11 @@ function serializeValue(value, depth) {
       return String(value)
     case "symbol":
       return value.toString()
-    case "function":
-      return "fn:" + (value.displayName ?? value.name ?? "")
+    case "function": {
+      const name = value.displayName ?? value.name
+      if (name) return "fn:" + name
+      return "fn#" + hash(String(value))
+    }
     case "object": {
       const next = depth + 1
       const items = (values) =>

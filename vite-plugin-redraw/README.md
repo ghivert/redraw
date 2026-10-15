@@ -60,9 +60,20 @@ cannot find them by itself. The plugin bridges the gap:
 - Two components with the same display name in the same module, built with
   the same factory arguments, share the same Fast Refresh identity. Give
   them distinct names.
-- Factory arguments are compared structurally, and functions by their name.
-  Two instantiations differing only by anonymous functions share the same
-  identity: put a discriminator in the name passed to `component_`.
+- Factory arguments should be static configuration: a variant, a size, a
+  child component, some data. They are compared structurally, named
+  functions by their name, and anonymous functions by a hash of their source
+  code. A callback varying per instance belongs in the props, not in the
+  factory arguments: two closures with the same code capturing different
+  values, such as two results of `fn on_toggle(side) { fn(v) { ... } }`,
+  share the same identity, and both instances would end up calling the last
+  one after a refresh.
+- Helpers receiving a component and returning it, such as
+  `fn memo(c) { memoize_(c) }`, are not replayed after a hot update. All the
+  render code lives in functions calling `component_`, which are replayed,
+  so a helper has nothing to refresh. The only effect is that a change in the
+  helper itself, like memoizing or not, waits for a full reload when its
+  module self-accepts the update.
 - Contexts created with `create_context_` are kept by call site, so a new
   default value is not applied until a full reload.
 - Pass `ignore: ["some_package/"]` to skip compiled dependencies that
