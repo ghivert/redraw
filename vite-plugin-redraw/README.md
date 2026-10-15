@@ -6,15 +6,20 @@ components keep their state.
 
 ## Setup
 
+The plugin works on the compiled Gleam output, so a loader compiling Gleam
+in Vite is needed, placed before it. Both
+[`@chouquette/gleam-vite-loader`](https://www.npmjs.com/package/@chouquette/gleam-vite-loader)
+and [`vite-gleam`](https://www.npmjs.com/package/vite-gleam) are supported.
+
 ```sh
-yarn add --dev vite-plugin-redraw vite-gleam @vitejs/plugin-react
+yarn add --dev vite-plugin-redraw @chouquette/gleam-vite-loader @vitejs/plugin-react
 ```
 
 ```ts
 // vite.config.ts
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
-import gleam from "vite-gleam"
+import { gleamImportPlugin as gleam } from "@chouquette/gleam-vite-loader"
 import redraw from "vite-plugin-redraw"
 
 export default defineConfig({
@@ -22,6 +27,8 @@ export default defineConfig({
   plugins: [gleam(), react(), redraw()],
 })
 ```
+
+With `vite-gleam`, replace the loader import by `import gleam from "vite-gleam"`.
 
 The plugin is development-only: production builds are left untouched.
 

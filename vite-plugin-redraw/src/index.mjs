@@ -10,7 +10,8 @@ const BUILD_DIR = "build/dev/javascript"
 /** Vite plugin enabling React Fast Refresh for Redraw components.
  *
  * Requirements:
- * - `vite-gleam`, placed before this plugin, to compile Gleam modules.
+ * - A Gleam loader placed before this plugin, to compile Gleam modules:
+ *   `@chouquette/gleam-vite-loader` or `vite-gleam`.
  * - `@vitejs/plugin-react`, which ships and installs the React Refresh runtime.
  *
  * The plugin is development-only. In production builds, no transform is
@@ -109,9 +110,11 @@ globalThis.__REDRAW_REFRESH__ = RefreshRuntime;`,
     handleHotUpdate({ file, modules, server }) {
       if (!enabled) return
       if (file.endsWith(".gleam")) {
-        // `vite-gleam` has already rebuilt the project at this point. The
-        // changed source may not be in the module graph (only the entry
-        // `.gleam` is imported directly), but its compiled output is.
+        // The Gleam loader has already rebuilt the project at this point.
+        // The changed source may not be in the module graph (`vite-gleam`
+        // imports the entry `.gleam` directly, `@chouquette/gleam-vite-loader`
+        // resolves `gleam:` ids to compiled files), but its compiled output
+        // is.
         const compiled = compiledPath(file)
         if (!compiled) return
         const extra = server.moduleGraph.getModulesByFile(compiled)

@@ -474,14 +474,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chouquette/gleam@npm:^1.13.0":
-  version: 1.13.0
-  resolution: "@chouquette/gleam@npm:1.13.0"
+"@chouquette/gleam-ts-loader@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@chouquette/gleam-ts-loader@npm:1.0.1"
+  checksum: 10c0/1418f6ca62a01cf49b56e6007abbec2c5f663a2910689686fd9cdabe4105848b8f6ed138d1db6d315cd7f45c1f02864d6d04631155d7e0434e9866542a99591a
+  languageName: node
+  linkType: hard
+
+"@chouquette/gleam-vite-loader@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@chouquette/gleam-vite-loader@npm:1.0.2"
   dependencies:
-    tar: "npm:^7.1.0"
+    toml: "npm:^3.0.0 || ^4.0.0 || ^5.0.0"
+  peerDependencies:
+    "@chouquette/gleam": ^1.14.0
+    vite: ^7.3.0 || ^8.0.0
+  checksum: 10c0/3d189388ab40e0839fb718a45751334d62d92b93e169ec66e89cd63b33dc2ecf02fe91b9d6f2ad5f8735273f8bbf516b6951c5703dad2b5bf2d89af56984be4b
+  languageName: node
+  linkType: hard
+
+"@chouquette/gleam@npm:^1.19.0":
+  version: 1.19.0
+  resolution: "@chouquette/gleam@npm:1.19.0"
+  dependencies:
+    tar: "npm:^7.5.13"
   bin:
     gleam: bin/cli.mjs
-  checksum: 10c0/3f4b5b79156ad8d2a13a72715db7b97187b6843587844b69c65f9c53411cd7999b94f0e34fb85d336edad655633728ea7dc341f763f4b6f1ba8bad30c00c1b53
+  checksum: 10c0/19562ae2e3979f015db952a508a366bbe2435eb80c3cec17e6ac08e04f4eb1947016b4e15c2c1ee4e3f8d0ff12b477acce17122e9b6b853aec5959562446f912
   languageName: node
   linkType: hard
 
@@ -868,7 +887,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jridgewell/sourcemap-codec@npm:^1.5.0, @jridgewell/sourcemap-codec@npm:^1.5.5":
+"@jridgewell/sourcemap-codec@npm:^1.5.0":
   version: 1.5.5
   resolution: "@jridgewell/sourcemap-codec@npm:1.5.5"
   checksum: 10c0/f9e538f302b63c0ebc06eecb1dd9918dd4289ed36147a0ddce35d6ea4d7ebbda243cda7b2213b6a5e1d8087a298d5cf630fb2bd39329cdecb82017023f6081a0
@@ -2271,11 +2290,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"example@workspace:.":
+"example@workspace:example":
   version: 0.0.0-use.local
-  resolution: "example@workspace:."
+  resolution: "example@workspace:example"
   dependencies:
-    "@chouquette/gleam": "npm:^1.13.0"
+    "@chouquette/gleam": "npm:^1.19.0"
+    "@chouquette/gleam-ts-loader": "npm:^1.0.1"
+    "@chouquette/gleam-vite-loader": "npm:^1.0.2"
     "@types/react": "npm:^19.2.7"
     "@types/react-dom": "npm:^19.2.3"
     "@vitejs/plugin-react": "npm:^5.1.2"
@@ -2285,9 +2306,9 @@ __metadata:
     eslint-plugin-react-refresh: "npm:^0.4.26"
     react: "npm:^19.2.3"
     react-dom: "npm:^19.2.3"
+    typescript: "npm:^5.9.3"
     vite: "npm:^7.3.0"
-    vite-gleam: "npm:^1.7.1"
-    vite-plugin-redraw: "portal:../vite-plugin-redraw"
+    vite-plugin-redraw: "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -3322,15 +3343,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"magic-string@npm:^0.30.21":
-  version: 0.30.21
-  resolution: "magic-string@npm:0.30.21"
-  dependencies:
-    "@jridgewell/sourcemap-codec": "npm:^1.5.5"
-  checksum: 10c0/299378e38f9a270069fc62358522ddfb44e94244baa0d6a8980ab2a9b2490a1d03b236b447eee309e17eb3bddfa482c61259d47960eb018a904f0ded52780c4a
-  languageName: node
-  linkType: hard
-
 "make-fetch-happen@npm:^13.0.0":
   version: 13.0.1
   resolution: "make-fetch-happen@npm:13.0.1"
@@ -3460,12 +3472,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minizlib@npm:^3.0.1":
-  version: 3.0.2
-  resolution: "minizlib@npm:3.0.2"
+"minizlib@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "minizlib@npm:3.1.0"
   dependencies:
     minipass: "npm:^7.1.2"
-  checksum: 10c0/9f3bd35e41d40d02469cb30470c55ccc21cae0db40e08d1d0b1dff01cc8cc89a6f78e9c5d2b7c844e485ec0a8abc2238111213fdc5b2038e6d1012eacf316f78
+  checksum: 10c0/5aad75ab0090b8266069c9aabe582c021ae53eb33c6c691054a13a45db3b4f91a7fb1bd79151e6b4e9e9a86727b522527c0a06ec7d45206b745d54cd3097bcec
   languageName: node
   linkType: hard
 
@@ -3475,15 +3487,6 @@ __metadata:
   bin:
     mkdirp: bin/cmd.js
   checksum: 10c0/46ea0f3ffa8bc6a5bc0c7081ffc3907777f0ed6516888d40a518c5111f8366d97d2678911ad1a6882bf592fa9de6c784fea32e1687bb94e1f4944170af48a5cf
-  languageName: node
-  linkType: hard
-
-"mkdirp@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "mkdirp@npm:3.0.1"
-  bin:
-    mkdirp: dist/cjs/src/bin.js
-  checksum: 10c0/9f2b975e9246351f5e3a40dcfac99fcd0baa31fbfab615fe059fb11e51f10e4803c63de1f384c54d656e4db31d000e4767e9ef076a22e12a641357602e31d57d
   languageName: node
   linkType: hard
 
@@ -3860,6 +3863,12 @@ __metadata:
   checksum: 10c0/094220b3ba3a76c1b668f972ace1dd15509b157aead1b40391d1c8e657e720c201d9719537375eff08f5e0514748c0319063392a6f000e31303aafc4471f1436
   languageName: node
   linkType: hard
+
+"redraw-workspace@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "redraw-workspace@workspace:."
+  languageName: unknown
+  linkType: soft
 
 "reflect.getprototypeof@npm:^1.0.6, reflect.getprototypeof@npm:^1.0.9":
   version: 1.0.10
@@ -4457,17 +4466,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:^7.1.0":
-  version: 7.4.3
-  resolution: "tar@npm:7.4.3"
+"tar@npm:^7.5.13":
+  version: 7.5.22
+  resolution: "tar@npm:7.5.22"
   dependencies:
     "@isaacs/fs-minipass": "npm:^4.0.0"
     chownr: "npm:^3.0.0"
     minipass: "npm:^7.1.2"
-    minizlib: "npm:^3.0.1"
-    mkdirp: "npm:^3.0.1"
+    minizlib: "npm:^3.1.0"
     yallist: "npm:^5.0.0"
-  checksum: 10c0/d4679609bb2a9b48eeaf84632b6d844128d2412b95b6de07d53d8ee8baf4ca0857c9331dfa510390a0727b550fd543d4d1a10995ad86cdf078423fbb8d99831d
+  checksum: 10c0/1311f6be85a8157ac4c9147bae43e13923d2a1aae15e4aa1bd5239e4e03d2cf53cfe103dde7f35832fbb4c938b042856bc8e9a0afd29abd05e2d1608788c4fea
   languageName: node
   linkType: hard
 
@@ -4488,10 +4496,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"toml@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "toml@npm:3.0.0"
-  checksum: 10c0/8d7ed3e700ca602e5419fca343e1c595eb7aa177745141f0761a5b20874b58ee5c878cd045c408da9d130cb2b611c639912210ba96ce2f78e443569aa8060c18
+"toml@npm:^3.0.0 || ^4.0.0 || ^5.0.0":
+  version: 5.0.1
+  resolution: "toml@npm:5.0.1"
+  checksum: 10c0/e04fabbbb0918b6c55ffb4d7444b6053e9a366911ff96794f7f750707f2e7617813e5b89880098886c5a9e3a72f4f291b178d55acc8cd12d84c6e201d8e69847
   languageName: node
   linkType: hard
 
@@ -4609,6 +4617,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typescript@npm:^5.9.3":
+  version: 5.9.3
+  resolution: "typescript@npm:5.9.3"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/6bd7552ce39f97e711db5aa048f6f9995b53f1c52f7d8667c1abdc1700c68a76a308f579cd309ce6b53646deb4e9a1be7c813a93baaf0a28ccd536a30270e1c5
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A^5.9.3#optional!builtin<compat/typescript>":
+  version: 5.9.3
+  resolution: "typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=379a07"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/6f7e53bf0d9702350deeb6f35e08b69cbc8b958c33e0ec77bdc0ad6a6c8e280f3959dcbfde6f5b0848bece57810696489deaaa53d75de3578ff255d168c1efbd
+  languageName: node
+  linkType: hard
+
 "unbox-primitive@npm:^1.0.2":
   version: 1.0.2
   resolution: "unbox-primitive@npm:1.0.2"
@@ -4674,30 +4702,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-gleam@npm:^1.7.1":
-  version: 1.7.1
-  resolution: "vite-gleam@npm:1.7.1"
-  dependencies:
-    magic-string: "npm:^0.30.21"
-    toml: "npm:^3.0.0"
-    vite: "npm:^7.2.4"
-  checksum: 10c0/5754e0b7096fcc56fdf871534b7a18034fed7c6f6b3384313242ad8af533ef1496c9f9c8d8f5e8db188ebbb56ccaec1bcbcec72d0d92283f9c32db89d92ea264
-  languageName: node
-  linkType: hard
-
-"vite-plugin-redraw@portal:../vite-plugin-redraw::locator=example%40workspace%3A.":
+"vite-plugin-redraw@workspace:*, vite-plugin-redraw@workspace:vite-plugin-redraw":
   version: 0.0.0-use.local
-  resolution: "vite-plugin-redraw@portal:../vite-plugin-redraw::locator=example%40workspace%3A."
+  resolution: "vite-plugin-redraw@workspace:vite-plugin-redraw"
   dependencies:
     "@babel/core": "npm:^7.28.0"
   peerDependencies:
+    "@chouquette/gleam-vite-loader": ">= 1.0.0"
     "@vitejs/plugin-react": ">= 4.0.0"
     vite: ">= 5.0.0"
     vite-gleam: ">= 1.0.0"
-  languageName: node
+  peerDependenciesMeta:
+    "@chouquette/gleam-vite-loader":
+      optional: true
+    vite-gleam:
+      optional: true
+  languageName: unknown
   linkType: soft
 
-"vite@npm:^7.2.4, vite@npm:^7.3.0":
+"vite@npm:^7.3.0":
   version: 7.3.0
   resolution: "vite@npm:7.3.0"
   dependencies:

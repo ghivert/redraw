@@ -1,0 +1,9 @@
+{
+  "name": "redraw-workspace",
+  "private": true,
+  "workspaces": [
+    "example",
+    "vite-plugin-redraw"
+  ],
+  "packageManager": "yarn@4.3.1"
+}

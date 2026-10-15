@@ -1,6 +1,6 @@
-import { main } from "./example.gleam"
+import { main } from "gleam:example"
 import "./stylesheets/index.css"
 import "./stylesheets/App.css"
 
-// Start the Lustre app.
+// Start the Redraw app.
 document.addEventListener("DOMContentLoaded", main)

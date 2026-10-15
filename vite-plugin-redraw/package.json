@@ -5,7 +5,10 @@
   "type": "module",
   "main": "./src/index.mjs",
   "exports": {
-    ".": "./src/index.mjs"
+    ".": {
+      "types": "./src/index.d.mts",
+      "default": "./src/index.mjs"
+    }
   },
   "files": [
     "src"
@@ -29,8 +32,18 @@
     "@babel/core": "^7.28.0"
   },
   "peerDependencies": {
+    "@chouquette/gleam-vite-loader": ">= 1.0.0",
     "@vitejs/plugin-react": ">= 4.0.0",
     "vite": ">= 5.0.0",
     "vite-gleam": ">= 1.0.0"
-  }
+  },
+  "peerDependenciesMeta": {
+    "@chouquette/gleam-vite-loader": {
+      "optional": true
+    },
+    "vite-gleam": {
+      "optional": true
+    }
+  },
+  "types": "./src/index.d.mts"
 }
