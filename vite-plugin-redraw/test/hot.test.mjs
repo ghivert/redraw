@@ -168,3 +168,14 @@ test("a factory throwing at re-run keeps the previous code without reloading", {
   hot.rerun("m", [() => component(hot, "App")])
   assert.match(calls.reloads[0], /"m Other" was removed or renamed/)
 })
+
+test("an unsupported runtime disables Fast Refresh with a warning", { skip: !built }, async (t) => {
+  const { hot, calls } = await setup(t)
+  delete globalThis.__REDRAW_REFRESH__.validateRefreshBoundaryAndEnqueueUpdate
+  component(hot, "App")
+  assert.equal(calls.ids.length, 0)
+  assert.equal(globalThis.__REDRAW_REFRESH__, null)
+  assert.match(calls.reloads[0], /does not export validateRefreshBoundaryAndEnqueueUpdate/)
+  component(hot, "App")
+  assert.equal(calls.reloads.length, 1)
+})

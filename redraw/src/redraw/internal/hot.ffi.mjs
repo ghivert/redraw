@@ -35,9 +35,33 @@ const moduleIds = new Map()
 const bootstraps = new Map()
 let reloading = false
 
+/** Functions of the React Refresh runtime this module relies on. The
+ * runtime shipped by `@vitejs/plugin-react` is not a public API: when a
+ * version stops exporting one of them, Fast Refresh is disabled with a
+ * warning, instead of failing at the first hot update. */
+const REQUIRED = [
+  "register",
+  "createSignatureFunctionForTransform",
+  "validateRefreshBoundaryAndEnqueueUpdate",
+]
+let checked = null
+
 function runtime() {
   if (typeof globalThis === "undefined") return null
-  return globalThis.__REDRAW_REFRESH__ ?? null
+  const refresh = globalThis.__REDRAW_REFRESH__
+  if (!refresh) return null
+  if (checked !== refresh) {
+    checked = refresh
+    const missing = REQUIRED.filter((name) => typeof refresh[name] !== "function")
+    if (missing.length > 0) {
+      console.warn(
+        `[redraw] The React Refresh runtime does not export ${missing.join(", ")}: Fast Refresh is disabled. This version of @vitejs/plugin-react is not supported by redraw.`,
+      )
+      globalThis.__REDRAW_REFRESH__ = null
+      return null
+    }
+  }
+  return refresh
 }
 
 /** Called by the Vite transform around every render function passed to
