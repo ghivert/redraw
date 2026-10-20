@@ -129,6 +129,9 @@ the entry script, reloads the page too.
   manual `gleam build` or `gleam add`, restart the dev server.
 - A handwritten FFI file Babel cannot parse is served without Fast Refresh,
   with a warning.
+- When the Gleam build fails, nothing is updated: the application keeps the
+  previous code until the next successful build. Showing the compiler error
+  in the browser is the loader's job.
 - Only `@vitejs/plugin-react` is supported. If the installed runtime lacks
   one of the functions Redraw relies on, Fast Refresh is disabled with a
   warning naming it.

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs"
+import { readFileSync, statSync } from "node:fs"
 import path from "node:path"
 import { transformAsync } from "@babel/core"
 import { normalizePath } from "vite"
@@ -168,6 +168,13 @@ globalThis.__REDRAW_REFRESH__ = RefreshRuntime;`,
         // is.
         const compiled = compiledPath(file)
         if (!compiled) return
+        // When the build failed, the compiled output predates the edit: the
+        // loader has reported the error, and adding the module now would
+        // re-execute stale code, and make Vite's client dismiss the error
+        // overlay, or reload the page when it is the first update. The
+        // output is not rewritten either when a module is edited back to
+        // its previous content: the decision is then left to the loader.
+        if (!isFresh(compiled, file)) return
         const extra = server.moduleGraph.getModulesByFile(compiled)
         if (!extra) return
         return [...new Set([...modules, ...extra])]
@@ -180,6 +187,18 @@ globalThis.__REDRAW_REFRESH__ = RefreshRuntime;`,
   }
 
   return [resolvePlugin, refreshPlugin]
+}
+
+/** Whether `compiled` was written after `source`, that is, whether the last
+ * build compiled it. Gleam rewrites the output of every module it
+ * recompiles, even when the code did not change, but skips a module whose
+ * source is identical to the one it last compiled. */
+function isFresh(compiled, source) {
+  try {
+    return statSync(compiled).mtimeMs >= statSync(source).mtimeMs
+  } catch {
+    return false
+  }
 }
 
 function readPackageName(root) {

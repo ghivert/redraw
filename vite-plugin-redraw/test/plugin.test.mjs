@@ -2,6 +2,7 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
+import { utimesSync, statSync } from "node:fs"
 import redraw from "../src/index.mjs"
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../example")
@@ -44,12 +45,21 @@ test("only the modules of local packages are transformed", async () => {
   assert.equal(hot.result, undefined)
 })
 
-test("compiled files changes are ignored and gleam sources map to their module", () => {
+test("compiled files changes are ignored and gleam sources map to their module", (t) => {
   const [, refresh] = plugin()
   const compiled = path.join(build, "example/example.mjs")
+  const source = path.join(root, "src/example.gleam")
   const module = { id: compiled }
   const server = { moduleGraph: { getModulesByFile: (f) => (f === compiled ? new Set([module]) : undefined) } }
-  assert.deepEqual(refresh.handleHotUpdate({ file: path.join(root, "src/example.gleam"), modules: [], server }), [module])
+  // The build succeeded: the compiled output is newer than the source.
+  const { atime, mtime } = statSync(compiled)
+  t.after(() => utimesSync(compiled, atime, mtime))
+  utimesSync(compiled, new Date(), new Date(Date.now() + 1000))
+  assert.deepEqual(refresh.handleHotUpdate({ file: source, modules: [], server }), [module])
+  // The build failed: the compiled output predates the edit, and the module
+  // is not added to what the loader decided.
+  utimesSync(compiled, new Date(), new Date(statSync(source).mtimeMs - 1000))
+  assert.equal(refresh.handleHotUpdate({ file: source, modules: [], server }), undefined)
   assert.deepEqual(refresh.handleHotUpdate({ file: path.join(build, "example/example.mjs"), modules: [module], server }), [])
   assert.equal(refresh.handleHotUpdate({ file: path.join(root, "src/App.css"), modules: [], server }), undefined)
 })
