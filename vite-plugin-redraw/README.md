@@ -123,10 +123,13 @@ the entry script, reloads the page too.
   `use_state_` remounts the component, but if the initial value is a call
   whose return type changed elsewhere, the state keeps a value of the
   previous type, as in React.
-- Editing a handwritten FFI file, `gleam.toml` or `manifest.toml` is not
-  handled by this plugin: a Gleam loader should rebuild and reload the page.
-  Changes under `build/` are ignored, since every save rewrites it: after a
-  manual `gleam build` or `gleam add`, restart the dev server.
+- Rebuilding on a change in a handwritten FFI file, in `gleam.toml` or in
+  `manifest.toml` is the loader's job. `@chouquette/gleam-vite-loader` from
+  1.1.0 rebuilds on all of them, updates the FFI module and reloads the page
+  on a configuration change; `vite-gleam` only rebuilds on `.gleam` files.
+  Changes under `build/` are ignored by this plugin, since every save
+  rewrites it: after a manual `gleam build` or `gleam add`, restart the dev
+  server.
 - A handwritten FFI file Babel cannot parse is served without Fast Refresh,
   with a warning.
 - When the Gleam build fails, nothing is updated: the application keeps the
