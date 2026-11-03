@@ -32,7 +32,7 @@ class ErrorBoundary extends React.Component {
       ? $option.Option$Some(capturedOwnerStack)
       : $option.Option$None()
     const err = $errorBoundary.Error$Error(name, message, cause, stack)
-    const errInfo = $errorBoundary.Error$ErrorInfo(componentStack, ownerStack)
+    const errInfo = $errorBoundary.ErrorInfo$ErrorInfo(componentStack, ownerStack)
     this.props.onError(err, errInfo)
     this.props.onRawError(error, info)
   }
