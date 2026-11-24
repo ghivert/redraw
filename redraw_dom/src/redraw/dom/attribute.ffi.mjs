@@ -20,6 +20,7 @@ export function convertStyle(styles) {
 
 /** Used to camelize CSS property names. */
 function camelize(key) {
+  if (key.startsWith("--")) return key
   return key.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
 }
 
