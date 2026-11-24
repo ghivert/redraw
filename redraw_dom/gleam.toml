@@ -1,6 +1,6 @@
 name = "redraw_dom"
 target = "javascript"
-version = "19.2.3"
+version = "19.2.4"
 
 description = "Redraw DOM renderer. Take a look at Redraw to use it."
 licences = ["MIT"]

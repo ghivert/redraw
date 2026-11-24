@@ -1,3 +1,7 @@
+## v19.2.4 - 2026-11-24
+
+- Fix support for custom properties in `attribute.style`.
+
 ## v19.2.3 - 2026-10-01
 
 - Add `aria` namespace, to support existing ARIA attributes.
