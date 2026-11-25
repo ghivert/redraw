@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs"
 import path from "node:path"
 import { transformAsync } from "@babel/core"
+import { normalizePath } from "vite"
 import { redrawRefresh } from "./transform.mjs"
 
 const HOT_IMPORT = "virtual:redraw/hot"
@@ -29,24 +30,26 @@ export default function redraw(options = {}) {
   let localPackages = new Set()
   let enabled = false
 
-  const hotFile = () => path.join(root, HOT_FILE)
-  const buildDir = () => path.join(root, BUILD_DIR)
+  // Vite ids and files use forward slashes on every platform: every path
+  // compared with them is normalized the same way.
+  const hotFile = () => normalizePath(path.join(root, HOT_FILE))
+  const buildDir = () => normalizePath(path.join(root, BUILD_DIR))
 
   /** Vite module id of the compiled output of a Gleam source file. */
   const compiledPath = (file) => {
     if (!packageName) return null
-    const relative = path.relative(root, file)
-    if (!relative.startsWith(`src${path.sep}`)) return null
+    const relative = normalizePath(path.relative(root, file))
+    if (!relative.startsWith("src/")) return null
     const module = relative.slice(4).replace(/\.gleam$/, ".mjs")
-    return path.join(buildDir(), packageName, module)
+    return `${buildDir()}/${packageName}/${module}`
   }
 
   /** Human readable, unique id for a module. Used in Fast Refresh ids and
    * in context keys. */
   const moduleId = (id) => {
     const [file] = id.split("?")
-    if (file.endsWith(".gleam")) return normalize(path.relative(root, file))
-    return normalize(path.relative(buildDir(), file))
+    if (file.endsWith(".gleam")) return normalizePath(path.relative(root, file))
+    return normalizePath(path.relative(buildDir(), file))
   }
 
   const isLocalModule = (id) => {
@@ -54,9 +57,9 @@ export default function redraw(options = {}) {
     if (file.endsWith(".gleam")) return true
     if (!file.endsWith(".mjs")) return false
     if (file === hotFile()) return false
-    const relative = path.relative(buildDir(), file)
+    const relative = normalizePath(path.relative(buildDir(), file))
     if (relative.startsWith("..") || path.isAbsolute(relative)) return false
-    const [pkg, ...rest] = relative.split(path.sep)
+    const [pkg, ...rest] = relative.split("/")
     if (!localPackages.has(pkg)) return false
     // `gleam.mjs` re-exports the prelude for each package, and the hot module
     // imports it: transforming it would create an import cycle.
@@ -68,7 +71,7 @@ export default function redraw(options = {}) {
     name: "redraw:resolve",
     enforce: "pre",
     configResolved(config) {
-      root = config.root
+      root = normalizePath(config.root)
       base = config.base
       enabled = config.command === "serve" && !config.isProduction
     },
@@ -143,8 +146,9 @@ globalThis.__REDRAW_REFRESH__ = RefreshRuntime;`,
       if (!result) return
       return { code: result.code, map: result.map }
     },
-    handleHotUpdate({ file, modules, server }) {
+    handleHotUpdate({ file: changed, modules, server }) {
       if (!enabled) return
+      const file = normalizePath(changed)
       if (file.endsWith(".gleam")) {
         // The Gleam loader has already rebuilt the project at this point.
         // The changed source may not be in the module graph (`vite-gleam`
@@ -160,7 +164,7 @@ globalThis.__REDRAW_REFRESH__ = RefreshRuntime;`,
       // Compiled files change on every `gleam build`. Their updates are
       // handled when the Gleam source changes, so ignore them here to avoid
       // a second refresh.
-      if (file.startsWith(buildDir())) return []
+      if (file.startsWith(buildDir() + "/")) return []
     },
   }
 
@@ -188,8 +192,4 @@ function readLocalPackages(root) {
     // No manifest: only the root package is transformed.
   }
   return packages
-}
-
-function normalize(file) {
-  return file.split(path.sep).join("/")
 }
