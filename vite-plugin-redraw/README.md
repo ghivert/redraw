@@ -7,7 +7,7 @@ components keep their state.
 ## Setup
 
 The plugin works on the compiled Gleam output, so a loader compiling Gleam
-in Vite is needed, placed before it. Both
+in Vite is needed. Both
 [`@chouquette/gleam-vite-loader`](https://www.npmjs.com/package/@chouquette/gleam-vite-loader)
 and [`vite-gleam`](https://www.npmjs.com/package/vite-gleam) are supported.
 It also needs a version of `redraw` that includes Fast Refresh support, see
@@ -25,14 +25,14 @@ import { gleamImportPlugin as gleam } from "@chouquette/gleam-vite-loader"
 import redraw from "vite-plugin-redraw"
 
 export default defineConfig({
-  // `gleam()` must come before `redraw()`.
   plugins: [gleam(), react(), redraw()],
 })
 ```
 
-At startup, the dev server logs the Gleam packages Fast Refresh is enabled
-for, and every page reload decided by the plugin is explained in the browser
-console, with the Gleam source involved.
+The order of the plugins does not matter: `redraw()` always runs after the
+loader. At startup, the dev server logs the Gleam packages Fast Refresh is
+enabled for, and every page reload decided by the plugin is explained in the
+browser console, with the Gleam source involved.
 
 With `vite-gleam`, replace the loader import by `import gleam from "vite-gleam"`.
 

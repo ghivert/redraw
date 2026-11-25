@@ -11,8 +11,9 @@ const BUILD_DIR = "build/dev/javascript"
 /** Vite plugin enabling React Fast Refresh for Redraw components.
  *
  * Requirements:
- * - A Gleam loader placed before this plugin, to compile Gleam modules:
- *   `@chouquette/gleam-vite-loader` or `vite-gleam`.
+ * - A Gleam loader compiling Gleam modules: `@chouquette/gleam-vite-loader`
+ *   or `vite-gleam`. This plugin is enforced `post`, so it runs after the
+ *   loader whatever the order in the configuration.
  * - `@vitejs/plugin-react`, which ships and installs the React Refresh runtime.
  *
  * The plugin is development-only. In production builds, no transform is

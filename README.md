@@ -129,7 +129,6 @@ import redraw from "vite-plugin-redraw"
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // `gleam()` must come before `redraw()`.
   plugins: [gleam(), react(), redraw()],
 })
 ```
