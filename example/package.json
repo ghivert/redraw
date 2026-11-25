@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@chouquette/gleam": "^1.19.0",
-    "@chouquette/gleam-vite-loader": "^1.0.2",
+    "@chouquette/gleam-vite-loader": "^1.0.3",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },

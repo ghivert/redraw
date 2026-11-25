@@ -481,15 +481,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chouquette/gleam-vite-loader@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "@chouquette/gleam-vite-loader@npm:1.0.2"
+"@chouquette/gleam-vite-loader@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@chouquette/gleam-vite-loader@npm:1.0.3"
   dependencies:
     toml: "npm:^3.0.0 || ^4.0.0 || ^5.0.0"
   peerDependencies:
     "@chouquette/gleam": ^1.14.0
     vite: ^7.3.0 || ^8.0.0
-  checksum: 10c0/3d189388ab40e0839fb718a45751334d62d92b93e169ec66e89cd63b33dc2ecf02fe91b9d6f2ad5f8735273f8bbf516b6951c5703dad2b5bf2d89af56984be4b
+  checksum: 10c0/bd13854f681778dec79c4cf52221e28b1782ead7c9b99e4fb64522590a783e63dc41f8e47515418aa8c21659920d1aa688e0d6ab76beb75738f2fdfadedfb204
   languageName: node
   linkType: hard
 
@@ -2296,7 +2296,7 @@ __metadata:
   dependencies:
     "@chouquette/gleam": "npm:^1.19.0"
     "@chouquette/gleam-ts-loader": "npm:^1.0.1"
-    "@chouquette/gleam-vite-loader": "npm:^1.0.2"
+    "@chouquette/gleam-vite-loader": "npm:^1.0.3"
     "@types/react": "npm:^19.2.7"
     "@types/react-dom": "npm:^19.2.3"
     "@vitejs/plugin-react": "npm:^5.1.2"
