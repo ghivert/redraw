@@ -108,6 +108,8 @@ the entry script, reloads the page too.
   previous type, as in React.
 - Editing a handwritten FFI file, `gleam.toml` or `manifest.toml` is not
   handled by this plugin: a Gleam loader should rebuild and reload the page.
+  Changes under `build/` are ignored, since every save rewrites it: after a
+  manual `gleam build` or `gleam add`, restart the dev server.
 - A handwritten FFI file Babel cannot parse is served without Fast Refresh,
   with a warning.
 - Pass `ignore: ["some_package/"]` to skip compiled packages that should
