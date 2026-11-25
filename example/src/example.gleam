@@ -1,3 +1,5 @@
+import button
+import filter
 import gleam/int
 import gleam/list
 import redraw as react
@@ -8,14 +10,15 @@ import redraw/dom/html
 
 pub fn main() {
   let assert Ok(node) = client.create_root("root")
-  use root <- client.render_(node, root())
+  let theme = react.create_context_("light")
+  use root <- client.render_(node, root(theme))
   react.strict_mode([root(Nil)])
 }
 
-pub fn root() -> react.ReactComponent(Nil) {
-  use app <- react.compose(app())
+pub fn root(theme: react.Context(String)) -> react.ReactComponent(Nil) {
+  use app <- react.compose(app(theme))
   use Nil <- react.component_("Root")
-  app(Nil)
+  react.provider(theme, "dark", [app(Nil)])
 }
 
 pub type CounterProps {
@@ -46,18 +49,41 @@ fn nav_links() {
   ])
 }
 
-fn app() {
+fn app(theme: react.Context(String)) {
   use counter <- react.compose(react.memoize_(counter()))
+  use primary <- react.compose(button.button(button.Primary))
+  use secondary <- react.compose(button.button(button.Secondary))
   use Nil <- react.component_("App")
   let #(count, set_count) = use_counter()
+  let #(current, set_filter) = react.use_state_(filter.All)
+  let current_theme = react.use_context(theme)
   react.fragment([
+    html.p([], [html.text("Theme: " <> current_theme)]),
     nav_links(),
     html.h1([], [html.text("Vite + Gleam + React")]),
     html.div([a.class("card")], [
       counter(CounterProps(count, set_count)),
+      html.div([a.class("buttons")], [
+        primary(button.ButtonProps("Clicks")),
+        secondary(button.ButtonProps("Clicks")),
+      ]),
+      html.div([a.class("buttons")], [
+        filter_button(filter.All, set_filter),
+        filter_button(filter.Active, set_filter),
+        filter_button(filter.Done, set_filter),
+      ]),
+      html.p([], [html.text("Filter: " <> filter.name(current))]),
+      html.p([], [
+        html.text(
+          "Variants: "
+          <> button.name(button.Primary)
+          <> ", "
+          <> button.name(button.Secondary),
+        ),
+      ]),
       html.p([], [
         html.text("Edit "),
-        html.code([], [html.text("src/main.gleam")]),
+        html.code([], [html.text("src/example.gleam")]),
         html.text(" and save to test HMR"),
       ]),
     ]),
@@ -70,4 +96,13 @@ fn app() {
 fn use_counter() {
   let #(count, set_count) = react.use_state_(0)
   #(count, set_count)
+}
+
+fn filter_button(
+  value: filter.Filter,
+  set_filter: fn(fn(filter.Filter) -> filter.Filter) -> Nil,
+) {
+  html.button([events.on_click(fn(_) { set_filter(fn(_) { value }) })], [
+    html.text(filter.name(value)),
+  ])
 }

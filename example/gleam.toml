@@ -20,3 +20,6 @@ redraw_dom = { path = "../redraw_dom" }
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"
+
+[javascript]
+typescript_declarations = true

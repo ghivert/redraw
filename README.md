@@ -93,15 +93,20 @@ project correctly.
 cd [project-name]
 yarn install
 
-# Install the Vite Gleam plugin. That plugin is required to tell Vite how to
-# read Gleam files.
-yarn add -D vite-gleam
-
-# If you want to build the project on Vercel or Netlify.
-# @chouquette/gleam provides a local version of the Gleam compiler installed in
-# your node_modules. You can freely skip that step if you don't need to build
-# your application remotely or if you're in control of the environment.
+# Install the Gleam compiler locally. @chouquette/gleam provides a version of
+# the compiler in your node_modules, used by the Vite loader below. It also
+# makes the project buildable on Vercel or Netlify.
 yarn add -D @chouquette/gleam
+
+# Install the Gleam Vite loader. That loader is required to tell Vite how to
+# compile Gleam files, and lets you import Gleam modules with the `gleam:`
+# protocol.
+yarn add -D @chouquette/gleam-vite-loader
+
+# Install the Vite Redraw plugin. That plugin is optional, and enables React
+# Fast Refresh for Redraw components: edit a component, and see the change
+# without losing the state of your application.
+yarn add -D vite-plugin-redraw
 
 # Remove the files needed for `gleam new` to work.
 mv README.md README.md.old
@@ -112,19 +117,60 @@ gleam new .
 gleam add redraw redraw_dom
 ```
 
-Now that everything is set up, you need to add the `vite-gleam` plugin in
-`vite.config.js`. An example of a `vite.config.js` should look like this.
+Now that everything is set up, you need to add the Gleam loader in
+`vite.config.js`, and the `vite-plugin-redraw` plugin if you want Fast Refresh.
+An example of a `vite.config.js` should look like this.
 
 ```javascript
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
-import gleam from "vite-gleam"
+import { gleamImportPlugin as gleam } from "@chouquette/gleam-vite-loader"
+import redraw from "vite-plugin-redraw"
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), gleam()],
+  plugins: [gleam(), react(), redraw()],
 })
 ```
+
+Gleam modules are then imported with the `gleam:` protocol, using the module
+name instead of the file path. In your entry point, with a project named
+`my_app` and a `main` function in `src/my_app.gleam`:
+
+```javascript
+import { main } from "gleam:my_app"
+
+document.addEventListener("DOMContentLoaded", main)
+```
+
+If you write your entry point in TypeScript, the companion
+[`@chouquette/gleam-ts-loader`](https://www.npmjs.com/package/@chouquette/gleam-ts-loader)
+types the `gleam:` imports in your editor. Install it, enable TypeScript
+declarations in `gleam.toml`, and register it in `tsconfig.json`.
+
+```sh
+yarn add -D @chouquette/gleam-ts-loader
+```
+
+```toml
+# gleam.toml
+[javascript]
+typescript_declarations = true
+```
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "plugins": [{ "name": "@chouquette/gleam-ts-loader" }]
+  }
+}
+```
+
+[`vite-gleam`](https://www.npmjs.com/package/vite-gleam) is still supported as
+an alternative loader: install it instead of `@chouquette/gleam-vite-loader`,
+use `import gleam from "vite-gleam"` in `vite.config.js`, and import your entry
+module by its path, `import { main } from "./src/my_app.gleam"`.
 
 You're good to go!
 
