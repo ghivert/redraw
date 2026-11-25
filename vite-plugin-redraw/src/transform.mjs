@@ -18,8 +18,14 @@ const STATE_HOOKS = new Set([
 const HOT_NAMESPACE = "$redraw_hot"
 const ARGS_NAME = "$redraw_args"
 
-/** Babel plugin applied to compiled Gleam modules in development.
+/** Babel plugin applied to the compiled modules of the local Gleam packages
+ * in development.
  *
+ * For every module:
+ * - Registers every custom type class with `$redraw_hot.type`, so that
+ *   values created before a hot update still match the new classes.
+ *
+ * For modules using `redraw`:
  * - Wraps every render function passed to `redraw.component_` in
  *   `$redraw_hot.tag(moduleId, hooksSignature, customHooks, render, args)`,
  *   where `args` are the arguments of the enclosing factory when it has
@@ -30,8 +36,6 @@ const ARGS_NAME = "$redraw_args"
  *   `$redraw_hot.context("moduleId#n", default)` to keep context identities
  *   stable across factory re-runs.
  * - Registers the hooks signature of module-level custom hooks (`use_*`).
- * - Registers every custom type class with `$redraw_hot.type`, so that
- *   values created before a hot update still match the new classes.
  * - Appends an `import.meta.hot` trailer that self-accepts the module and
  *   re-runs its component factories after a hot update.
  *
@@ -48,14 +52,14 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
         enter(path, state) {
           state.code = state.file.code
           state.redraw = findRedrawBindings(path)
-          if (!state.redraw) return
-          state.factories = findFactories(path, state.redraw, moduleId)
+          state.factories = state.redraw
+            ? findFactories(path, state.redraw, moduleId)
+            : new Map()
           state.customHooks = []
           state.contexts = 0
           state.touched = false
         },
         exit(path, state) {
-          if (!state.redraw) return
           for (const fn of state.customHooks) {
             path.pushContainer(
               "body",
@@ -87,7 +91,6 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
       },
 
       ClassDeclaration(path, state) {
-        if (!state.redraw) return
         if (!isTopLevel(path) || !path.node.id) return
         const name = path.node.id.name
         const statement = path.parentPath.isExportNamedDeclaration()

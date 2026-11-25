@@ -1,4 +1,5 @@
 import button
+import filter
 import gleam/int
 import gleam/list
 import redraw as react
@@ -53,6 +54,7 @@ fn app() {
   use secondary <- react.compose(button.button(button.Secondary))
   use Nil <- react.component_("App")
   let #(count, set_count) = use_counter()
+  let #(current, set_filter) = react.use_state_(filter.All)
   react.fragment([
     nav_links(),
     html.h1([], [html.text("Vite + Gleam + React")]),
@@ -62,6 +64,12 @@ fn app() {
         primary(button.ButtonProps("Clicks")),
         secondary(button.ButtonProps("Clicks")),
       ]),
+      html.div([a.class("buttons")], [
+        filter_button(filter.All, set_filter),
+        filter_button(filter.Active, set_filter),
+        filter_button(filter.Done, set_filter),
+      ]),
+      html.p([], [html.text("Filter: " <> filter.name(current))]),
       html.p([], [
         html.text("Edit "),
         html.code([], [html.text("src/example.gleam")]),
@@ -77,4 +85,13 @@ fn app() {
 fn use_counter() {
   let #(count, set_count) = react.use_state_(0)
   #(count, set_count)
+}
+
+fn filter_button(
+  value: filter.Filter,
+  set_filter: fn(fn(filter.Filter) -> filter.Filter) -> Nil,
+) {
+  html.button([events.on_click(fn(_) { set_filter(fn(_) { value }) })], [
+    html.text(filter.name(value)),
+  ])
 }

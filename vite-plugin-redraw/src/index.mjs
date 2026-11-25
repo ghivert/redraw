@@ -16,12 +16,17 @@ const BUILD_DIR = "build/dev/javascript"
  *
  * The plugin is development-only. In production builds, no transform is
  * applied and Redraw's hot module is inert.
+ *
+ * Only the modules of the root package and of the local path dependencies
+ * are transformed: they are the ones that can change during a session. Hex
+ * packages are left alone.
  */
 export default function redraw(options = {}) {
   const ignore = options.ignore ?? []
   let root = process.cwd()
   let base = "/"
   let packageName = null
+  let localPackages = new Set()
   let enabled = false
 
   const hotFile = () => path.join(root, HOT_FILE)
@@ -44,14 +49,18 @@ export default function redraw(options = {}) {
     return normalize(path.relative(buildDir(), file))
   }
 
-  const isCompiledModule = (id) => {
+  const isLocalModule = (id) => {
     const [file] = id.split("?")
     if (file.endsWith(".gleam")) return true
     if (!file.endsWith(".mjs")) return false
+    if (file === hotFile()) return false
     const relative = path.relative(buildDir(), file)
     if (relative.startsWith("..") || path.isAbsolute(relative)) return false
-    // Redraw itself does not need to be transformed, only its users.
-    if (relative.startsWith(`redraw${path.sep}`)) return false
+    const [pkg, ...rest] = relative.split(path.sep)
+    if (!localPackages.has(pkg)) return false
+    // `gleam.mjs` re-exports the prelude for each package, and the hot module
+    // imports it: transforming it would create an import cycle.
+    if (rest.length === 1 && rest[0] === "gleam.mjs") return false
     return !ignore.some((prefix) => relative.startsWith(prefix))
   }
 
@@ -89,6 +98,8 @@ globalThis.__REDRAW_REFRESH__ = RefreshRuntime;`,
     apply: "serve",
     configResolved(config) {
       packageName = readPackageName(root)
+      localPackages = readLocalPackages(root)
+      if (packageName) localPackages.add(packageName)
       if (!enabled) return
       const names = config.plugins.map((plugin) => plugin.name)
       if (!names.some((name) => name.startsWith("vite:react"))) {
@@ -109,9 +120,7 @@ globalThis.__REDRAW_REFRESH__ = RefreshRuntime;`,
     },
     async transform(code, id, options) {
       if (!enabled || options?.ssr) return
-      if (!isCompiledModule(id)) return
-      // Fast path: modules not importing `redraw` have nothing to refresh.
-      if (!code.includes("redraw.mjs")) return
+      if (!isLocalModule(id)) return
       const result = await transformAsync(code, {
         configFile: false,
         babelrc: false,
@@ -156,6 +165,19 @@ function readPackageName(root) {
   } catch {
     return null
   }
+}
+
+/** Names of the path dependencies listed in `manifest.toml`. */
+function readLocalPackages(root) {
+  const packages = new Set()
+  try {
+    const toml = readFileSync(path.join(root, "manifest.toml"), "utf8")
+    const entries = toml.matchAll(/\{\s*name\s*=\s*"([^"]+)"[^}]*source\s*=\s*"local"/g)
+    for (const [, name] of entries) packages.add(name)
+  } catch {
+    // No manifest: only the root package is transformed.
+  }
+  return packages
 }
 
 function normalize(file) {

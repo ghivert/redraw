@@ -51,7 +51,9 @@ cannot find them by itself. The plugin bridges the gap:
 - Every Gleam value is an instance of a class, matched with `instanceof` by
   the compiled code. After a hot update, values built before the update, or
   kept in hooks state, are reconciled with the new classes, so pattern
-  matching and equality keep working across generations.
+  matching and equality keep working across generations. This applies to
+  every module of the root package and of its path dependencies, including
+  modules that only define types.
 - When the hooks of a component change, or the initial value of a state,
   React remounts the component, as it does for JSX components.
 
@@ -80,5 +82,5 @@ cannot find them by itself. The plugin bridges the gap:
   previous type, as in React.
 - Contexts created with `create_context_` are kept by call site, so a new
   default value is not applied until a full reload.
-- Pass `ignore: ["some_package/"]` to skip compiled dependencies that
-  should not be transformed.
+- Pass `ignore: ["some_package/"]` to skip compiled packages that should
+  not be transformed.
