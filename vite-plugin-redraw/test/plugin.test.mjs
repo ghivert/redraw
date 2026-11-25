@@ -16,7 +16,7 @@ function plugin() {
     command: "serve",
     isProduction: false,
     plugins: [{ name: "vite:react-babel" }],
-    logger: { warn() {} },
+    logger: { warn() {}, info() {} },
   }
   resolve.configResolved(config)
   refresh.configResolved(config)

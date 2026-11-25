@@ -28,8 +28,9 @@ export default defineConfig({
 })
 ```
 
-Every page reload decided by the plugin is explained in the browser console,
-with the Gleam source involved.
+At startup, the dev server logs the Gleam packages Fast Refresh is enabled
+for, and every page reload decided by the plugin is explained in the browser
+console, with the Gleam source involved.
 
 With `vite-gleam`, replace the loader import by `import gleam from "vite-gleam"`.
 

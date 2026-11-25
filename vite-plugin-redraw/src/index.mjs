@@ -116,6 +116,10 @@ globalThis.__REDRAW_REFRESH__ = RefreshRuntime;`,
           "[vite-plugin-redraw] @vitejs/plugin-react is not configured: it ships the React Refresh runtime, nothing will be refreshed.",
         )
       }
+      config.logger.info(
+        `[vite-plugin-redraw] Fast Refresh enabled for ${[...localPackages].join(", ")}`,
+        { timestamp: true },
+      )
     },
     buildStart() {
       if (!enabled) return
