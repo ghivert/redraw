@@ -53,7 +53,9 @@ cannot find them by itself. The plugin bridges the gap:
   kept in hooks state, are reconciled with the new classes, so pattern
   matching and equality keep working across generations. This applies to
   every module of the root package and of its path dependencies, including
-  modules that only define types.
+  modules that only define types. Whether editing a path dependency triggers
+  an update at all depends on the Gleam loader watching its sources: Vite
+  only watches the project root by default.
 - When the hooks of a component change, or the initial value of a state,
   React remounts the component, as it does for JSX components.
 - A module is updated in place when only its components changed. When an
@@ -120,5 +122,8 @@ the entry script, reloads the page too.
   manual `gleam build` or `gleam add`, restart the dev server.
 - A handwritten FFI file Babel cannot parse is served without Fast Refresh,
   with a warning.
+- Only `@vitejs/plugin-react` is supported. If the installed runtime lacks
+  one of the functions Redraw relies on, Fast Refresh is disabled with a
+  warning naming it.
 - Pass `ignore: ["some_package/"]` to skip compiled packages that should
   not be transformed.
