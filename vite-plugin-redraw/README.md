@@ -92,6 +92,10 @@ the entry script, reloads the page too.
 - Two components with the same display name in the same module, built with
   the same factory arguments, share the same Fast Refresh identity. Give
   them distinct names.
+- Call `component_` directly in the factory, with the render function
+  written inline. A wrapper such as `fn my_component(name, render)` calling
+  `component_` for its callers cannot be attributed to the right module by
+  the transform: components built through it are left out of Fast Refresh.
 - Helpers receiving a component and returning it, such as
   `fn memo(c) { memoize_(c) }`, are not replayed after a hot update. All the
   render code lives in functions calling `component_`, which are replayed,

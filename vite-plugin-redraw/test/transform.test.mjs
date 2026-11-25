@@ -117,3 +117,12 @@ export function main() {
   const hashOf = (code) => code.match(/bootstrap\("pkg\/mod\.mjs", "([a-z0-9]+)"\)/)[1]
   assert.equal(hashOf(await transform(main(10))), hashOf(await transform(main(12))))
 })
+
+test("a component_ call whose render is not a function literal is left alone", async () => {
+  const code = await transform(REDRAW + `
+export function wrapper(name, render) { return $react.component_(name, render); }
+`)
+  assert.doesNotMatch(code, /\$redraw_hot\.tag\(/)
+  assert.doesNotMatch(code, /\$redraw_hot\.invoked\(/)
+  assert.doesNotMatch(code, /import\.meta\.hot/)
+})

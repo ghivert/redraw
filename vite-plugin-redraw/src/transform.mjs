@@ -44,9 +44,10 @@ const ARGS_NAME = "$redraw_args"
  *   re-runs its component factories after a hot update.
  *
  * A factory is a top-level function building a component: it calls
- * `component_`, `compose` or `memoize_`. Zero-argument factories are re-run
- * as is. Parameterized factories are replayed with their recorded arguments,
- * provided they call `component_` themselves and only take plain parameters.
+ * `component_` with a function literal, `compose` or `memoize_`.
+ * Zero-argument factories are re-run as is. Parameterized factories are
+ * replayed with their recorded arguments, provided they call `component_`
+ * themselves and only take plain parameters.
  */
 export function redrawRefresh(_babel, { moduleId, hotImport }) {
   return {
@@ -146,7 +147,10 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
         switch (called) {
           case "component_": {
             const render = path.get("arguments.1")
-            if (!render.node) return
+            // A render that is not a function literal comes from a wrapper
+            // around `component_`, which a syntactic transform cannot
+            // attribute to the right module: left alone.
+            if (!render.node || !render.isFunction()) return
             const { signature, customHooks } = hooksSignature(render, state)
             const args = [
               t.stringLiteral(moduleId),
@@ -246,8 +250,11 @@ function findFactories(program, redraw, moduleId) {
     fn.traverse({
       CallExpression(call) {
         const called = redrawFunction(call.node.callee, redraw)
-        if (called === "component_") creates = true
-        else if (called === "compose" || called === "memoize_") composes = true
+        if (called === "component_") {
+          if (t.isFunction(call.node.arguments[1])) creates = true
+        } else if (called === "compose" || called === "memoize_") {
+          composes = true
+        }
       },
     })
     if (!creates && !composes) continue
