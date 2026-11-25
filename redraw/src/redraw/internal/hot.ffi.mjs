@@ -20,6 +20,7 @@
 import React from "react"
 
 const contexts = new Map()
+const types = new Map()
 
 function runtime() {
   if (typeof globalThis === "undefined") return null
@@ -62,6 +63,36 @@ export function register(type, source, suffix = "") {
   const module = meta?.module ? meta.module + " " : ""
   refresh.register(type, module + name + suffix)
   return type
+}
+
+/** Called by the Vite transform after every custom type class declaration.
+ * Every Gleam value is an instance of a class, and the compiled code matches
+ * them with `instanceof`. After a hot update, the module defines new classes,
+ * while values built by modules that were not updated, or kept in hooks
+ * state, are instances of the previous ones. Both generations are reconciled:
+ *
+ * - Previous instances become instances of the new class, by chaining the
+ *   previous prototype to the new one. Their `constructor` resolves to the
+ *   new class too, so that the prelude `isEqual` and `withFields` see a
+ *   single class.
+ * - Code that was not updated keeps matching with the previous class: its
+ *   `Symbol.hasInstance` is redirected to the new class, so that new
+ *   instances are recognized as well. */
+export function type(key, Class) {
+  if (!runtime()) return Class
+  const previous = types.get(key)
+  if (previous && previous !== Class) {
+    Object.setPrototypeOf(previous.prototype, Class.prototype)
+    // Without an own `constructor`, the lookup walks the chain up to the
+    // newest class, whatever the number of generations in between.
+    delete previous.prototype.constructor
+    Object.defineProperty(previous, Symbol.hasInstance, {
+      configurable: true,
+      value: (value) => value instanceof Class,
+    })
+  }
+  types.set(key, Class)
+  return Class
 }
 
 /** Called by the Vite transform in place of `create_context_`. Contexts are

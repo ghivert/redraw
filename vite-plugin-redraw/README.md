@@ -44,6 +44,10 @@ cannot find them by itself. The plugin bridges the gap:
 - When a module is hot updated, the transform re-runs its component
   factories, which register the new render functions under the same ids,
   then asks React to refresh. Mounted components are updated in place.
+- Every Gleam value is an instance of a class, matched with `instanceof` by
+  the compiled code. After a hot update, values built before the update, or
+  kept in hooks state, are reconciled with the new classes, so pattern
+  matching and equality keep working across generations.
 - When the hooks of a component change, React remounts it, as it does for
   JSX components.
 

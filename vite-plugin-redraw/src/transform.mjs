@@ -14,6 +14,8 @@ const HOT_NAMESPACE = "$redraw_hot"
  *   `$redraw_hot.context("moduleId#n", default)` to keep context identities
  *   stable across factory re-runs.
  * - Registers the hooks signature of module-level custom hooks (`use_*`).
+ * - Registers every custom type class with `$redraw_hot.type`, so that
+ *   values created before a hot update still match the new classes.
  * - Appends an `import.meta.hot` trailer that self-accepts the module and
  *   re-runs its component factories (zero-argument top-level functions
  *   building a component) after a hot update.
@@ -62,6 +64,24 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
             )
           }
         },
+      },
+
+      ClassDeclaration(path, state) {
+        if (!state.redraw) return
+        if (!isTopLevel(path) || !path.node.id) return
+        const name = path.node.id.name
+        const statement = path.parentPath.isExportNamedDeclaration()
+          ? path.parentPath
+          : path
+        statement.insertAfter(
+          t.expressionStatement(
+            hotCall("type", [
+              t.stringLiteral(`${moduleId} ${name}`),
+              t.identifier(name),
+            ]),
+          ),
+        )
+        state.touched = true
       },
 
       FunctionDeclaration(path, state) {
