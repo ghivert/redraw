@@ -100,9 +100,13 @@ the entry script, reloads the page too.
   Anything that must exist once, such as a store, belongs in `main`, and
   reaches components through props or a context.
 - Factory arguments should be static configuration: a variant, a size, a
-  child component, some data. They are compared structurally, named
-  functions by their name, and anonymous functions by a hash of their source
-  code. A callback varying per instance belongs in the props, not in the
+  child component, some data, a context created in `main`. Gleam values are
+  compared structurally, named functions by their name, anonymous functions
+  by a hash of their source code, and instances of classes that are not Gleam
+  values, such as a context, a `Map`, a `Date`, a DOM node or an observable,
+  by their identity. A plain object built in FFI is compared by its fields. A
+  callback
+  varying per instance belongs in the props, not in the
   factory arguments: two closures with the same code capturing different
   values, such as two results of `fn on_toggle(side) { fn(v) { ... } }`,
   share the same identity, and both instances would end up calling the last

@@ -198,3 +198,48 @@ test("a module re-executed by propagation propagates when it has non-factory exp
   assert.equal(hot.exports("components", "v1", {}), false)
   assert.equal(hot.exports("components", "v1", {}), false)
 })
+
+test("objects that are not Gleam values are identified, not serialized", { skip: built }, async (t) => {
+  const { hot, calls } = await setup(t)
+  const React = (await import("react")).default
+  const theme = React.createContext("light")
+  const other = React.createContext("light")
+  const store = { items: [] }
+  store.self = store
+  component(hot, "App", [theme])
+  component(hot, "App", [theme])
+  component(hot, "App", [other])
+  component(hot, "App", [store])
+  component(hot, "App", [store])
+  assert.equal(calls.ids[0], calls.ids[1])
+  assert.notEqual(calls.ids[0], calls.ids[2])
+  assert.match(calls.ids[0], /^m App #\(ref#\d+\)$/)
+  assert.equal(calls.ids[3], calls.ids[4])
+  assert.match(calls.ids[3], /^m App #\(Object\(items:#\(\),self:ref#\d+\)\)$/)
+  // Built-in handles are identified too: two empty maps are two maps.
+  component(hot, "App", [new Map()])
+  component(hot, "App", [new Map()])
+  assert.notEqual(calls.ids[5], calls.ids[6])
+  assert.match(calls.ids[5], /^m App #\(ref#\d+\)$/)
+  // A plain object built in FFI is still data.
+  component(hot, "App", [{ url: "/api" }])
+  component(hot, "App", [{ url: "/api" }])
+  assert.equal(calls.ids[7], calls.ids[8])
+  // Any instance of a non-Gleam class is a handle, even when its fields
+  // change over time, like the observers of an observable.
+  class Observable { constructor() { this.observers = [] } }
+  const observable = new Observable()
+  component(hot, "App", [observable])
+  observable.observers.push(() => {})
+  component(hot, "App", [observable])
+  component(hot, "App", [new Observable()])
+  assert.equal(calls.ids[9], calls.ids[10])
+  assert.notEqual(calls.ids[9], calls.ids[11])
+  assert.match(calls.ids[9], /^m App #\(ref#\d+\)$/)
+  // The Dict of the standard library stays data.
+  const { new$: newDict, insert } = await import(pathToFileURL(path.join(build, "gleam_stdlib/gleam/dict.mjs")))
+  component(hot, "App", [insert(newDict(), "a", 1)])
+  component(hot, "App", [insert(newDict(), "a", 1)])
+  assert.equal(calls.ids[12], calls.ids[13])
+  assert.doesNotMatch(calls.ids[12], /ref#/)
+})

@@ -10,14 +10,15 @@ import redraw/dom/html
 
 pub fn main() {
   let assert Ok(node) = client.create_root("root")
-  use root <- client.render_(node, root())
+  let theme = react.create_context_("light")
+  use root <- client.render_(node, root(theme))
   react.strict_mode([root(Nil)])
 }
 
-pub fn root() -> react.ReactComponent(Nil) {
-  use app <- react.compose(app())
+pub fn root(theme: react.Context(String)) -> react.ReactComponent(Nil) {
+  use app <- react.compose(app(theme))
   use Nil <- react.component_("Root")
-  app(Nil)
+  react.provider(theme, "dark", [app(Nil)])
 }
 
 pub type CounterProps {
@@ -48,14 +49,16 @@ fn nav_links() {
   ])
 }
 
-fn app() {
+fn app(theme: react.Context(String)) {
   use counter <- react.compose(react.memoize_(counter()))
   use primary <- react.compose(button.button(button.Primary))
   use secondary <- react.compose(button.button(button.Secondary))
   use Nil <- react.component_("App")
   let #(count, set_count) = use_counter()
   let #(current, set_filter) = react.use_state_(filter.All)
+  let current_theme = react.use_context(theme)
   react.fragment([
+    html.p([], [html.text("Theme: " <> current_theme)]),
     nav_links(),
     html.h1([], [html.text("Vite + Gleam + React")]),
     html.div([a.class("card")], [

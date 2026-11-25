@@ -26,6 +26,8 @@
 
 import React from "react"
 import * as $gleam from "../../gleam.mjs"
+import Dict from "../../../gleam_stdlib/dict.mjs"
+import * as $dict from "../../../gleam_stdlib/gleam/dict.mjs"
 
 const contexts = new Map()
 const invocations = new Map()
@@ -329,16 +331,49 @@ function setSignature(refresh, type, signature, customHooks) {
  * by a hash of their source code: it is stable across factory re-runs, which
  * recreate every closure, and differs between closures with different code.
  * Two closures with the same code capturing different values still share an
- * identity. */
+ * identity.
+ *
+ * Objects that are not Gleam values, such as a React context, a DOM node, a
+ * `Map`, a `Promise` or an observable, are identified by a token attached to
+ * the object itself: it is stable as long as the same object is passed,
+ * which is the case of a value created in `main`. They are recognized as
+ * instances of a class that is not a Gleam one, by a `$$typeof` property,
+ * React's mark, or by appearing inside their own serialization, since Gleam
+ * values never do. A plain object built in FFI is still serialized by its
+ * fields. */
 const MAX_LENGTH = 200
+const identities = new WeakMap()
+let nextIdentity = 1
 
 function serialize(value) {
-  const output = serializeValue(value, 0)
+  const output = serializeValue(value, 0, new Set())
   if (output.length <= MAX_LENGTH) return output
   return "#" + hash(output)
 }
 
-function serializeValue(value, depth) {
+/** Whether an object is a handle rather than data: any instance of a class
+ * that is not a Gleam value. Gleam values are custom types, lists, bit
+ * arrays, codepoints and dictionaries, all handled before this check; the
+ * `Set` of the standard library is a custom type. A plain object, built in
+ * FFI, is data. Everything else, a `Map`, a `Date`, a `Promise`, a DOM node,
+ * an observable, is compared by identity: its fields may be internal state,
+ * and may change after the component was built. */
+function isHandle(value) {
+  const prototype = Object.getPrototypeOf(value)
+  if (prototype === null || prototype === Object.prototype) return false
+  return !(value instanceof $gleam.CustomType)
+}
+
+function identity(value) {
+  let token = identities.get(value)
+  if (token === undefined) {
+    token = nextIdentity++
+    identities.set(value, token)
+  }
+  return "ref#" + token
+}
+
+function serializeValue(value, depth, seen) {
   if (depth > 8) return "…"
   // Gleam `Nil` compiles to `undefined`.
   if (value === undefined) return "Nil"
@@ -358,18 +393,30 @@ function serializeValue(value, depth) {
       return "fn#" + hash(String(value))
     }
     case "object": {
+      if ("$$typeof" in value || seen.has(value)) return identity(value)
+      seen.add(value)
       const next = depth + 1
       const items = (values) =>
-        values.map((item) => serializeValue(item, next)).join(",")
+        values.map((item) => serializeValue(item, next, seen)).join(",")
       if (value instanceof $gleam.List) return "[" + items(value.toArray()) + "]"
       // Tuples compile to arrays.
       if (Array.isArray(value)) return "#(" + items(value) + ")"
       if (value instanceof $gleam.BitArray)
         return "<<" + items([...$gleam.BitArray$BitArray$data(value)]) + ">>"
       if (value instanceof $gleam.UtfCodepoint) return "cp:" + value.value
+      // A dictionary is serialized by its entries, sorted: its internal tree
+      // depends on the history of insertions, and carries a generation.
+      if (value instanceof Dict) {
+        const entries = $dict
+          .to_list(value)
+          .toArray()
+          .map(([key, item]) => serializeValue(key, next, seen) + "=>" + serializeValue(item, next, seen))
+        return "Dict{" + entries.sort().join(",") + "}"
+      }
+      if (isHandle(value)) return identity(value)
       const name = value.constructor?.name ?? "Object"
       const fields = Object.keys(value).map(
-        (key) => key + ":" + serializeValue(value[key], next),
+        (key) => key + ":" + serializeValue(value[key], next, seen),
       )
       return name + "(" + fields.join(",") + ")"
     }
