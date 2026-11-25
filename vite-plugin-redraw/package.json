@@ -45,5 +45,8 @@
       "optional": true
     }
   },
-  "types": "./src/index.d.mts"
+  "types": "./src/index.d.mts",
+  "scripts": {
+    "test": "node --test"
+  }
 }

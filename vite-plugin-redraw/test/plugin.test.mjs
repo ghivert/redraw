@@ -1,0 +1,55 @@
+import { test } from "node:test"
+import assert from "node:assert/strict"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+import redraw from "../src/index.mjs"
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../example")
+const build = path.join(root, "build/dev/javascript")
+
+function plugin() {
+  const [, refresh] = redraw()
+  const [resolve] = redraw()
+  const config = {
+    root,
+    base: "/",
+    command: "serve",
+    isProduction: false,
+    plugins: [{ name: "vite:react-babel" }],
+    logger: { warn() {} },
+  }
+  resolve.configResolved(config)
+  refresh.configResolved(config)
+  return redraw().map((p) => (p.configResolved(config), p))
+}
+
+async function transform(code, file) {
+  const [, refresh] = plugin()
+  const warnings = []
+  const result = await refresh.transform.call({ warn: (m) => warnings.push(m) }, code, file)
+  return { result, warnings }
+}
+
+test("only the modules of local packages are transformed", async () => {
+  const code = `export function f() {}`
+  const local = await transform(code, path.join(build, "example/x.mjs"))
+  assert.ok(local.result?.code.includes("$redraw_hot.types"))
+  const dependency = await transform(code, path.join(build, "redraw_dom/redraw/dom/html.mjs"))
+  assert.ok(dependency.result?.code.includes("$redraw_hot.types"))
+  const hex = await transform(code, path.join(build, "gleam_stdlib/gleam/list.mjs"))
+  assert.equal(hex.result, undefined)
+  const prelude = await transform(code, path.join(build, "example/gleam.mjs"))
+  assert.equal(prelude.result, undefined)
+  const hot = await transform(code, path.join(build, "redraw/redraw/internal/hot.ffi.mjs"))
+  assert.equal(hot.result, undefined)
+})
+
+test("compiled files changes are ignored and gleam sources map to their module", () => {
+  const [, refresh] = plugin()
+  const compiled = path.join(build, "example/example.mjs")
+  const module = { id: compiled }
+  const server = { moduleGraph: { getModulesByFile: (f) => (f === compiled ? new Set([module]) : undefined) } }
+  assert.deepEqual(refresh.handleHotUpdate({ file: path.join(root, "src/example.gleam"), modules: [], server }), [module])
+  assert.deepEqual(refresh.handleHotUpdate({ file: path.join(build, "example/example.mjs"), modules: [module], server }), [])
+  assert.equal(refresh.handleHotUpdate({ file: path.join(root, "src/App.css"), modules: [], server }), undefined)
+})
