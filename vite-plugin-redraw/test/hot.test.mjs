@@ -13,9 +13,11 @@ const build = path.resolve(
 )
 const hotFile = path.join(build, "redraw/redraw/internal/hot.ffi.mjs")
 const built = existsSync(hotFile)
+  ? false
+  : "the example is not built: run `gleam build` in example/ first"
 const { CustomType, isEqual } = built
-  ? await import(pathToFileURL(path.join(build, "prelude.mjs")))
-  : {}
+  ? {}
+  : await import(pathToFileURL(path.join(build, "prelude.mjs")))
 
 let generation = 0
 
@@ -41,7 +43,7 @@ function component(hot, name, args) {
   return hot.register(() => {}, render)
 }
 
-test("classes are reconciled across generations", { skip: !built }, async (t) => {
+test("classes are reconciled across generations", { skip: built }, async (t) => {
   const { hot, calls } = await setup(t)
   class V1 extends CustomType { constructor(a) { super(); this.a = a } }
   hot.type("m V", V1)
@@ -58,7 +60,7 @@ test("classes are reconciled across generations", { skip: !built }, async (t) =>
   assert.equal(calls.reloads.length, 0)
 })
 
-test("a change in the fields of a type reloads", { skip: !built }, async (t) => {
+test("a change in the fields of a type reloads", { skip: built }, async (t) => {
   const { hot, calls } = await setup(t)
   class V1 extends CustomType { constructor(a) { super(); this.a = a } }
   hot.type("m V", V1)
@@ -68,7 +70,7 @@ test("a change in the fields of a type reloads", { skip: !built }, async (t) => 
   assert.match(calls.reloads[0], /fields of m V changed/)
 })
 
-test("a removed variant reloads", { skip: !built }, async (t) => {
+test("a removed variant reloads", { skip: built }, async (t) => {
   const { hot, calls } = await setup(t)
   hot.types("m", ["All", "Done"])
   hot.types("m", ["All", "Done", "Archived"])
@@ -77,7 +79,7 @@ test("a removed variant reloads", { skip: !built }, async (t) => {
   assert.match(calls.reloads[0], /Done was removed from m/)
 })
 
-test("a change in main reloads", { skip: !built }, async (t) => {
+test("a change in main reloads", { skip: built }, async (t) => {
   const { hot, calls } = await setup(t)
   hot.bootstrap("m", "abc")
   hot.bootstrap("m", "abc")
@@ -86,7 +88,7 @@ test("a change in main reloads", { skip: !built }, async (t) => {
   assert.match(calls.reloads[0], /main changed in m/)
 })
 
-test("ids include the factory arguments", { skip: !built }, async (t) => {
+test("ids include the factory arguments", { skip: built }, async (t) => {
   const { hot, calls } = await setup(t)
   class Primary extends CustomType {}
   class Secondary extends CustomType {}
@@ -102,7 +104,7 @@ test("ids include the factory arguments", { skip: !built }, async (t) => {
   assert.equal(calls.ids[4], "m Plain")
 })
 
-test("a re-run replays recorded arguments and refreshes", { skip: !built }, async (t) => {
+test("a re-run replays recorded arguments and refreshes", { skip: built }, async (t) => {
   const { hot, calls } = await setup(t)
   const replayed = []
   const button = (variant) => {
@@ -120,7 +122,7 @@ test("a re-run replays recorded arguments and refreshes", { skip: !built }, asyn
   assert.equal(calls.reloads.length, 0)
 })
 
-test("a component missing after a re-run reloads", { skip: !built }, async (t) => {
+test("a component missing after a re-run reloads", { skip: built }, async (t) => {
   const { hot, calls } = await setup(t)
   hot.rerun("m", [() => component(hot, "App"), () => component(hot, "Old")])
   assert.equal(calls.reloads.length, 0)
@@ -128,7 +130,7 @@ test("a component missing after a re-run reloads", { skip: !built }, async (t) =
   assert.match(calls.reloads[0], /"m Old" was removed or renamed/)
 })
 
-test("contexts are kept by key and reload on a new default", { skip: !built }, async (t) => {
+test("contexts are kept by key and reload on a new default", { skip: built }, async (t) => {
   const { hot, calls } = await setup(t)
   const first = hot.context("m#0", "light")
   assert.equal(hot.context("m#0", "light"), first)
@@ -137,7 +139,7 @@ test("contexts are kept by key and reload on a new default", { skip: !built }, a
   assert.match(calls.reloads[0], /default value of a context changed/)
 })
 
-test("the memoized wrapper registered by the parent is not required after a re-run", { skip: !built }, async (t) => {
+test("the memoized wrapper registered by the parent is not required after a re-run", { skip: built }, async (t) => {
   const { hot, calls } = await setup(t)
   const counter = () => {
     const render = hot.tag("child", "", () => [], (props) => props)
@@ -153,7 +155,7 @@ test("the memoized wrapper registered by the parent is not required after a re-r
   assert.equal(calls.refreshes, 1)
 })
 
-test("a factory throwing at re-run keeps the previous code without reloading", { skip: !built }, async (t) => {
+test("a factory throwing at re-run keeps the previous code without reloading", { skip: built }, async (t) => {
   const { hot, calls } = await setup(t)
   const original = console.error
   const errors = []
@@ -169,7 +171,7 @@ test("a factory throwing at re-run keeps the previous code without reloading", {
   assert.match(calls.reloads[0], /"m Other" was removed or renamed/)
 })
 
-test("an unsupported runtime disables Fast Refresh with a warning", { skip: !built }, async (t) => {
+test("an unsupported runtime disables Fast Refresh with a warning", { skip: built }, async (t) => {
   const { hot, calls } = await setup(t)
   delete globalThis.__REDRAW_REFRESH__.validateRefreshBoundaryAndEnqueueUpdate
   component(hot, "App")
@@ -180,7 +182,7 @@ test("an unsupported runtime disables Fast Refresh with a warning", { skip: !bui
   assert.equal(calls.reloads.length, 1)
 })
 
-test("an edited module propagates only when a non-factory export changed", { skip: !built }, async (t) => {
+test("an edited module propagates only when a non-factory export changed", { skip: built }, async (t) => {
   const { hot } = await setup(t)
   assert.equal(hot.exports("m", "v1", { label: "a", limit: "b" }), false)
   assert.equal(hot.exports("m", "v2", { label: "a", limit: "b" }), false)
@@ -189,7 +191,7 @@ test("an edited module propagates only when a non-factory export changed", { ski
   assert.equal(hot.exports("m", "v5", { label: "c" }), false)
 })
 
-test("a module re-executed by propagation propagates when it has non-factory exports", { skip: !built }, async (t) => {
+test("a module re-executed by propagation propagates when it has non-factory exports", { skip: built }, async (t) => {
   const { hot } = await setup(t)
   assert.equal(hot.exports("helpers", "v1", { label: "a" }), false)
   assert.equal(hot.exports("helpers", "v1", { label: "a" }), true)
