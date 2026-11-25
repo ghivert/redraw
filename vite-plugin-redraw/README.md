@@ -28,6 +28,9 @@ export default defineConfig({
 })
 ```
 
+Every page reload decided by the plugin is explained in the browser console,
+with the Gleam source involved.
+
 With `vite-gleam`, replace the loader import by `import gleam from "vite-gleam"`.
 
 The plugin is development-only: production builds are left untouched.

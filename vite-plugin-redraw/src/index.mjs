@@ -44,12 +44,18 @@ export default function redraw(options = {}) {
     return `${buildDir()}/${packageName}/${module}`
   }
 
-  /** Human readable, unique id for a module. Used in Fast Refresh ids and
-   * in context keys. */
+  /** Unique id of a module, used in Fast Refresh ids, in context keys and in
+   * the messages printed in the browser. It is the path of the Gleam source,
+   * `src/button.gleam` for the root package, `redraw_dom/src/redraw/dom/html.gleam`
+   * for a path dependency, since that is what the user edits. A handwritten
+   * `.ffi.mjs` file keeps its name. */
   const moduleId = (id) => {
     const [file] = id.split("?")
     if (file.endsWith(".gleam")) return normalizePath(path.relative(root, file))
-    return normalizePath(path.relative(buildDir(), file))
+    const relative = normalizePath(path.relative(buildDir(), file))
+    const [pkg, ...rest] = relative.split("/")
+    const source = rest.join("/").replace(/(?<!\.ffi)\.mjs$/, ".gleam")
+    return pkg === packageName ? `src/${source}` : `${pkg}/src/${source}`
   }
 
   const isLocalModule = (id) => {

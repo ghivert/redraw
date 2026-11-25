@@ -58,5 +58,17 @@ test("a module Babel cannot parse is served as is, with a warning", async () => 
   const { result, warnings } = await transform(`export const = ;`, path.join(build, "example/broken.ffi.mjs"))
   assert.equal(result, undefined)
   assert.equal(warnings.length, 1)
-  assert.match(warnings[0], /example\/broken\.ffi\.mjs could not be transformed/)
+  assert.match(warnings[0], /src\/broken\.ffi\.mjs could not be transformed/)
+})
+
+test("module ids are the paths of the Gleam sources", async () => {
+  const [, refresh] = plugin()
+  const code = `export function f() {}`
+  const id = async (file) => {
+    const { code: out } = await refresh.transform.call({ warn() {} }, code, file)
+    return out.match(/\$redraw_hot\.types\("([^"]+)"/)[1]
+  }
+  assert.equal(await id(path.join(build, "example/button.mjs")), "src/button.gleam")
+  assert.equal(await id(path.join(build, "example/dom/foo.ffi.mjs")), "src/dom/foo.ffi.mjs")
+  assert.equal(await id(path.join(build, "redraw_dom/redraw/dom/html.mjs")), "redraw_dom/src/redraw/dom/html.gleam")
 })
