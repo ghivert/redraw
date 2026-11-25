@@ -53,3 +53,10 @@ test("compiled files changes are ignored and gleam sources map to their module",
   assert.deepEqual(refresh.handleHotUpdate({ file: path.join(build, "example/example.mjs"), modules: [module], server }), [])
   assert.equal(refresh.handleHotUpdate({ file: path.join(root, "src/App.css"), modules: [], server }), undefined)
 })
+
+test("a module Babel cannot parse is served as is, with a warning", async () => {
+  const { result, warnings } = await transform(`export const = ;`, path.join(build, "example/broken.ffi.mjs"))
+  assert.equal(result, undefined)
+  assert.equal(warnings.length, 1)
+  assert.match(warnings[0], /example\/broken\.ffi\.mjs could not be transformed/)
+})

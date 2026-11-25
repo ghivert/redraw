@@ -121,15 +121,25 @@ globalThis.__REDRAW_REFRESH__ = RefreshRuntime;`,
     async transform(code, id, options) {
       if (!enabled || options?.ssr) return
       if (!isLocalModule(id)) return
-      const result = await transformAsync(code, {
-        configFile: false,
-        babelrc: false,
-        filename: id,
-        sourceFileName: id,
-        sourceMaps: true,
-        parserOpts: { sourceType: "module" },
-        plugins: [[redrawRefresh, { moduleId: moduleId(id), hotImport: HOT_IMPORT }]],
-      })
+      let result
+      try {
+        result = await transformAsync(code, {
+          configFile: false,
+          babelrc: false,
+          filename: id,
+          sourceFileName: id,
+          sourceMaps: true,
+          parserOpts: { sourceType: "module" },
+          plugins: [[redrawRefresh, { moduleId: moduleId(id), hotImport: HOT_IMPORT }]],
+        })
+      } catch (error) {
+        // A handwritten FFI file may use a syntax Babel does not parse: it
+        // is served as is, without Fast Refresh, rather than failing to load.
+        this.warn(
+          `[vite-plugin-redraw] ${moduleId(id)} could not be transformed and is served without Fast Refresh: ${error.message}`,
+        )
+        return
+      }
       if (!result) return
       return { code: result.code, map: result.map }
     },
