@@ -71,6 +71,14 @@ fn app() {
       ]),
       html.p([], [html.text("Filter: " <> filter.name(current))]),
       html.p([], [
+        html.text(
+          "Variants: "
+          <> button.name(button.Primary)
+          <> ", "
+          <> button.name(button.Secondary),
+        ),
+      ]),
+      html.p([], [
         html.text("Edit "),
         html.code([], [html.text("src/example.gleam")]),
         html.text(" and save to test HMR"),

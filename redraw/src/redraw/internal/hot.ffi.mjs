@@ -33,6 +33,7 @@ const classes = new Map()
 const moduleTypes = new Map()
 const moduleIds = new Map()
 const bootstraps = new Map()
+const moduleExports = new Map()
 let reloading = false
 
 /** Functions of the React Refresh runtime this module relies on. The
@@ -190,6 +191,29 @@ export function bootstrap(module, hash) {
   if (previous !== undefined && previous !== hash) {
     reload(`main changed in ${module}`)
   }
+}
+
+/** Called by the Vite transform at the end of a module with factories, with
+ * a hash of the module and a hash of every export that is not a factory.
+ * Importers hold those exports through ESM bindings to the previous instance
+ * of the module. The trailer invalidates the module, so that the update
+ * propagates to the importers, when this returns `true`:
+ *
+ * - The module was edited, and one of those exports changed.
+ * - The module was not edited, so it was re-executed because a dependency
+ *   changed, and it has such exports: through them, importers still reach
+ *   the previous dependency. */
+export function exports(module, moduleHash, hashes) {
+  if (!runtime()) return false
+  const previous = moduleExports.get(module)
+  moduleExports.set(module, { moduleHash, hashes })
+  if (!previous) return false
+  const names = new Set([...Object.keys(previous.hashes), ...Object.keys(hashes)])
+  if (previous.moduleHash === moduleHash) return names.size > 0
+  for (const name of names) {
+    if (previous.hashes[name] !== hashes[name]) return true
+  }
+  return false
 }
 
 /** Called by the Vite transform in place of `create_context_`. Contexts are

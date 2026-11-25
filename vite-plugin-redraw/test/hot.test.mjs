@@ -179,3 +179,20 @@ test("an unsupported runtime disables Fast Refresh with a warning", { skip: !bui
   component(hot, "App")
   assert.equal(calls.reloads.length, 1)
 })
+
+test("an edited module propagates only when a non-factory export changed", { skip: !built }, async (t) => {
+  const { hot } = await setup(t)
+  assert.equal(hot.exports("m", "v1", { label: "a", limit: "b" }), false)
+  assert.equal(hot.exports("m", "v2", { label: "a", limit: "b" }), false)
+  assert.equal(hot.exports("m", "v3", { label: "c", limit: "b" }), true)
+  assert.equal(hot.exports("m", "v4", { label: "c" }), true)
+  assert.equal(hot.exports("m", "v5", { label: "c" }), false)
+})
+
+test("a module re-executed by propagation propagates when it has non-factory exports", { skip: !built }, async (t) => {
+  const { hot } = await setup(t)
+  assert.equal(hot.exports("helpers", "v1", { label: "a" }), false)
+  assert.equal(hot.exports("helpers", "v1", { label: "a" }), true)
+  assert.equal(hot.exports("components", "v1", {}), false)
+  assert.equal(hot.exports("components", "v1", {}), false)
+})

@@ -56,6 +56,15 @@ cannot find them by itself. The plugin bridges the gap:
   modules that only define types.
 - When the hooks of a component change, or the initial value of a state,
   React remounts the component, as it does for JSX components.
+- A module is updated in place when only its components changed. When an
+  export that importers may hold through an ESM binding changed, a helper, a
+  custom hook or a constant, the update propagates to the importers, which
+  re-run their own factories with the new bindings. A module re-executed
+  because one of its dependencies changed propagates too when it has such
+  exports, since importers reach the previous dependency through them.
+  Modules without components, such as modules defining only types, always
+  propagate. The entry module should export `main` and factories only: an
+  update reaching it through a helper export reloads the page.
 - When a factory throws while re-running, the error is reported, the
   application keeps the previous code, and the next save tries again.
 
@@ -97,11 +106,10 @@ the entry script, reloads the page too.
   `component_` for its callers cannot be attributed to the right module by
   the transform: components built through it are left out of Fast Refresh.
 - Helpers receiving a component and returning it, such as
-  `fn memo(c) { memoize_(c) }`, are not replayed after a hot update. All the
-  render code lives in functions calling `component_`, which are replayed,
-  so a helper has nothing to refresh. The only effect is that a change in the
-  helper itself, like memoizing or not, waits for a full reload when its
-  module self-accepts the update.
+  `fn memo(c) { memoize_(c) }`, are not replayed after a hot update: all the
+  render code lives in functions calling `component_`, which are replayed.
+  A change in such a helper propagates to its importers like any other
+  helper change.
 - The type of a state is erased at runtime. Changing the initial value of a
   `use_state_` remounts the component, but if the initial value is a call
   whose return type changed elsewhere, the state keeps a value of the

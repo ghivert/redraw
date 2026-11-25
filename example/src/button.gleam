@@ -3,6 +3,7 @@ import redraw as react
 import redraw/dom/attribute as a
 import redraw/dom/events
 import redraw/dom/html
+import text
 
 pub type Variant {
   Primary
@@ -31,9 +32,9 @@ pub fn button(variant: Variant) {
   )
 }
 
-fn name(variant: Variant) -> String {
+pub fn name(variant: Variant) -> String {
   case variant {
-    Primary -> "primary"
-    Secondary -> "secondary"
+    Primary -> text.title("primary")
+    Secondary -> text.title("secondary")
   }
 }

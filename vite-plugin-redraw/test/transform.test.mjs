@@ -126,3 +126,38 @@ export function wrapper(name, render) { return $react.component_(name, render); 
   assert.doesNotMatch(code, /\$redraw_hot\.invoked\(/)
   assert.doesNotMatch(code, /import\.meta\.hot/)
 })
+
+test("non-factory exports are hashed, factories, main, classes and accessors are not", async () => {
+  const code = await transform(REDRAW + `
+import { CustomType as $CustomType } from "./gleam.mjs";
+export class Props extends $CustomType {}
+export const Props$Props = () => new Props();
+export const limit = 3;
+export function label(x) { return "" + x; }
+export function use_thing() { return $react.use_state_(0); }
+export function memo(c) { return $react.memoize_(c); }
+export function button(v) { return $react.component_("Button", (p) => $html.text("")); }
+export function root() { return $react.component_("Root", (p) => $html.text("")); }
+export function main() { return root(); }
+`)
+  const match = code.match(/const \$redraw_stale = \$redraw_hot\.exports\("pkg\/mod\.mjs", "[a-z0-9]+", \{([^}]*)\}\)/)
+  assert.ok(match, code)
+  const names = [...match[1].matchAll(/"([^"]+)": "[a-z0-9]+"/g)].map((m) => m[1])
+  assert.deepEqual(names, ["limit", "label", "use_thing", "memo"])
+  assert.match(code, /if \(\$redraw_stale\) import\.meta\.hot\.invalidate\(/)
+})
+
+test("the module hash ignores positions, and generated classes are not listed", async () => {
+  const module = (line) => REDRAW + `
+import { CustomType as $CustomType } from "./gleam.mjs";
+export class Props extends $CustomType {}
+class Echo$Inspector {}
+function app() { return $react.component_("App", (p) => { echo(1, undefined, "src/m.gleam", ${line}); return $html.text(""); }); }
+`
+  const moduleHash = (code) => code.match(/\$redraw_hot\.exports\("pkg\/mod\.mjs", "([a-z0-9]+)"/)[1]
+  const a = await transform(module(3))
+  const b = await transform(module(9))
+  assert.equal(moduleHash(a), moduleHash(b))
+  assert.match(a, /\$redraw_hot\.types\("pkg\/mod\.mjs", \["Props"\]\)/)
+  assert.doesNotMatch(a, /type\("pkg\/mod\.mjs Echo\$Inspector"/)
+})

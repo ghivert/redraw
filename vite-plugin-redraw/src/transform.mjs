@@ -17,6 +17,7 @@ const STATE_HOOKS = new Set([
 ])
 const HOT_NAMESPACE = "$redraw_hot"
 const ARGS_NAME = "$redraw_args"
+const STALE_NAME = "$redraw_stale"
 
 /** Babel plugin applied to the compiled modules of the local Gleam packages
  * in development.
@@ -40,8 +41,15 @@ const ARGS_NAME = "$redraw_args"
  *   `$redraw_hot.context("moduleId#n", default)` to keep context identities
  *   stable across factory re-runs.
  * - Registers the hooks signature of module-level custom hooks (`use_*`).
- * - Appends an `import.meta.hot` trailer that self-accepts the module and
- *   re-runs its component factories after a hot update.
+ * - Registers a hash of the module and of every export that is not a
+ *   factory (helpers, custom hooks, constants) with `$redraw_hot.exports`:
+ *   importers hold those through ESM bindings to the previous module
+ *   instance, so when one of them changed, or when the module was
+ *   re-executed because a dependency changed, the update must propagate to
+ *   the importers.
+ * - Appends an `import.meta.hot` trailer that self-accepts the module,
+ *   re-runs its component factories after a hot update, and invalidates the
+ *   module when a non-factory export changed.
  *
  * A factory is a top-level function building a component: it calls
  * `component_` with a function literal, `compose` or `memoize_`.
@@ -98,7 +106,14 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
           const plain = factories.filter((f) => f.kind === "plain")
           const parameterized = factories.filter((f) => f.kind === "parameterized")
           if (plain.length > 0 || parameterized.length > 0) {
-            path.pushContainer("body", trailer(moduleId, plain, parameterized))
+            path.pushContainer("body", [
+              staleDeclaration(
+                moduleId,
+                hashSource(state.code, path.node),
+                exportsHashes(path, state),
+              ),
+              trailer(moduleId, plain, parameterized),
+            ])
           }
           path.unshiftContainer(
             "body",
@@ -297,6 +312,35 @@ function enclosingFactory(path, state) {
   return state.factories.get(fn.node.id.name) ?? null
 }
 
+/** Hashes of the exports importers may hold through ESM bindings: every
+ * exported function that is not a factory (helpers, custom hooks, wrappers)
+ * except `main`, which has its own hash, and every exported constant written
+ * by the user. The generated accessors of custom types contain a `$` and
+ * build the current classes, and classes themselves are reconciled: both are
+ * left out. */
+function exportsHashes(program, state) {
+  const hashes = []
+  for (const statement of program.get("body")) {
+    if (!statement.isExportNamedDeclaration()) continue
+    const declaration = statement.node.declaration
+    if (t.isFunctionDeclaration(declaration) && declaration.id) {
+      const name = declaration.id.name
+      if (name === "main") continue
+      const kind = state.factories.get(name)?.kind
+      if (kind === "plain" || kind === "parameterized") continue
+      hashes.push([name, hashSource(state.code, declaration)])
+    } else if (t.isVariableDeclaration(declaration)) {
+      for (const declarator of declaration.declarations) {
+        if (!t.isIdentifier(declarator.id)) continue
+        const name = declarator.id.name
+        if (name.includes("$")) continue
+        hashes.push([name, hashSource(state.code, declarator)])
+      }
+    }
+  }
+  return hashes
+}
+
 /** Collects every `use_*` call inside `path`, in source order, to build the
  * hooks signature React Refresh compares between two versions of a component.
  * The initial value of state hooks is part of the signature. Calls to
@@ -385,15 +429,35 @@ function hotCall(name, args) {
   )
 }
 
+function staleDeclaration(moduleId, moduleHash, hashes) {
+  return t.variableDeclaration("const", [
+    t.variableDeclarator(
+      t.identifier(STALE_NAME),
+      hotCall("exports", [
+        t.stringLiteral(moduleId),
+        t.stringLiteral(moduleHash),
+        t.objectExpression(
+          hashes.map(([name, value]) =>
+            t.objectProperty(t.stringLiteral(name), t.stringLiteral(value)),
+          ),
+        ),
+      ]),
+    ),
+  ])
+}
+
 const buildTrailer = template.statement(
   `
 if (import.meta.hot) {
   import.meta.hot.accept();
-  if (import.meta.hot.data.redraw) HOT.rerun(MODULE, FACTORIES, PARAMETERIZED);
+  if (import.meta.hot.data.redraw) {
+    HOT.rerun(MODULE, FACTORIES, PARAMETERIZED);
+    if (STALE) import.meta.hot.invalidate("an export used by importers changed");
+  }
   import.meta.hot.data.redraw = true;
 }
 `,
-  { placeholderPattern: /^(HOT|MODULE|FACTORIES|PARAMETERIZED)$/ },
+  { placeholderPattern: /^(HOT|MODULE|FACTORIES|PARAMETERIZED|STALE)$/ },
 )
 
 function trailer(moduleId, plain, parameterized) {
@@ -406,6 +470,7 @@ function trailer(moduleId, plain, parameterized) {
         t.objectProperty(t.stringLiteral(f.key), t.identifier(f.name)),
       ),
     ),
+    STALE: t.identifier(STALE_NAME),
   })
 }
 
