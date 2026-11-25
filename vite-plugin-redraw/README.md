@@ -94,6 +94,15 @@ reason printed in the console:
 As in Vite, a change in a module that no component module imports, such as
 the entry script, reloads the page too.
 
+## Linting
+
+The rules below are checked on the Gleam sources by
+[`redraw_lint`](../redraw_lint), which has the types the transform lacks:
+`gleam run -m redraw_lint` in the project reports every factory parameter
+that is a function or an FFI handle, every `component_` call the transform
+cannot attribute, duplicate component names, helper exports of the entry
+module and factories creating resources.
+
 ## Rules and limitations
 
 - Factories run once at startup, then once per hot update of their module.

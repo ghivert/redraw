@@ -1,0 +1,11 @@
+id = "redraw-lint"
+name = "Redraw Lint"
+description = "Fast Refresh warnings for Redraw projects, from redraw_lint."
+version = "0.1.0"
+schema_version = 1
+authors = ["Guillaume Hivert <guillaume@steerlab.fr>"]
+repository = "https://github.com/ghivert/redraw"
+
+[language_servers.redraw-lint]
+name = "Redraw Lint"
+languages = ["Gleam"]

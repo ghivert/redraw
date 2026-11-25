@@ -1,0 +1,25 @@
+name = "redraw_lint"
+version = "0.1.0"
+target = "javascript"
+
+description = "Lints Redraw sources for the patterns React Fast Refresh cannot handle"
+licences = ["MIT"]
+gleam = ">= 1.13.0"
+
+[repository]
+type = "github"
+user = "ghivert"
+repo = "redraw"
+path = "redraw_lint"
+
+[dependencies]
+gleam_stdlib = ">= 1.0.0 and < 2.0.0"
+glance = ">= 7.0.0 and < 8.0.0"
+tom = ">= 2.1.0 and < 3.0.0"
+argv = ">= 1.1.0 and < 2.0.0"
+gleam_json = ">= 3.1.0 and < 4.0.0"
+gleam_javascript = ">= 1.0.1 and < 2.0.0"
+glexer = ">= 2.5.0 and < 3.0.0"
+
+[dev_dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"
