@@ -5,11 +5,16 @@ import { template, types as t } from "@babel/core"
 const REDRAW_SOURCE = /(^|\/)redraw\/redraw\.mjs$/
 const HOOK_NAME = /^use_/
 const HOT_NAMESPACE = "$redraw_hot"
+const ARGS_NAME = "$redraw_args"
 
 /** Babel plugin applied to compiled Gleam modules in development.
  *
  * - Wraps every render function passed to `redraw.component_` in
- *   `$redraw_hot.tag(moduleId, hooksSignature, customHooks, render)`.
+ *   `$redraw_hot.tag(moduleId, hooksSignature, customHooks, render, args)`,
+ *   where `args` are the arguments of the enclosing factory when it has
+ *   parameters.
+ * - Records the arguments of every call to a parameterized factory, so that
+ *   the factory can be replayed after a hot update.
  * - Replaces `redraw.create_context_(default)` by
  *   `$redraw_hot.context("moduleId#n", default)` to keep context identities
  *   stable across factory re-runs.
@@ -17,8 +22,12 @@ const HOT_NAMESPACE = "$redraw_hot"
  * - Registers every custom type class with `$redraw_hot.type`, so that
  *   values created before a hot update still match the new classes.
  * - Appends an `import.meta.hot` trailer that self-accepts the module and
- *   re-runs its component factories (zero-argument top-level functions
- *   building a component) after a hot update.
+ *   re-runs its component factories after a hot update.
+ *
+ * A factory is a top-level function building a component: it calls
+ * `component_`, `compose` or `memoize_`. Zero-argument factories are re-run
+ * as is. Parameterized factories are replayed with their recorded arguments,
+ * provided they call `component_` themselves and only take plain parameters.
  */
 export function redrawRefresh(_babel, { moduleId, hotImport }) {
   return {
@@ -27,7 +36,8 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
       Program: {
         enter(path, state) {
           state.redraw = findRedrawBindings(path)
-          state.factories = new Map()
+          if (!state.redraw) return
+          state.factories = findFactories(path, state.redraw, moduleId)
           state.customHooks = []
           state.contexts = 0
           state.touched = false
@@ -47,18 +57,16 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
             )
           }
           const factories = [...state.factories.values()]
-            .filter((f) => f.rerunnable)
-            .map((f) => f.name)
-          if (factories.length > 0) {
-            path.pushContainer("body", trailer(factories))
+          const plain = factories.filter((f) => f.kind === "plain")
+          const parameterized = factories.filter((f) => f.kind === "parameterized")
+          if (plain.length > 0 || parameterized.length > 0) {
+            path.pushContainer("body", trailer(plain, parameterized))
           }
           if (state.touched || state.customHooks.length || factories.length) {
             path.unshiftContainer(
               "body",
               t.importDeclaration(
-                [
-                  t.importNamespaceSpecifier(t.identifier(HOT_NAMESPACE)),
-                ],
+                [t.importNamespaceSpecifier(t.identifier(HOT_NAMESPACE))],
                 t.stringLiteral(hotImport),
               ),
             )
@@ -99,25 +107,23 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
         if (!called) return
         switch (called) {
           case "component_": {
-            markFactory(path, state)
             const render = path.get("arguments.1")
             if (!render.node) return
             const { signature, customHooks } = hooksSignature(render, state)
-            render.replaceWith(
-              hotCall("tag", [
-                t.stringLiteral(moduleId),
-                t.stringLiteral(signature),
-                customHooks,
-                render.node,
-              ]),
-            )
+            const args = [
+              t.stringLiteral(moduleId),
+              t.stringLiteral(signature),
+              customHooks,
+              render.node,
+            ]
+            const factory = enclosingFactory(path, state)
+            if (factory?.kind === "parameterized") {
+              args.push(t.identifier(ARGS_NAME))
+            }
+            render.replaceWith(hotCall("tag", args))
             state.touched = true
             return
           }
-          case "compose":
-          case "memoize_":
-            markFactory(path, state)
-            return
           case "create_context_": {
             const key = `${moduleId}#${state.contexts++}`
             path.replaceWith(
@@ -177,14 +183,61 @@ function isTopLevel(path) {
   return parent.isExportNamedDeclaration() && parent.parentPath.isProgram()
 }
 
-/** Records the top-level function enclosing `path` as a component factory.
- * Only zero-argument factories can be re-run blindly after a hot update. */
-function markFactory(path, state) {
+/** Finds the component factories of the module, and instruments the
+ * parameterized ones: their arguments are captured at the start of the body
+ * (which avoids any shadowing issue in nested `use` callbacks) and recorded
+ * for replay. */
+function findFactories(program, redraw, moduleId) {
+  const factories = new Map()
+  for (const statement of program.get("body")) {
+    const fn = statement.isExportNamedDeclaration()
+      ? statement.get("declaration")
+      : statement
+    if (!fn.isFunctionDeclaration() || !fn.node.id) continue
+    let creates = false
+    let composes = false
+    fn.traverse({
+      CallExpression(call) {
+        const called = redrawFunction(call.node.callee, redraw)
+        if (called === "component_") creates = true
+        else if (called === "compose" || called === "memoize_") composes = true
+      },
+    })
+    if (!creates && !composes) continue
+    const name = fn.node.id.name
+    const params = fn.node.params
+    if (params.length === 0) {
+      factories.set(name, { name, kind: "plain" })
+      continue
+    }
+    // A parameterized function creating no component of its own has no
+    // identity to refresh. One with destructured or rest parameters is not
+    // produced by Gleam, so it is left alone too.
+    if (!creates || !params.every((param) => t.isIdentifier(param))) {
+      factories.set(name, { name, kind: "skip" })
+      continue
+    }
+    const key = `${moduleId} ${name}`
+    factories.set(name, { name, kind: "parameterized", key })
+    fn.get("body").unshiftContainer("body", [
+      t.variableDeclaration("const", [
+        t.variableDeclarator(
+          t.identifier(ARGS_NAME),
+          t.arrayExpression(params.map((param) => t.identifier(param.name))),
+        ),
+      ]),
+      t.expressionStatement(
+        hotCall("invoked", [t.stringLiteral(key), t.identifier(ARGS_NAME)]),
+      ),
+    ])
+  }
+  return factories
+}
+
+function enclosingFactory(path, state) {
   const fn = path.findParent((p) => p.isFunctionDeclaration() && isTopLevel(p))
-  if (!fn || !fn.node.id) return
-  const name = fn.node.id.name
-  if (state.factories.has(name)) return
-  state.factories.set(name, { name, rerunnable: fn.node.params.length === 0 })
+  if (!fn || !fn.node.id) return null
+  return state.factories.get(fn.node.id.name) ?? null
 }
 
 /** Collects every `use_*` call inside `path`, in source order, to build the
@@ -223,19 +276,13 @@ function hooksSignature(path, state) {
       }
     }
   }
-  if (path.isFunction()) {
-    path.get("body").traverse({
-      CallExpression(call) {
-        visit(call.node.callee, call.scope)
-      },
-    })
-  } else {
-    path.traverse({
-      CallExpression(call) {
-        visit(call.node.callee, call.scope)
-      },
-    })
+  const visitor = {
+    CallExpression(call) {
+      visit(call.node.callee, call.scope)
+    },
   }
+  if (path.isFunction()) path.get("body").traverse(visitor)
+  else path.traverse(visitor)
   return {
     signature: names.join("\n"),
     customHooks: t.arrowFunctionExpression([], t.arrayExpression(custom)),
@@ -253,16 +300,21 @@ const buildTrailer = template.statement(
   `
 if (import.meta.hot) {
   import.meta.hot.accept();
-  if (import.meta.hot.data.redraw) HOT.rerun(FACTORIES);
+  if (import.meta.hot.data.redraw) HOT.rerun(FACTORIES, PARAMETERIZED);
   import.meta.hot.data.redraw = true;
 }
 `,
-  { placeholderPattern: /^(HOT|FACTORIES)$/ },
+  { placeholderPattern: /^(HOT|FACTORIES|PARAMETERIZED)$/ },
 )
 
-function trailer(factories) {
+function trailer(plain, parameterized) {
   return buildTrailer({
     HOT: t.identifier(HOT_NAMESPACE),
-    FACTORIES: t.arrayExpression(factories.map((name) => t.identifier(name))),
+    FACTORIES: t.arrayExpression(plain.map((f) => t.identifier(f.name))),
+    PARAMETERIZED: t.objectExpression(
+      parameterized.map((f) =>
+        t.objectProperty(t.stringLiteral(f.key), t.identifier(f.name)),
+      ),
+    ),
   })
 }

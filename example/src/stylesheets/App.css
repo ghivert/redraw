@@ -53,3 +53,20 @@
 .read-the-docs {
   color: #888;
 }
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.button.primary {
+  background: #646cff;
+  color: white;
+}
+
+.button.secondary {
+  background: #ffbf47;
+  color: #213547;
+}

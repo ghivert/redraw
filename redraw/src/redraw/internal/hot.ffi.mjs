@@ -12,14 +12,17 @@
 // the `compose` chain. Fast Refresh identifies components by a stable id and
 // swaps "families" of types. `register` gives every wrapper created by
 // `component_` and `compose` such an id, derived from the module path (tagged
-// by the Vite transform) and the display name. When a module is hot updated,
-// the Vite transform calls `rerun` with the module factories: they create new
-// wrappers, registered under the same ids, and `refresh` asks React to swap
-// them in place, keeping the state of mounted components.
+// by the Vite transform), the display name, and the arguments of the factory
+// when it has some. When a module is hot updated, the Vite transform calls
+// `rerun` with the module factories: they create new wrappers, registered
+// under the same ids, and `refresh` asks React to swap them in place, keeping
+// the state of mounted components.
 
 import React from "react"
+import * as $gleam from "../../gleam.mjs"
 
 const contexts = new Map()
+const invocations = new Map()
 const types = new Map()
 
 function runtime() {
@@ -28,11 +31,11 @@ function runtime() {
 }
 
 /** Called by the Vite transform around every render function passed to
- * `component_`. Attaches the module id and the hooks signature to the render
- * function, so that `register` can use them later. */
-export function tag(module, signature, customHooks, render) {
+ * `component_`. Attaches the module id, the hooks signature and the factory
+ * arguments to the render function, so that `register` can use them later. */
+export function tag(module, signature, customHooks, render, args) {
   if (typeof render === "function")
-    render.__redrawHot = { module, signature, customHooks }
+    render.__redrawHot = { module, signature, customHooks, args }
   return render
 }
 
@@ -61,8 +64,27 @@ export function register(type, source, suffix = "") {
       setSignature(refresh, type, meta.signature, meta.customHooks)
   }
   const module = meta?.module ? meta.module + " " : ""
-  refresh.register(type, module + name + suffix)
+  // Components built by a parameterized factory are distinct components for
+  // every set of arguments: `button(Primary)` and `button(Secondary)` must
+  // not share a Fast Refresh family, or they would both end up rendering
+  // with the last registered one.
+  const args = meta?.args ? " " + serialize(meta.args) : ""
+  refresh.register(type, module + name + args + suffix)
   return type
+}
+
+/** Called by the Vite transform at the start of every parameterized factory.
+ * Remembers the arguments of each call, so that the factory can be replayed
+ * after a hot update of its module. Calls are deduplicated by the serialized
+ * arguments, so the registry stays bounded. */
+export function invoked(key, args) {
+  if (!runtime()) return
+  let calls = invocations.get(key)
+  if (!calls) {
+    calls = new Map()
+    invocations.set(key, calls)
+  }
+  calls.set(serialize(args), args)
 }
 
 /** Called by the Vite transform after every custom type class declaration.
@@ -111,17 +133,26 @@ export function context(key, defaultValue) {
 
 /** Called by the Vite transform when a module is re-evaluated after a hot
  * update. Re-runs the module factories to register the new render functions,
- * then asks React to refresh. */
-export function rerun(factories) {
+ * then asks React to refresh. `factories` are the zero-argument factories,
+ * `parameterized` maps a factory key to the new function, replayed with the
+ * arguments recorded by `invoked`. */
+export function rerun(factories, parameterized = {}) {
   if (!runtime()) return
-  for (const factory of factories) {
-    try {
-      factory()
-    } catch (error) {
-      console.error("[redraw] Could not re-run a component factory", error)
-    }
+  for (const factory of factories) attempt(factory)
+  for (const [key, factory] of Object.entries(parameterized)) {
+    const calls = invocations.get(key)
+    if (!calls) continue
+    for (const args of calls.values()) attempt(factory, args)
   }
   refresh()
+}
+
+function attempt(factory, args = []) {
+  try {
+    factory(...args)
+  } catch (error) {
+    console.error("[redraw] Could not re-run a component factory", error)
+  }
 }
 
 /** Enqueue a React Refresh. The runtime shipped by `@vitejs/plugin-react`
@@ -138,4 +169,60 @@ export function refresh() {
 function setSignature(refresh, type, signature, customHooks) {
   const sign = refresh.createSignatureFunctionForTransform()
   sign(type, signature, false, customHooks)
+}
+
+/** Structural, deterministic serialization of Gleam values, used to tell
+ * apart the components built by a parameterized factory. Gleam values are
+ * never cyclic. Functions are serialized by their name, which covers Redraw
+ * components passed as arguments, but not anonymous functions: two
+ * instantiations differing only by anonymous functions share an identity. */
+const MAX_LENGTH = 200
+
+function serialize(value) {
+  const output = serializeValue(value, 0)
+  if (output.length <= MAX_LENGTH) return output
+  return "#" + hash(output)
+}
+
+function serializeValue(value, depth) {
+  if (depth > 8) return "…"
+  // Gleam `Nil` compiles to `undefined`.
+  if (value === undefined) return "Nil"
+  if (value === null) return "null"
+  switch (typeof value) {
+    case "string":
+      return JSON.stringify(value)
+    case "number":
+    case "boolean":
+    case "bigint":
+      return String(value)
+    case "symbol":
+      return value.toString()
+    case "function":
+      return "fn:" + (value.displayName ?? value.name ?? "")
+    case "object": {
+      const next = depth + 1
+      const items = (values) =>
+        values.map((item) => serializeValue(item, next)).join(",")
+      if (value instanceof $gleam.List) return "[" + items(value.toArray()) + "]"
+      // Tuples compile to arrays.
+      if (Array.isArray(value)) return "#(" + items(value) + ")"
+      if (value instanceof $gleam.BitArray)
+        return "<<" + items([...$gleam.BitArray$BitArray$data(value)]) + ">>"
+      if (value instanceof $gleam.UtfCodepoint) return "cp:" + value.value
+      const name = value.constructor?.name ?? "Object"
+      const fields = Object.keys(value).map(
+        (key) => key + ":" + serializeValue(value[key], next),
+      )
+      return name + "(" + fields.join(",") + ")"
+    }
+    default:
+      return String(value)
+  }
+}
+
+function hash(input) {
+  let h = 5381
+  for (let i = 0; i < input.length; i++) h = ((h << 5) + h + input.charCodeAt(i)) | 0
+  return (h >>> 0).toString(36)
 }

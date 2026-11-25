@@ -44,6 +44,10 @@ cannot find them by itself. The plugin bridges the gap:
 - When a module is hot updated, the transform re-runs its component
   factories, which register the new render functions under the same ids,
   then asks React to refresh. Mounted components are updated in place.
+- Parameterized factories, such as `fn button(variant: Variant)`, build one
+  component per set of arguments. The arguments are part of the component
+  id, and every call is recorded, so the factory is replayed with the same
+  arguments after a hot update.
 - Every Gleam value is an instance of a class, matched with `instanceof` by
   the compiled code. After a hot update, values built before the update, or
   kept in hooks state, are reconciled with the new classes, so pattern
@@ -53,11 +57,12 @@ cannot find them by itself. The plugin bridges the gap:
 
 ## Limitations
 
-- Only zero-argument factories are re-run after a hot update. A module whose
-  components are all built by parameterized factories falls back to a full
-  reload.
-- Two components with the same display name in the same module share the
-  same Fast Refresh identity. Give them distinct names.
+- Two components with the same display name in the same module, built with
+  the same factory arguments, share the same Fast Refresh identity. Give
+  them distinct names.
+- Factory arguments are compared structurally, and functions by their name.
+  Two instantiations differing only by anonymous functions share the same
+  identity: put a discriminator in the name passed to `component_`.
 - Contexts created with `create_context_` are kept by call site, so a new
   default value is not applied until a full reload.
 - Pass `ignore: ["some_package/"]` to skip compiled dependencies that

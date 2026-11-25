@@ -1,3 +1,4 @@
+import button
 import gleam/int
 import gleam/list
 import redraw as react
@@ -48,6 +49,8 @@ fn nav_links() {
 
 fn app() {
   use counter <- react.compose(react.memoize_(counter()))
+  use primary <- react.compose(button.button(button.Primary))
+  use secondary <- react.compose(button.button(button.Secondary))
   use Nil <- react.component_("App")
   let #(count, set_count) = use_counter()
   react.fragment([
@@ -55,6 +58,10 @@ fn app() {
     html.h1([], [html.text("Vite + Gleam + React")]),
     html.div([a.class("card")], [
       counter(CounterProps(count, set_count)),
+      html.div([a.class("buttons")], [
+        primary(button.ButtonProps("Clicks")),
+        secondary(button.ButtonProps("Clicks")),
+      ]),
       html.p([], [
         html.text("Edit "),
         html.code([], [html.text("src/example.gleam")]),
