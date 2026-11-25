@@ -87,8 +87,25 @@ globalThis.__REDRAW_REFRESH__ = RefreshRuntime;`,
     name: "redraw:refresh",
     enforce: "post",
     apply: "serve",
-    configResolved() {
+    configResolved(config) {
       packageName = readPackageName(root)
+      if (!enabled) return
+      const names = config.plugins.map((plugin) => plugin.name)
+      if (!names.some((name) => name.startsWith("vite:react"))) {
+        config.logger.warn(
+          "[vite-plugin-redraw] @vitejs/plugin-react is not configured: it ships the React Refresh runtime, nothing will be refreshed.",
+        )
+      }
+    },
+    buildStart() {
+      if (!enabled) return
+      try {
+        readFileSync(hotFile())
+      } catch {
+        this.warn(
+          `[vite-plugin-redraw] ${HOT_FILE} is missing: the installed version of redraw does not support Fast Refresh.`,
+        )
+      }
     },
     async transform(code, id, options) {
       if (!enabled || options?.ssr) return
