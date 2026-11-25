@@ -10,6 +10,8 @@ The plugin works on the compiled Gleam output, so a loader compiling Gleam
 in Vite is needed, placed before it. Both
 [`@chouquette/gleam-vite-loader`](https://www.npmjs.com/package/@chouquette/gleam-vite-loader)
 and [`vite-gleam`](https://www.npmjs.com/package/vite-gleam) are supported.
+It also needs a version of `redraw` that includes Fast Refresh support, see
+the `redraw` changelog.
 
 ```sh
 yarn add --dev vite-plugin-redraw @chouquette/gleam-vite-loader @vitejs/plugin-react
@@ -82,7 +84,8 @@ reason printed in the console:
 
 - A variant removed or renamed: values of that variant may still be held
   in a state, and no class can take them over.
-- A record whose fields changed: existing values keep their old shape.
+- A record whose fields changed, a field added to a props type included:
+  existing values keep their old shape.
 - A component removed, renamed, or moved to another module: its mounted
   instances could not be refreshed.
 - A change in `main`, which runs once.
