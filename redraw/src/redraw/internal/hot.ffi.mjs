@@ -17,13 +17,23 @@
 // `rerun` with the module factories: they create new wrappers, registered
 // under the same ids, and `refresh` asks React to swap them in place, keeping
 // the state of mounted components.
+//
+// Some edits cannot be applied to a running application: a removed variant
+// still held in a state, a record whose fields changed, a component that was
+// renamed or removed, a change in `main`, which runs once. Those are detected
+// when the updated module re-evaluates, and the page is reloaded, with the
+// reason printed in the console.
 
 import React from "react"
 import * as $gleam from "../../gleam.mjs"
 
 const contexts = new Map()
 const invocations = new Map()
-const types = new Map()
+const classes = new Map()
+const moduleTypes = new Map()
+const moduleIds = new Map()
+const bootstraps = new Map()
+let reloading = false
 
 function runtime() {
   if (typeof globalThis === "undefined") return null
@@ -69,7 +79,13 @@ export function register(type, source, suffix = "") {
   // not share a Fast Refresh family, or they would both end up rendering
   // with the last registered one.
   const args = meta?.args ? " " + serialize(meta.args) : ""
-  refresh.register(type, module + name + args + suffix)
+  const id = module + name + args + suffix
+  // Only the plain id is tracked for the missing components check: the
+  // memoized wrapper is registered by `compose`, in the module of the parent,
+  // and is not re-registered by the re-run of this module. React does not
+  // need it to be: the inner fiber is resolved through its own family.
+  if (meta?.module && !suffix) remember(moduleIds, meta.module, id)
+  refresh.register(type, id)
   return type
 }
 
@@ -99,11 +115,17 @@ export function invoked(key, args) {
  *   single class.
  * - Code that was not updated keeps matching with the previous class: its
  *   `Symbol.hasInstance` is redirected to the new class, so that new
- *   instances are recognized as well. */
+ *   instances are recognized as well.
+ *
+ * Previous instances keep their fields though. When the constructor arity
+ * changes, fields were added or removed, and the page is reloaded. */
 export function type(key, Class) {
   if (!runtime()) return Class
-  const previous = types.get(key)
+  const previous = classes.get(key)
   if (previous && previous !== Class) {
+    if (previous.length !== Class.length) {
+      reload(`the fields of ${key} changed`)
+    }
     Object.setPrototypeOf(previous.prototype, Class.prototype)
     // Without an own `constructor`, the lookup walks the chain up to the
     // newest class, whatever the number of generations in between.
@@ -113,36 +135,93 @@ export function type(key, Class) {
       value: (value) => value instanceof Class,
     })
   }
-  types.set(key, Class)
+  classes.set(key, Class)
   return Class
+}
+
+/** Called by the Vite transform at the end of every module, with the names
+ * of the classes it declares. A class that disappeared is a removed or
+ * renamed variant: values of that variant may still be held in a state, and
+ * no new class can take them over, so the page is reloaded. */
+export function types(module, names) {
+  if (!runtime()) return
+  const previous = moduleTypes.get(module)
+  moduleTypes.set(module, new Set(names))
+  if (!previous) return
+  for (const name of previous) {
+    if (!names.includes(name)) {
+      reload(`${name} was removed from ${module}`)
+      return
+    }
+  }
+}
+
+/** Called by the Vite transform at the end of a module defining `main`, with
+ * a hash of its code. `main` runs once, so a change in it cannot be applied
+ * without reloading the page. */
+export function bootstrap(module, hash) {
+  if (!runtime()) return
+  const previous = bootstraps.get(module)
+  bootstraps.set(module, hash)
+  if (previous !== undefined && previous !== hash) {
+    reload(`main changed in ${module}`)
+  }
 }
 
 /** Called by the Vite transform in place of `create_context_`. Contexts are
  * created inside factories too, so re-running a factory would create a new
  * context identity: providers would move to the new one while consumers keep
- * the old one. Contexts are kept by call site instead. */
+ * the old one. Contexts are kept by call site instead. The default value of
+ * a context cannot be changed after its creation: when it changes, the page
+ * is reloaded. */
 export function context(key, defaultValue) {
   if (!runtime()) return React.createContext(defaultValue)
-  let context = contexts.get(key)
-  if (!context) {
-    context = React.createContext(defaultValue)
-    contexts.set(key, context)
+  const serialized = serialize(defaultValue)
+  let entry = contexts.get(key)
+  if (!entry) {
+    entry = { context: React.createContext(defaultValue), serialized }
+    contexts.set(key, entry)
+  } else if (entry.serialized !== serialized) {
+    reload(`the default value of a context changed in ${key}`)
   }
-  return context
+  return entry.context
 }
 
 /** Called by the Vite transform when a module is re-evaluated after a hot
  * update. Re-runs the module factories to register the new render functions,
  * then asks React to refresh. `factories` are the zero-argument factories,
  * `parameterized` maps a factory key to the new function, replayed with the
- * arguments recorded by `invoked`. */
-export function rerun(factories, parameterized = {}) {
+ * arguments recorded by `invoked`.
+ *
+ * Every component of the module registered before the update must be
+ * registered again by the re-run: otherwise, its mounted instances would
+ * keep the previous code. That happens when a component is removed, renamed,
+ * or moved to another module, and the page is reloaded.
+ *
+ * When a factory throws, the new code is broken: as React Refresh does, the
+ * error is reported, the application keeps the previous code, and the next
+ * save tries again. */
+export function rerun(module, factories, parameterized = {}) {
   if (!runtime()) return
-  for (const factory of factories) attempt(factory)
+  const previous = moduleIds.get(module) ?? new Set()
+  moduleIds.set(module, new Set())
+  let failed = false
+  for (const factory of factories) failed = !attempt(factory) || failed
   for (const [key, factory] of Object.entries(parameterized)) {
     const calls = invocations.get(key)
     if (!calls) continue
-    for (const args of calls.values()) attempt(factory, args)
+    for (const args of calls.values()) failed = !attempt(factory, args) || failed
+  }
+  const current = moduleIds.get(module)
+  if (failed) {
+    moduleIds.set(module, new Set([...previous, ...current]))
+    return
+  }
+  for (const id of previous) {
+    if (!current.has(id)) {
+      reload(`the component "${id}" was removed or renamed`)
+      return
+    }
   }
   refresh()
 }
@@ -150,8 +229,13 @@ export function rerun(factories, parameterized = {}) {
 function attempt(factory, args = []) {
   try {
     factory(...args)
+    return true
   } catch (error) {
-    console.error("[redraw] Could not re-run a component factory", error)
+    console.error(
+      "[redraw] A component factory threw while re-running after a hot update. The application keeps the previous code until the next successful save.",
+      error,
+    )
+    return false
   }
 }
 
@@ -164,6 +248,25 @@ export function refresh() {
   if (!refresh) return
   const exports = { Redraw: function Redraw() {} }
   refresh.validateRefreshBoundaryAndEnqueueUpdate("redraw:hot", exports, exports)
+}
+
+/** Reloads the page once, with the reason printed in the console. */
+function reload(reason) {
+  if (reloading) return
+  reloading = true
+  console.warn(
+    `[redraw] ${reason}: this change cannot be applied with Fast Refresh, reloading the page.`,
+  )
+  globalThis.location?.reload()
+}
+
+function remember(registry, key, value) {
+  let values = registry.get(key)
+  if (!values) {
+    values = new Set()
+    registry.set(key, values)
+  }
+  values.add(value)
 }
 
 function setSignature(refresh, type, signature, customHooks) {

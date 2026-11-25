@@ -23,7 +23,11 @@ const ARGS_NAME = "$redraw_args"
  *
  * For every module:
  * - Registers every custom type class with `$redraw_hot.type`, so that
- *   values created before a hot update still match the new classes.
+ *   values created before a hot update still match the new classes, and
+ *   lists them with `$redraw_hot.types`, so that a removed variant is
+ *   detected.
+ * - Registers a hash of `main` with `$redraw_hot.bootstrap`, so that a
+ *   change in the bootstrap is detected.
  *
  * For modules using `redraw`:
  * - Wraps every render function passed to `redraw.component_` in
@@ -55,44 +59,64 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
           state.factories = state.redraw
             ? findFactories(path, state.redraw, moduleId)
             : new Map()
+          state.classes = []
           state.customHooks = []
           state.contexts = 0
-          state.touched = false
         },
         exit(path, state) {
+          const statements = []
           for (const fn of state.customHooks) {
-            path.pushContainer(
-              "body",
-              t.expressionStatement(
-                hotCall("hook", [
-                  t.identifier(fn.name),
-                  t.stringLiteral(fn.signature),
-                  fn.customHooks,
-                ]),
-              ),
+            statements.push(
+              hotCall("hook", [
+                t.identifier(fn.name),
+                t.stringLiteral(fn.signature),
+                fn.customHooks,
+              ]),
             )
           }
+          statements.push(
+            hotCall("types", [
+              t.stringLiteral(moduleId),
+              t.arrayExpression(state.classes.map((name) => t.stringLiteral(name))),
+            ]),
+          )
+          const main = findMain(path)
+          if (main) {
+            statements.push(
+              hotCall("bootstrap", [
+                t.stringLiteral(moduleId),
+                t.stringLiteral(hashSource(state.code, main.node)),
+              ]),
+            )
+          }
+          path.pushContainer(
+            "body",
+            statements.map((call) => t.expressionStatement(call)),
+          )
           const factories = [...state.factories.values()]
           const plain = factories.filter((f) => f.kind === "plain")
           const parameterized = factories.filter((f) => f.kind === "parameterized")
           if (plain.length > 0 || parameterized.length > 0) {
-            path.pushContainer("body", trailer(plain, parameterized))
+            path.pushContainer("body", trailer(moduleId, plain, parameterized))
           }
-          if (state.touched || state.customHooks.length || factories.length) {
-            path.unshiftContainer(
-              "body",
-              t.importDeclaration(
-                [t.importNamespaceSpecifier(t.identifier(HOT_NAMESPACE))],
-                t.stringLiteral(hotImport),
-              ),
-            )
-          }
+          path.unshiftContainer(
+            "body",
+            t.importDeclaration(
+              [t.importNamespaceSpecifier(t.identifier(HOT_NAMESPACE))],
+              t.stringLiteral(hotImport),
+            ),
+          )
         },
       },
 
       ClassDeclaration(path, state) {
         if (!isTopLevel(path) || !path.node.id) return
         const name = path.node.id.name
+        // Classes generated for the module's own needs, like the inspector
+        // of `echo`, contain a `$`, which a Gleam type name cannot: they
+        // appear and disappear with the code using them.
+        if (name.includes("$")) return
+        state.classes.push(name)
         const statement = path.parentPath.isExportNamedDeclaration()
           ? path.parentPath
           : path
@@ -104,7 +128,6 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
             ]),
           ),
         )
-        state.touched = true
       },
 
       FunctionDeclaration(path, state) {
@@ -136,7 +159,6 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
               args.push(t.identifier(ARGS_NAME))
             }
             render.replaceWith(hotCall("tag", args))
-            state.touched = true
             return
           }
           case "create_context_": {
@@ -144,7 +166,6 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
             path.replaceWith(
               hotCall("context", [t.stringLiteral(key), ...path.node.arguments]),
             )
-            state.touched = true
             return
           }
         }
@@ -198,17 +219,28 @@ function isTopLevel(path) {
   return parent.isExportNamedDeclaration() && parent.parentPath.isProgram()
 }
 
+function topLevelFunctions(program) {
+  const functions = []
+  for (const statement of program.get("body")) {
+    const fn = statement.isExportNamedDeclaration()
+      ? statement.get("declaration")
+      : statement
+    if (fn.isFunctionDeclaration() && fn.node.id) functions.push(fn)
+  }
+  return functions
+}
+
+function findMain(program) {
+  return topLevelFunctions(program).find((fn) => fn.node.id.name === "main")
+}
+
 /** Finds the component factories of the module, and instruments the
  * parameterized ones: their arguments are captured at the start of the body
  * (which avoids any shadowing issue in nested `use` callbacks) and recorded
  * for replay. */
 function findFactories(program, redraw, moduleId) {
   const factories = new Map()
-  for (const statement of program.get("body")) {
-    const fn = statement.isExportNamedDeclaration()
-      ? statement.get("declaration")
-      : statement
-    if (!fn.isFunctionDeclaration() || !fn.node.id) continue
+  for (const fn of topLevelFunctions(program)) {
     let creates = false
     let composes = false
     fn.traverse({
@@ -319,6 +351,26 @@ function initialValue(name, call, state) {
   return "(" + args.join(", ") + ")"
 }
 
+/** Hash of the source of a node, with the source positions Gleam embeds in
+ * `let assert`, `assert`, `panic`, `todo` and `echo` neutralized: they move
+ * with every edit above the node, and must not count as a change. */
+export function hashSource(code, node) {
+  return hash(stableSource(code.slice(node.start, node.end)))
+}
+
+export function stableSource(source) {
+  return source
+    .replace(
+      /(makeError\(\s*"[^"]*",\s*FILEPATH,\s*"[^"]*",\s*)\d+/g,
+      (_, prefix) => prefix + "0",
+    )
+    .replace(
+      /\b(start|end|pattern_start|pattern_end|expression_start)\s*:\s*\d+/g,
+      (_, key) => key + ":0",
+    )
+    .replace(/("[^"]*\.gleam",\s*)\d+\)/g, (_, prefix) => prefix + "0)")
+}
+
 function hotCall(name, args) {
   return t.callExpression(
     t.memberExpression(t.identifier(HOT_NAMESPACE), t.identifier(name)),
@@ -330,16 +382,17 @@ const buildTrailer = template.statement(
   `
 if (import.meta.hot) {
   import.meta.hot.accept();
-  if (import.meta.hot.data.redraw) HOT.rerun(FACTORIES, PARAMETERIZED);
+  if (import.meta.hot.data.redraw) HOT.rerun(MODULE, FACTORIES, PARAMETERIZED);
   import.meta.hot.data.redraw = true;
 }
 `,
-  { placeholderPattern: /^(HOT|FACTORIES|PARAMETERIZED)$/ },
+  { placeholderPattern: /^(HOT|MODULE|FACTORIES|PARAMETERIZED)$/ },
 )
 
-function trailer(plain, parameterized) {
+function trailer(moduleId, plain, parameterized) {
   return buildTrailer({
     HOT: t.identifier(HOT_NAMESPACE),
+    MODULE: t.stringLiteral(moduleId),
     FACTORIES: t.arrayExpression(plain.map((f) => t.identifier(f.name))),
     PARAMETERIZED: t.objectExpression(
       parameterized.map((f) =>
@@ -347,4 +400,10 @@ function trailer(plain, parameterized) {
       ),
     ),
   })
+}
+
+function hash(input) {
+  let h = 5381
+  for (let i = 0; i < input.length; i++) h = ((h << 5) + h + input.charCodeAt(i)) | 0
+  return (h >>> 0).toString(36)
 }

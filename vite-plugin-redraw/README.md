@@ -56,12 +56,31 @@ cannot find them by itself. The plugin bridges the gap:
   modules that only define types.
 - When the hooks of a component change, or the initial value of a state,
   React remounts the component, as it does for JSX components.
+- When a factory throws while re-running, the error is reported, the
+  application keeps the previous code, and the next save tries again.
 
-## Limitations
+## When the page is reloaded
 
-- Two components with the same display name in the same module, built with
-  the same factory arguments, share the same Fast Refresh identity. Give
-  them distinct names.
+Some edits cannot be applied to a running application. They are detected
+when the updated module re-evaluates, and the page is reloaded, with the
+reason printed in the console:
+
+- A variant removed or renamed: values of that variant may still be held
+  in a state, and no class can take them over.
+- A record whose fields changed: existing values keep their old shape.
+- A component removed, renamed, or moved to another module: its mounted
+  instances could not be refreshed.
+- A change in `main`, which runs once.
+- A change in the default value of a context.
+
+As in Vite, a change in a module that no component module imports, such as
+the entry script, reloads the page too.
+
+## Rules and limitations
+
+- Factories run once at startup, then once per hot update of their module.
+  Anything that must exist once, such as a store, belongs in `main`, and
+  reaches components through props or a context.
 - Factory arguments should be static configuration: a variant, a size, a
   child component, some data. They are compared structurally, named
   functions by their name, and anonymous functions by a hash of their source
@@ -70,6 +89,9 @@ cannot find them by itself. The plugin bridges the gap:
   values, such as two results of `fn on_toggle(side) { fn(v) { ... } }`,
   share the same identity, and both instances would end up calling the last
   one after a refresh.
+- Two components with the same display name in the same module, built with
+  the same factory arguments, share the same Fast Refresh identity. Give
+  them distinct names.
 - Helpers receiving a component and returning it, such as
   `fn memo(c) { memoize_(c) }`, are not replayed after a hot update. All the
   render code lives in functions calling `component_`, which are replayed,
@@ -80,7 +102,7 @@ cannot find them by itself. The plugin bridges the gap:
   `use_state_` remounts the component, but if the initial value is a call
   whose return type changed elsewhere, the state keeps a value of the
   previous type, as in React.
-- Contexts created with `create_context_` are kept by call site, so a new
-  default value is not applied until a full reload.
+- Editing a handwritten FFI file, `gleam.toml` or `manifest.toml` is not
+  handled by this plugin: a Gleam loader should rebuild and reload the page.
 - Pass `ignore: ["some_package/"]` to skip compiled packages that should
   not be transformed.
