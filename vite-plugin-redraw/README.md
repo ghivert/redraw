@@ -52,8 +52,8 @@ cannot find them by itself. The plugin bridges the gap:
   the compiled code. After a hot update, values built before the update, or
   kept in hooks state, are reconciled with the new classes, so pattern
   matching and equality keep working across generations.
-- When the hooks of a component change, React remounts it, as it does for
-  JSX components.
+- When the hooks of a component change, or the initial value of a state,
+  React remounts the component, as it does for JSX components.
 
 ## Limitations
 
@@ -74,6 +74,10 @@ cannot find them by itself. The plugin bridges the gap:
   so a helper has nothing to refresh. The only effect is that a change in the
   helper itself, like memoizing or not, waits for a full reload when its
   module self-accepts the update.
+- The type of a state is erased at runtime. Changing the initial value of a
+  `use_state_` remounts the component, but if the initial value is a call
+  whose return type changed elsewhere, the state keeps a value of the
+  previous type, as in React.
 - Contexts created with `create_context_` are kept by call site, so a new
   default value is not applied until a full reload.
 - Pass `ignore: ["some_package/"]` to skip compiled dependencies that

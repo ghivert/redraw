@@ -4,6 +4,17 @@ import { template, types as t } from "@babel/core"
  * `../redraw/redraw.mjs`, `../../redraw/redraw.mjs`, etc. */
 const REDRAW_SOURCE = /(^|\/)redraw\/redraw\.mjs$/
 const HOOK_NAME = /^use_/
+/** Hooks whose initial value is part of the signature, like `useState` and
+ * `useReducer` in React Refresh: changing the initial value of a state
+ * remounts the component instead of keeping a value of the previous type. */
+const STATE_HOOKS = new Set([
+  "use_state",
+  "use_state_",
+  "use_reducer",
+  "use_reducer_",
+  "use_ref",
+  "use_ref_",
+])
 const HOT_NAMESPACE = "$redraw_hot"
 const ARGS_NAME = "$redraw_args"
 
@@ -35,6 +46,7 @@ export function redrawRefresh(_babel, { moduleId, hotImport }) {
     visitor: {
       Program: {
         enter(path, state) {
+          state.code = state.file.code
           state.redraw = findRedrawBindings(path)
           if (!state.redraw) return
           state.factories = findFactories(path, state.redraw, moduleId)
@@ -245,15 +257,17 @@ function enclosingFactory(path, state) {
 
 /** Collects every `use_*` call inside `path`, in source order, to build the
  * hooks signature React Refresh compares between two versions of a component.
- * Calls to module-level functions and namespace members are also returned as
+ * The initial value of state hooks is part of the signature. Calls to
+ * module-level functions and namespace members are also returned as
  * expressions, so React Refresh can follow custom hooks signatures. */
 function hooksSignature(path, state) {
   const names = []
   const custom = []
   const seen = new Set()
-  const visit = (callee, scope) => {
+  const visit = (call, scope) => {
+    const callee = call.callee
     if (t.isIdentifier(callee) && HOOK_NAME.test(callee.name)) {
-      names.push(callee.name)
+      names.push(callee.name + initialValue(callee.name, call, state))
       const binding = scope.getBinding(callee.name)
       if (binding && binding.scope.path.isProgram() && !seen.has(callee.name)) {
         seen.add(callee.name)
@@ -267,7 +281,7 @@ function hooksSignature(path, state) {
       HOOK_NAME.test(callee.property.name)
     ) {
       const key = `${callee.object.name}.${callee.property.name}`
-      names.push(key)
+      names.push(key + initialValue(callee.property.name, call, state))
       const binding = scope.getBinding(callee.object.name)
       const isNamespace =
         binding &&
@@ -281,7 +295,7 @@ function hooksSignature(path, state) {
   }
   const visitor = {
     CallExpression(call) {
-      visit(call.node.callee, call.scope)
+      visit(call.node, call.scope)
     },
   }
   if (path.isFunction()) path.get("body").traverse(visitor)
@@ -290,6 +304,16 @@ function hooksSignature(path, state) {
     signature: names.join("\n"),
     customHooks: t.arrowFunctionExpression([], t.arrayExpression(custom)),
   }
+}
+
+/** Source of the arguments of a state hook call, as written in the compiled
+ * module, so that a change in the initial value changes the signature. */
+function initialValue(name, call, state) {
+  if (!STATE_HOOKS.has(name)) return ""
+  const args = call.arguments.map((arg) =>
+    arg.start == null ? "?" : state.code.slice(arg.start, arg.end),
+  )
+  return "(" + args.join(", ") + ")"
 }
 
 function hotCall(name, args) {
